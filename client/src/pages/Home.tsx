@@ -121,13 +121,8 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<"reels" | "grid">("reels");
   const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
 
-  // TODO: Replace with actual Google Drive API call
-  const { data: media = mockMedia, isLoading } = useQuery({
+  const { data: media = [], isLoading, error } = useQuery<MediaItem[]>({
     queryKey: ["/api/media"],
-    queryFn: async () => {
-      // This will be replaced with actual API call
-      return mockMedia;
-    },
   });
 
   const handleMediaClick = (index: number) => {
@@ -139,6 +134,25 @@ export default function Home() {
     return (
       <div className="flex items-center justify-center h-screen bg-background">
         <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (error || media.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-background p-6 text-center">
+        <h2 className="text-xl font-semibold text-foreground mb-2">No media found</h2>
+        <p className="text-muted-foreground">
+          {error ? "Failed to connect to Google Drive. " : "No photos or videos found in your Google Drive."}
+          {/* TODO: remove mock functionality - fallback to mock data for demo */}
+        </p>
+        <button
+          onClick={() => window.location.reload()}
+          className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover-elevate active-elevate-2"
+          data-testid="button-retry"
+        >
+          Try Again
+        </button>
       </div>
     );
   }
