@@ -27,6 +27,7 @@ Preferred communication style: Simple, everyday language.
 **Key UI Patterns**
 - Full-screen Reels feed with vertical swipe navigation
 - Grid view with filtering (All/Photos/Videos)
+- Library viewer for grid items with navigation controls (Back to Library, Previous, Next)
 - Bottom navigation for tab switching
 - Toast notifications for user feedback
 - Responsive design with mobile-first approach
