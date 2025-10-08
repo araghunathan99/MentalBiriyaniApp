@@ -240,13 +240,18 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
   const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!videoRef.current || !currentMedia?.isVideo) return;
     
+    const duration = videoRef.current.duration;
+    if (!isFinite(duration) || duration === 0) return;
+    
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const percentage = (x / rect.width) * 100;
-    const newTime = (percentage / 100) * videoRef.current.duration;
+    const newTime = (percentage / 100) * duration;
     
-    videoRef.current.currentTime = newTime;
-    setVideoProgress(percentage);
+    if (isFinite(newTime)) {
+      videoRef.current.currentTime = newTime;
+      setVideoProgress(percentage);
+    }
   };
 
   const handleProgressDragStart = (e: React.MouseEvent | React.TouchEvent) => {
@@ -257,6 +262,9 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
   const handleProgressDrag = (e: MouseEvent | TouchEvent) => {
     if (!isDraggingProgress || !videoRef.current || !currentMedia?.isVideo) return;
     
+    const duration = videoRef.current.duration;
+    if (!isFinite(duration) || duration === 0) return;
+    
     const progressBar = document.getElementById('video-progress-bar');
     if (!progressBar) return;
     
@@ -264,9 +272,12 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
     const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
     const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
     const percentage = (x / rect.width) * 100;
+    const newTime = (percentage / 100) * duration;
     
-    setVideoProgress(percentage);
-    videoRef.current.currentTime = (percentage / 100) * videoRef.current.duration;
+    if (isFinite(newTime)) {
+      setVideoProgress(percentage);
+      videoRef.current.currentTime = newTime;
+    }
   };
 
   const handleProgressDragEnd = () => {

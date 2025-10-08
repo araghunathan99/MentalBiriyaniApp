@@ -218,12 +218,15 @@ export default function Home() {
           const checkAndLockOrientation = (element: HTMLVideoElement | HTMLImageElement | null) => {
             if (!element) return;
             
-            const aspectRatio = element.videoWidth 
-              ? element.videoWidth / element.videoHeight 
-              : element.naturalWidth / element.naturalHeight;
+            let aspectRatio = 1;
+            if (element instanceof HTMLVideoElement) {
+              aspectRatio = element.videoWidth / element.videoHeight;
+            } else if (element instanceof HTMLImageElement) {
+              aspectRatio = element.naturalWidth / element.naturalHeight;
+            }
             
             if (aspectRatio > 1) {
-              screen.orientation.lock('landscape').catch(() => {});
+              (screen.orientation as any).lock('landscape').catch(() => {});
             } else {
               screen.orientation.unlock();
             }
