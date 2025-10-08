@@ -61,12 +61,13 @@ Preferred communication style: Simple, everyday language.
 ### External Dependencies
 
 **Google Photos Integration**
-- Google Drive API v3 accessing Google Photos via `spaces='photos'` parameter
-- Search strategy: First searches for "MentalBiriyani" in file names/content, then falls back to all photos
+- Google Photos Library API for fetching media from specific album
+- Album source: "MentalBiriyani" (case-insensitive search, strict match required)
 - OAuth2 authentication via Replit Google Drive connector
 - Scopes: `https://www.googleapis.com/auth/drive.photos.readonly`
-- Fetches up to 100 media items ordered by modified time (newest first)
-- Response includes thumbnailLink, webContentLink, webViewLink, mimeType, size, modifiedTime
+- Fetches up to 100 media items from the specified album only
+- Response includes baseUrl (display), productUrl (view link), filename, mimeType, creation metadata
+- No fallback: Album must exist and contain media items
 
 **Database Service**
 - Neon Serverless PostgreSQL via `@neondatabase/serverless`
