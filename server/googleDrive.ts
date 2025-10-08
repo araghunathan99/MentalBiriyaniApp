@@ -50,70 +50,128 @@ export async function getGoogleDriveClient() {
 
 export async function listMediaFiles() {
   try {
-    const drive = await getGoogleDriveClient();
+    const accessToken = await getAccessToken();
     
-    // Search for files in Google Photos that are in an album named "MentalBiriyani"
-    // Using Drive API with spaces='photos' which works with drive.photos.readonly scope
-    const response = await drive.files.list({
-      spaces: 'photos',
-      q: "name contains 'MentalBiriyani'",
-      fields: 'files(id, name, mimeType, thumbnailLink, webContentLink, webViewLink, modifiedTime, size, parents)',
-      pageSize: 100,
-      orderBy: 'modifiedTime desc',
-    });
+    console.log('Fetching albums from Google Photos...');
+    
+    // Step 1: List all albums using Google Photos Library API
+    const albumsResponse = await fetch(
+      'https://photoslibrary.googleapis.com/v1/albums',
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
 
-    let files = response.data.files || [];
-    
-    if (files.length === 0) {
-      throw new Error('No files found with "MentalBiriyani" in the name. Make sure your album or photos include "MentalBiriyani" in their name/title.');
+    if (!albumsResponse.ok) {
+      const errorText = await albumsResponse.text();
+      throw new Error(`Failed to fetch albums: ${albumsResponse.status} ${albumsResponse.statusText} - ${errorText}`);
     }
 
-    console.log(`Found ${files.length} media items with "MentalBiriyani" in Google Photos`);
+    const albumsData = await albumsResponse.json();
+    const albums = albumsData.albums || [];
     
-    return files.map((file) => ({
-      id: file.id || '',
-      name: file.name || '',
-      mimeType: file.mimeType || '',
-      thumbnailLink: file.thumbnailLink,
-      webContentLink: file.webContentLink,
-      webViewLink: file.webViewLink,
-      modifiedTime: file.modifiedTime,
-      size: file.size,
-      isVideo: file.mimeType?.startsWith('video/') || false,
-      isImage: file.mimeType?.startsWith('image/') || false,
+    console.log(`Found ${albums.length} albums. Looking for "MentalBiriyani"...`);
+    
+    // Find the MentalBiriyani album (case-insensitive)
+    const targetAlbum = albums.find((album: any) => 
+      album.title?.toLowerCase() === 'mentalbiriyani'
+    );
+
+    if (!targetAlbum || !targetAlbum.id) {
+      const albumTitles = albums.map((a: any) => a.title).join(', ');
+      console.log('Available albums:', albumTitles || 'none');
+      throw new Error(`Album "MentalBiriyani" not found. Available albums: ${albumTitles || 'none'}`);
+    }
+
+    console.log(`✓ Found album "MentalBiriyani" (ID: ${targetAlbum.id})`);
+
+    // Step 2: Fetch media items from the MentalBiriyani album
+    const mediaResponse = await fetch(
+      'https://photoslibrary.googleapis.com/v1/mediaItems:search',
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          albumId: targetAlbum.id,
+          pageSize: 100
+        })
+      }
+    );
+
+    if (!mediaResponse.ok) {
+      const errorText = await mediaResponse.text();
+      throw new Error(`Failed to fetch media: ${mediaResponse.status} ${mediaResponse.statusText} - ${errorText}`);
+    }
+
+    const mediaData = await mediaResponse.json();
+    const mediaItems = mediaData.mediaItems || [];
+
+    if (mediaItems.length === 0) {
+      throw new Error('No media items found in "MentalBiriyani" album');
+    }
+
+    console.log(`✓ Found ${mediaItems.length} media items in "MentalBiriyani" album`);
+    
+    return mediaItems.map((item: any) => ({
+      id: item.id || '',
+      name: item.filename || '',
+      mimeType: item.mimeType || '',
+      thumbnailLink: item.baseUrl,
+      webContentLink: item.baseUrl,
+      webViewLink: item.productUrl,
+      modifiedTime: item.mediaMetadata?.creationTime,
+      size: undefined,
+      isVideo: item.mimeType?.startsWith('video/') || false,
+      isImage: item.mimeType?.startsWith('image/') || false,
     }));
   } catch (error) {
-    console.error('Error fetching Google Photos files:', error);
+    console.error('Error fetching from Google Photos Library API:', error);
     throw error;
   }
 }
 
 export async function getFileById(fileId: string) {
   try {
-    const drive = await getGoogleDriveClient();
+    const accessToken = await getAccessToken();
     
-    const response = await drive.files.get({
-      fileId,
-      fields: 'id, name, mimeType, thumbnailLink, webContentLink, webViewLink, modifiedTime, size',
-      supportsAllDrives: true,
-    });
+    // Fetch specific media item using Google Photos Library API
+    const response = await fetch(
+      `https://photoslibrary.googleapis.com/v1/mediaItems/${fileId}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
 
-    const file = response.data;
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to fetch media item: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+
+    const item = await response.json();
     
     return {
-      id: file.id || '',
-      name: file.name || '',
-      mimeType: file.mimeType || '',
-      thumbnailLink: file.thumbnailLink,
-      webContentLink: file.webContentLink,
-      webViewLink: file.webViewLink,
-      modifiedTime: file.modifiedTime,
-      size: file.size,
-      isVideo: file.mimeType?.startsWith('video/') || false,
-      isImage: file.mimeType?.startsWith('image/') || false,
+      id: item.id || '',
+      name: item.filename || '',
+      mimeType: item.mimeType || '',
+      thumbnailLink: item.baseUrl,
+      webContentLink: item.baseUrl,
+      webViewLink: item.productUrl,
+      modifiedTime: item.mediaMetadata?.creationTime,
+      size: undefined,
+      isVideo: item.mimeType?.startsWith('video/') || false,
+      isImage: item.mimeType?.startsWith('image/') || false,
     };
   } catch (error) {
-    console.error(`Error fetching file ${fileId}:`, error);
+    console.error(`Error fetching media item ${fileId}:`, error);
     throw error;
   }
 }
