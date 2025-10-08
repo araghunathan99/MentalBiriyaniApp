@@ -60,16 +60,14 @@ Preferred communication style: Simple, everyday language.
 
 ### External Dependencies
 
-**Google Photos Integration**
-- Primary: Google Photos Library API for direct album access
-- Fallback: Google Drive API v3 with `spaces='photos'` parameter
-- Album source: "MentalBiriyani" (case-insensitive search)
+**Google Drive Integration**
+- Google Drive API v3 for accessing media files
 - OAuth2 authentication via Replit Google Drive connector
-- Primary scope: `https://www.googleapis.com/auth/photoslibrary.readonly` (optional)
-- Fallback scope: `https://www.googleapis.com/auth/drive.photos.readonly` (required)
-- Photos API: Fetches from specific album
-- Drive API fallback: Searches for files with "MentalBiriyani" in name
-- Falls back to mock data if all methods fail
+- Required scope: `https://www.googleapis.com/auth/drive.readonly`
+- Fetches all photos and videos (image/* and video/* mimeTypes) from Google Drive
+- Sorted by modification time (newest first)
+- Up to 100 media items per request
+- Falls back to mock data if Drive API fails or no files found
 
 **Database Service**
 - Neon Serverless PostgreSQL via `@neondatabase/serverless`
@@ -88,7 +86,7 @@ Preferred communication style: Simple, everyday language.
 
 ### Data Flow
 
-1. **Media Loading**: Google Drive API (photos space, "MentalBiriyani" search) → Backend routes → TanStack Query → React components
+1. **Media Loading**: Google Drive API (all photos/videos) → Backend routes → TanStack Query → React components
 2. **User Interactions**: Component events → LocalStorage (likes) → UI updates
 3. **Sharing**: URL-based routing → ShareView page → Fetch specific media item
 4. **Authentication**: Replit Google Drive connector → OAuth access token → Drive client initialization
