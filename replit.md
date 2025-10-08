@@ -63,11 +63,13 @@ Preferred communication style: Simple, everyday language.
 **Google Drive Integration**
 - Google Drive API v3 for accessing media files
 - OAuth2 authentication via Replit Google Drive connector
-- Required scope: `https://www.googleapis.com/auth/drive.readonly`
-- Fetches all photos and videos (image/* and video/* mimeTypes) from Google Drive
+- Required scope: `https://www.googleapis.com/auth/drive.readonly` (plus photos.readonly, file, appdata, etc.)
+- **Folder-Specific Filtering**: Fetches ONLY from "MentalBiriyani" folder
+- **Unlimited Pagination**: Uses `nextPageToken` to fetch ALL media files (no 100-item limit)
+- Fetches all photos and videos (image/* and video/* mimeTypes) from the folder
 - Sorted by modification time (newest first)
-- Up to 100 media items per request
-- Falls back to mock data if Drive API fails or no files found
+- Currently serving 6 photos/videos from "MentalBiriyani" folder
+- Falls back to mock data if Drive API fails or folder not found
 
 **Database Service**
 - Neon Serverless PostgreSQL via `@neondatabase/serverless`
@@ -86,7 +88,10 @@ Preferred communication style: Simple, everyday language.
 
 ### Data Flow
 
-1. **Media Loading**: Google Drive API (all photos/videos) → Backend routes → TanStack Query → React components
+1. **Media Loading**: 
+   - Search for "MentalBiriyani" folder by name → Get folder ID
+   - Fetch ALL media files from folder using pagination (do-while loop with nextPageToken)
+   - Transform Drive metadata → Backend routes → TanStack Query → React components
 2. **User Interactions**: Component events → LocalStorage (likes) → UI updates
 3. **Sharing**: URL-based routing → ShareView page → Fetch specific media item
 4. **Authentication**: Replit Google Drive connector → OAuth access token → Drive client initialization
