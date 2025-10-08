@@ -328,7 +328,7 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
         <video
           ref={videoRef}
           src={`/api/media/${currentMedia.id}/content`}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain"
           loop
           muted={isMuted}
           playsInline
@@ -342,7 +342,7 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
           ref={imageRef}
           src={`/api/media/${currentMedia.id}/content`}
           alt={currentMedia.name}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain"
           onClick={handleTap}
           onDoubleClick={handleDoubleTap}
           data-testid="image-viewer"
