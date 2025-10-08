@@ -5,8 +5,6 @@ import confetti from "canvas-confetti";
 export default function Landing() {
   const [, setLocation] = useLocation();
   const [showText, setShowText] = useState(false);
-  const [meteorKey, setMeteorKey] = useState(0);
-  const [meteorPosition, setMeteorPosition] = useState({ top: 10, left: 20 });
 
   // Generate random stars across full screen
   const stars = Array.from({ length: 100 }, (_, i) => ({
@@ -86,25 +84,6 @@ export default function Landing() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Random meteor effect every 5-10 seconds
-  useEffect(() => {
-    const showMeteor = () => {
-      // Random position in top 30% of screen
-      setMeteorPosition({
-        top: Math.random() * 30,
-        left: Math.random() * 60 + 20, // Keep between 20-80%
-      });
-      setMeteorKey(prev => prev + 1);
-      
-      // Schedule next meteor
-      const nextDelay = (Math.random() * 6000) + 12000; // 12-18 seconds
-      return setTimeout(showMeteor, nextDelay);
-    };
-
-    const timeout = showMeteor();
-    return () => clearTimeout(timeout);
-  }, []);
-
   const handleClick = () => {
     setLocation("/home");
   };
@@ -130,21 +109,6 @@ export default function Landing() {
           }}
         />
       ))}
-
-      {/* Meteor */}
-      <div 
-        key={meteorKey}
-        className="absolute animate-meteor"
-        style={{
-          top: `${meteorPosition.top}%`,
-          left: `${meteorPosition.left}%`,
-        }}
-      >
-        <div className="relative">
-          <div className="w-2 h-2 bg-white rounded-full shadow-[0_0_15px_3px_rgba(255,255,255,0.9)]" />
-          <div className="absolute top-1/2 right-full h-[1px] w-[80px] bg-gradient-to-r from-white/70 to-transparent -translate-y-1/2" />
-        </div>
-      </div>
 
       <div 
         className={`text-center space-y-6 transition-all duration-1000 ${
