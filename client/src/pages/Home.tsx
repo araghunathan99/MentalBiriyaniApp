@@ -121,6 +121,7 @@ const mockMedia: MediaItem[] = [
 export default function Home() {
   const [activeTab, setActiveTab] = useState<"reels" | "grid">("reels");
   const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
+  const [libraryViewerIndex, setLibraryViewerIndex] = useState<number | null>(null);
 
   // Check for cached media on mount
   const cachedMedia = getCachedMedia();
@@ -150,8 +151,28 @@ export default function Home() {
   }, []);
 
   const handleMediaClick = (index: number) => {
-    setSelectedMediaIndex(index);
-    setActiveTab("reels");
+    if (activeTab === "grid") {
+      setLibraryViewerIndex(index);
+    } else {
+      setSelectedMediaIndex(index);
+      setActiveTab("reels");
+    }
+  };
+
+  const handleBackToLibrary = () => {
+    setLibraryViewerIndex(null);
+  };
+
+  const handlePreviousMedia = () => {
+    if (libraryViewerIndex !== null && libraryViewerIndex > 0) {
+      setLibraryViewerIndex(libraryViewerIndex - 1);
+    }
+  };
+
+  const handleNextMedia = () => {
+    if (libraryViewerIndex !== null && libraryViewerIndex < media.length - 1) {
+      setLibraryViewerIndex(libraryViewerIndex + 1);
+    }
   };
 
   if (isLoading) {
@@ -176,6 +197,75 @@ export default function Home() {
         >
           Try Again
         </button>
+      </div>
+    );
+  }
+
+  // Library viewer mode
+  if (activeTab === "grid" && libraryViewerIndex !== null) {
+    const currentMedia = media[libraryViewerIndex];
+    const hasPrevious = libraryViewerIndex > 0;
+    const hasNext = libraryViewerIndex < media.length - 1;
+
+    return (
+      <div className="h-screen w-full bg-background flex flex-col">
+        <div className="flex-1 flex items-center justify-center overflow-auto p-4">
+          {currentMedia.isImage && (
+            <img
+              src={currentMedia.webContentLink || currentMedia.webViewLink || ""}
+              alt={currentMedia.name}
+              className="max-w-full max-h-full object-contain"
+              data-testid={`img-library-media-${currentMedia.id}`}
+            />
+          )}
+          {currentMedia.isVideo && (
+            <video
+              src={currentMedia.webContentLink || currentMedia.webViewLink || ""}
+              controls
+              autoPlay
+              muted
+              className="max-w-full max-h-full"
+              data-testid={`video-library-media-${currentMedia.id}`}
+            />
+          )}
+        </div>
+
+        <div className="sticky bottom-0 bg-background border-t border-border px-4 py-3 flex items-center justify-between">
+          <button
+            onClick={handleBackToLibrary}
+            className="px-4 py-2 text-sm font-medium text-foreground bg-secondary rounded-md hover-elevate active-elevate-2"
+            data-testid="button-back-to-library"
+          >
+            Back to Library
+          </button>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handlePreviousMedia}
+              disabled={!hasPrevious}
+              className={`px-4 py-2 text-sm font-medium rounded-md hover-elevate active-elevate-2 ${
+                hasPrevious
+                  ? "text-foreground bg-secondary"
+                  : "text-muted-foreground bg-secondary/50 cursor-not-allowed"
+              }`}
+              data-testid="button-previous-media"
+            >
+              Previous
+            </button>
+            <button
+              onClick={handleNextMedia}
+              disabled={!hasNext}
+              className={`px-4 py-2 text-sm font-medium rounded-md hover-elevate active-elevate-2 ${
+                hasNext
+                  ? "text-foreground bg-secondary"
+                  : "text-muted-foreground bg-secondary/50 cursor-not-allowed"
+              }`}
+              data-testid="button-next-media"
+            >
+              Next
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
