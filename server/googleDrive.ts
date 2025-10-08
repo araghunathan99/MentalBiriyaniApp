@@ -52,25 +52,53 @@ export async function listMediaFiles() {
   try {
     const drive = await getGoogleDriveClient();
     
-    console.log('Fetching all photos and videos from Google Drive...');
+    console.log('Searching for "MentalBiriyani" folder in Google Drive...');
     
-    // Fetch all image and video files from Google Drive
-    const response = await drive.files.list({
-      q: "(mimeType contains 'image/' or mimeType contains 'video/')",
-      fields: 'files(id, name, mimeType, thumbnailLink, webContentLink, webViewLink, modifiedTime, size)',
-      pageSize: 100,
-      orderBy: 'modifiedTime desc',
+    // Step 1: Find the MentalBiriyani folder
+    const folderResponse = await drive.files.list({
+      q: "name='MentalBiriyani' and mimeType='application/vnd.google-apps.folder' and trashed=false",
+      fields: 'files(id, name)',
+      pageSize: 1,
     });
 
-    const files = response.data.files || [];
+    const folders = folderResponse.data.files || [];
     
-    if (files.length === 0) {
-      throw new Error('No photos or videos found in Google Drive. Please add some media files to your Drive.');
+    if (folders.length === 0) {
+      throw new Error('Folder "MentalBiriyani" not found in Google Drive. Please create this folder and add photos/videos to it.');
     }
 
-    console.log(`✓ Found ${files.length} photos and videos from Google Drive`);
+    const folderId = folders[0].id!;
+    console.log(`✓ Found folder "MentalBiriyani" (ID: ${folderId})`);
     
-    return files.map((file) => ({
+    // Step 2: Fetch ALL media files from the folder using pagination
+    let allFiles: any[] = [];
+    let nextPageToken: string | undefined = undefined;
+    let pageCount = 0;
+    
+    do {
+      const filesResponse = await drive.files.list({
+        q: `'${folderId}' in parents and (mimeType contains 'image/' or mimeType contains 'video/') and trashed=false`,
+        fields: 'nextPageToken, files(id, name, mimeType, thumbnailLink, webContentLink, webViewLink, modifiedTime, size)',
+        pageSize: 100,
+        orderBy: 'modifiedTime desc',
+        pageToken: nextPageToken,
+      });
+
+      const files = filesResponse.data.files || [];
+      allFiles = allFiles.concat(files);
+      nextPageToken = filesResponse.data.nextPageToken || undefined;
+      pageCount++;
+      
+      console.log(`  Page ${pageCount}: Found ${files.length} files (total so far: ${allFiles.length})`);
+    } while (nextPageToken);
+    
+    if (allFiles.length === 0) {
+      throw new Error('No photos or videos found in "MentalBiriyani" folder. Please add some media files to this folder.');
+    }
+
+    console.log(`✓ Found ${allFiles.length} total photos and videos in "MentalBiriyani" folder`);
+    
+    return allFiles.map((file) => ({
       id: file.id || '',
       name: file.name || '',
       mimeType: file.mimeType || '',
