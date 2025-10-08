@@ -266,7 +266,7 @@ export default function Home() {
           {currentMedia.isVideo && (
             <video
               ref={videoRef}
-              src={currentMedia.webContentLink || currentMedia.webViewLink || ""}
+              src={`https://drive.google.com/uc?export=view&id=${currentMedia.id}`}
               controls
               autoPlay
               muted
