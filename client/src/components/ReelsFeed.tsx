@@ -96,13 +96,15 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
     if (controlsTimeoutRef.current) {
       clearTimeout(controlsTimeoutRef.current);
     }
-    controlsTimeoutRef.current = setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       setShowControls(false);
     }, 3000);
+    controlsTimeoutRef.current = timeoutId;
 
     return () => {
       if (controlsTimeoutRef.current) {
         clearTimeout(controlsTimeoutRef.current);
+        controlsTimeoutRef.current = undefined;
       }
     };
   }, [currentIndex]);
@@ -203,6 +205,7 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
       setShowControls(false);
       if (controlsTimeoutRef.current) {
         clearTimeout(controlsTimeoutRef.current);
+        controlsTimeoutRef.current = undefined;
       }
     } else {
       // If controls are hidden, show them
@@ -213,9 +216,10 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
       if (controlsTimeoutRef.current) {
         clearTimeout(controlsTimeoutRef.current);
       }
-      controlsTimeoutRef.current = setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         setShowControls(false);
       }, 3000);
+      controlsTimeoutRef.current = timeoutId;
     }
   };
 
@@ -346,7 +350,7 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
       )}
 
       <div 
-        className={`absolute top-0 left-0 right-0 p-4 pt-safe bg-gradient-to-b from-black/60 to-transparent transition-opacity duration-300 ${showControls ? "opacity-100" : "opacity-0"}`}
+        className={`absolute top-0 left-0 right-0 p-4 pt-safe bg-gradient-to-b from-black/60 to-transparent transition-opacity duration-300 ${showControls ? "opacity-100" : "opacity-0 pointer-events-none"}`}
       >
         <div className="flex items-center gap-3">
           <div className="flex-1">
@@ -358,7 +362,7 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
         </div>
       </div>
 
-      <div className={`absolute right-4 bottom-24 flex flex-col gap-6 transition-opacity duration-300 ${showControls ? "opacity-100" : "opacity-0"}`}>
+      <div className={`absolute right-4 bottom-24 flex flex-col gap-6 transition-opacity duration-300 ${showControls ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
         <div className="flex flex-col items-center">
           <Button
             size="icon"
@@ -409,7 +413,7 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
       </div>
 
       {currentMedia.isVideo && (
-        <div className={`absolute left-0 right-0 bottom-16 px-4 transition-opacity duration-300 ${showControls ? "opacity-100" : "opacity-0"}`}>
+        <div className={`absolute left-0 right-0 bottom-16 px-4 transition-opacity duration-300 ${showControls ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
           <div
             id="video-progress-bar"
             className="relative h-1 bg-white/30 rounded-full cursor-pointer group"
@@ -431,7 +435,7 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
         </div>
       )}
 
-      <div className={`absolute left-0 right-0 bottom-0 p-4 pb-safe bg-gradient-to-t from-black/60 to-transparent transition-opacity duration-300 ${showControls ? "opacity-100" : "opacity-0"}`}>
+      <div className={`absolute left-0 right-0 bottom-0 p-4 pb-safe bg-gradient-to-t from-black/60 to-transparent transition-opacity duration-300 ${showControls ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
         <div className="flex items-center justify-center gap-2 relative">
           {/* Left click zone for previous */}
           <div 
