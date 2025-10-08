@@ -327,7 +327,7 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
       {currentMedia.isVideo ? (
         <video
           ref={videoRef}
-          src={currentMedia.webContentLink || ""}
+          src={`https://drive.google.com/uc?export=view&id=${currentMedia.id}`}
           className="w-full h-full object-cover"
           loop
           muted={isMuted}
@@ -340,7 +340,7 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
       ) : (
         <img
           ref={imageRef}
-          src={currentMedia.thumbnailLink || currentMedia.webContentLink || ""}
+          src={currentMedia.webContentLink || currentMedia.thumbnailLink || ""}
           alt={currentMedia.name}
           className="w-full h-full object-cover"
           onClick={handleTap}
