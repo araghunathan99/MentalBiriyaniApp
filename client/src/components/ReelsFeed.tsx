@@ -19,6 +19,7 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const imageRef = useRef<HTMLImageElement>(null);
   const controlsTimeoutRef = useRef<NodeJS.Timeout>();
   const { toast } = useToast();
 
@@ -28,6 +29,50 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
     if (currentMedia) {
       setIsLiked(isMediaLiked(currentMedia.id));
     }
+  }, [currentMedia]);
+
+  // Auto screen rotation based on media aspect ratio
+  useEffect(() => {
+    const handleOrientationLock = async () => {
+      if (!('orientation' in screen) || !screen.orientation) return;
+      
+      const checkAndLockOrientation = (element: HTMLVideoElement | HTMLImageElement | null) => {
+        if (!element) return;
+        
+        const aspectRatio = element.videoWidth 
+          ? element.videoWidth / element.videoHeight 
+          : element.naturalWidth / element.naturalHeight;
+        
+        // If landscape media (width > height), suggest landscape orientation
+        if (aspectRatio > 1) {
+          screen.orientation.lock('landscape').catch(() => {
+            // Orientation lock may fail on some devices/browsers
+          });
+        } else {
+          // Portrait or square media, unlock to allow natural orientation
+          screen.orientation.unlock();
+        }
+      };
+
+      if (currentMedia?.isVideo && videoRef.current) {
+        videoRef.current.addEventListener('loadedmetadata', () => {
+          checkAndLockOrientation(videoRef.current);
+        });
+      } else if (!currentMedia?.isVideo && imageRef.current) {
+        imageRef.current.addEventListener('load', () => {
+          checkAndLockOrientation(imageRef.current);
+        });
+      }
+    };
+
+    handleOrientationLock();
+
+    return () => {
+      // Unlock orientation when component unmounts
+      if ('orientation' in screen && screen.orientation) {
+        screen.orientation.unlock();
+      }
+    };
   }, [currentMedia]);
 
   useEffect(() => {
@@ -111,6 +156,7 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
 
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchStart(e.targetTouches[0].clientY);
+    setTouchEnd(e.targetTouches[0].clientY);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
@@ -118,12 +164,21 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
   };
 
   const handleTouchEnd = () => {
-    if (touchStart - touchEnd > 75) {
-      handleNext();
+    const swipeDistance = touchStart - touchEnd;
+    
+    // Only navigate if swipe distance is significant (more than 75px)
+    // and there was actual movement (not just a tap)
+    if (Math.abs(swipeDistance) > 75) {
+      if (swipeDistance > 0) {
+        handleNext();
+      } else {
+        handlePrevious();
+      }
     }
-    if (touchStart - touchEnd < -75) {
-      handlePrevious();
-    }
+    
+    // Reset touch values
+    setTouchStart(0);
+    setTouchEnd(0);
   };
 
   if (!currentMedia) return null;
@@ -150,6 +205,7 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
         />
       ) : (
         <img
+          ref={imageRef}
           src={currentMedia.thumbnailLink || currentMedia.webContentLink || ""}
           alt={currentMedia.name}
           className="w-full h-full object-cover"
