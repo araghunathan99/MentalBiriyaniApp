@@ -18,9 +18,12 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
   const [isMuted, setIsMuted] = useState(true);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
+  const [videoProgress, setVideoProgress] = useState(0);
+  const [isDraggingProgress, setIsDraggingProgress] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const controlsTimeoutRef = useRef<NodeJS.Timeout>();
+  const containerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
   const currentMedia = media[currentIndex];
@@ -39,13 +42,16 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
       const checkAndLockOrientation = (element: HTMLVideoElement | HTMLImageElement | null) => {
         if (!element) return;
         
-        const aspectRatio = element.videoWidth 
-          ? element.videoWidth / element.videoHeight 
-          : element.naturalWidth / element.naturalHeight;
+        let aspectRatio = 1;
+        if (element instanceof HTMLVideoElement) {
+          aspectRatio = element.videoWidth / element.videoHeight;
+        } else if (element instanceof HTMLImageElement) {
+          aspectRatio = element.naturalWidth / element.naturalHeight;
+        }
         
         // If landscape media (width > height), suggest landscape orientation
         if (aspectRatio > 1) {
-          screen.orientation.lock('landscape').catch(() => {
+          (screen.orientation as any).lock('landscape').catch(() => {
             // Orientation lock may fail on some devices/browsers
           });
         } else {
@@ -100,6 +106,56 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
       }
     };
   }, [currentIndex]);
+
+  // Keyboard navigation (arrow keys)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
+        e.preventDefault();
+        handlePrevious();
+      } else if (e.key === "ArrowDown" || e.key === "ArrowRight") {
+        e.preventDefault();
+        handleNext();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [currentIndex, media.length]);
+
+  // Scroll/wheel navigation
+  useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      if (e.deltaY > 0) {
+        handleNext();
+      } else if (e.deltaY < 0) {
+        handlePrevious();
+      }
+    };
+
+    const container = containerRef.current;
+    if (container) {
+      container.addEventListener("wheel", handleWheel, { passive: false });
+      return () => container.removeEventListener("wheel", handleWheel);
+    }
+  }, [currentIndex, media.length]);
+
+  // Video progress tracking
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !currentMedia?.isVideo) return;
+
+    const updateProgress = () => {
+      if (!isDraggingProgress) {
+        const progress = (video.currentTime / video.duration) * 100;
+        setVideoProgress(progress || 0);
+      }
+    };
+
+    video.addEventListener("timeupdate", updateProgress);
+    return () => video.removeEventListener("timeupdate", updateProgress);
+  }, [currentMedia, isDraggingProgress]);
 
   const handleNext = () => {
     setCurrentIndex((prev) => (prev + 1) % media.length);
@@ -181,10 +237,63 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
     setTouchEnd(0);
   };
 
+  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!videoRef.current || !currentMedia?.isVideo) return;
+    
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const percentage = (x / rect.width) * 100;
+    const newTime = (percentage / 100) * videoRef.current.duration;
+    
+    videoRef.current.currentTime = newTime;
+    setVideoProgress(percentage);
+  };
+
+  const handleProgressDragStart = (e: React.MouseEvent | React.TouchEvent) => {
+    e.stopPropagation();
+    setIsDraggingProgress(true);
+  };
+
+  const handleProgressDrag = (e: MouseEvent | TouchEvent) => {
+    if (!isDraggingProgress || !videoRef.current || !currentMedia?.isVideo) return;
+    
+    const progressBar = document.getElementById('video-progress-bar');
+    if (!progressBar) return;
+    
+    const rect = progressBar.getBoundingClientRect();
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
+    const percentage = (x / rect.width) * 100;
+    
+    setVideoProgress(percentage);
+    videoRef.current.currentTime = (percentage / 100) * videoRef.current.duration;
+  };
+
+  const handleProgressDragEnd = () => {
+    setIsDraggingProgress(false);
+  };
+
+  useEffect(() => {
+    if (isDraggingProgress) {
+      window.addEventListener('mousemove', handleProgressDrag);
+      window.addEventListener('mouseup', handleProgressDragEnd);
+      window.addEventListener('touchmove', handleProgressDrag);
+      window.addEventListener('touchend', handleProgressDragEnd);
+      
+      return () => {
+        window.removeEventListener('mousemove', handleProgressDrag);
+        window.removeEventListener('mouseup', handleProgressDragEnd);
+        window.removeEventListener('touchmove', handleProgressDrag);
+        window.removeEventListener('touchend', handleProgressDragEnd);
+      };
+    }
+  }, [isDraggingProgress]);
+
   if (!currentMedia) return null;
 
   return (
     <div 
+      ref={containerRef}
       className="relative w-full h-full bg-black overflow-hidden"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
@@ -268,6 +377,29 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
           </div>
         )}
       </div>
+
+      {currentMedia.isVideo && (
+        <div className={`absolute left-0 right-0 bottom-16 px-4 transition-opacity duration-300 ${showControls ? "opacity-100" : "opacity-0"}`}>
+          <div
+            id="video-progress-bar"
+            className="relative h-1 bg-white/30 rounded-full cursor-pointer group"
+            onClick={handleProgressClick}
+            data-testid="video-progress-bar"
+          >
+            <div
+              className="absolute top-0 left-0 h-full bg-white rounded-full transition-all"
+              style={{ width: `${videoProgress}%` }}
+            />
+            <div
+              className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity"
+              style={{ left: `${videoProgress}%`, transform: 'translate(-50%, -50%)' }}
+              onMouseDown={handleProgressDragStart}
+              onTouchStart={handleProgressDragStart}
+              data-testid="video-progress-handle"
+            />
+          </div>
+        </div>
+      )}
 
       <div className={`absolute left-0 right-0 bottom-0 p-4 pb-safe bg-gradient-to-t from-black/60 to-transparent transition-opacity duration-300 ${showControls ? "opacity-100" : "opacity-0"}`}>
         <div className="flex items-center justify-center gap-2">
