@@ -79,7 +79,7 @@ export default function Landing() {
 
   return (
     <div 
-      className="h-screen w-full bg-background flex items-center justify-center p-6 cursor-pointer"
+      className="h-screen w-full bg-gradient-to-b from-[#0a0e27] via-[#1a1f3a] to-[#2d3561] flex items-center justify-center p-6 cursor-pointer"
       onClick={handleClick}
       data-testid="button-enter-app"
     >
