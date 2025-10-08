@@ -113,6 +113,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Proxy endpoint to serve media files with authentication
+  app.get("/api/media/:id/content", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { default: fetch } = await import('node-fetch');
+      const { getGoogleDriveClient } = await import('./googleDrive.js');
+      
+      const drive = await getGoogleDriveClient();
+      
+      // Get file metadata to check mime type
+      const fileResponse = await drive.files.get({
+        fileId: id,
+        fields: 'mimeType, name',
+      });
+      
+      const mimeType = fileResponse.data.mimeType || 'application/octet-stream';
+      
+      // Get the file content with alt=media
+      const response = await drive.files.get(
+        {
+          fileId: id,
+          alt: 'media',
+        },
+        {
+          responseType: 'stream',
+        }
+      );
+      
+      // Set appropriate headers
+      res.setHeader('Content-Type', mimeType);
+      res.setHeader('Cache-Control', 'public, max-age=86400'); // Cache for 1 day
+      
+      // Pipe the stream to response
+      (response.data as any).pipe(res);
+    } catch (error: any) {
+      console.error(`Error serving media content ${req.params.id}:`, error);
+      res.status(500).json({ 
+        error: "Failed to load media",
+        message: error.message 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;

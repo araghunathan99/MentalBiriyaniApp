@@ -257,7 +257,7 @@ export default function Home() {
           {currentMedia.isImage && (
             <img
               ref={imageRef}
-              src={currentMedia.webContentLink || currentMedia.webViewLink || ""}
+              src={`/api/media/${currentMedia.id}/content`}
               alt={currentMedia.name}
               className="max-w-full max-h-full object-contain"
               data-testid={`img-library-media-${currentMedia.id}`}
@@ -266,7 +266,7 @@ export default function Home() {
           {currentMedia.isVideo && (
             <video
               ref={videoRef}
-              src={`https://drive.google.com/uc?export=view&id=${currentMedia.id}`}
+              src={`/api/media/${currentMedia.id}/content`}
               controls
               autoPlay
               muted
