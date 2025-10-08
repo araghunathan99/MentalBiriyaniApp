@@ -109,6 +109,10 @@ Preferred communication style: Simple, everyday language.
 - Muted autoplay by default (mobile browser compliance)
 - Play/pause toggle on tap
 - Volume control available but not persistent
+- Desktop: Draggable progress bar for video seeking
+- Desktop: Keyboard navigation (Arrow Up/Down/Left/Right)
+- Desktop: Scroll wheel navigation support
+- Progress bar validates video duration is finite before seeking
 
 **Media Caching**
 - LocalStorage-based caching with 4MB size limit
