@@ -198,16 +198,25 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
   };
 
   const handleTap = () => {
-    if (currentMedia?.isVideo) {
-      setIsPlaying(!isPlaying);
-    }
-    setShowControls(true);
-    if (controlsTimeoutRef.current) {
-      clearTimeout(controlsTimeoutRef.current);
-    }
-    controlsTimeoutRef.current = setTimeout(() => {
+    if (showControls) {
+      // If controls are showing, hide them on tap
       setShowControls(false);
-    }, 3000);
+      if (controlsTimeoutRef.current) {
+        clearTimeout(controlsTimeoutRef.current);
+      }
+    } else {
+      // If controls are hidden, show them
+      if (currentMedia?.isVideo) {
+        setIsPlaying(!isPlaying);
+      }
+      setShowControls(true);
+      if (controlsTimeoutRef.current) {
+        clearTimeout(controlsTimeoutRef.current);
+      }
+      controlsTimeoutRef.current = setTimeout(() => {
+        setShowControls(false);
+      }, 3000);
+    }
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -238,6 +247,7 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
   };
 
   const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
     if (!videoRef.current || !currentMedia?.isVideo) return;
     
     const duration = videoRef.current.duration;
@@ -354,7 +364,10 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
             size="icon"
             variant="ghost"
             className="h-12 w-12 rounded-full bg-transparent text-white hover:scale-110 transition-transform no-default-hover-elevate"
-            onClick={handleLike}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleLike();
+            }}
             data-testid="button-like"
           >
             <Heart className={`h-7 w-7 ${isLiked ? "fill-destructive text-destructive" : ""}`} />
@@ -367,7 +380,10 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
             size="icon"
             variant="ghost"
             className="h-12 w-12 rounded-full bg-transparent text-white hover:scale-110 transition-transform no-default-hover-elevate"
-            onClick={handleShare}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleShare();
+            }}
             data-testid="button-share"
           >
             <Share2 className="h-6 w-6" />
@@ -380,7 +396,10 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
               size="icon"
               variant="ghost"
               className="h-12 w-12 rounded-full bg-transparent text-white hover:scale-110 transition-transform no-default-hover-elevate"
-              onClick={() => setIsMuted(!isMuted)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsMuted(!isMuted);
+              }}
               data-testid="button-mute"
             >
               {isMuted ? <VolumeX className="h-6 w-6" /> : <Volume2 className="h-6 w-6" />}
@@ -413,7 +432,17 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
       )}
 
       <div className={`absolute left-0 right-0 bottom-0 p-4 pb-safe bg-gradient-to-t from-black/60 to-transparent transition-opacity duration-300 ${showControls ? "opacity-100" : "opacity-0"}`}>
-        <div className="flex items-center justify-center gap-2">
+        <div className="flex items-center justify-center gap-2 relative">
+          {/* Left click zone for previous */}
+          <div 
+            className="absolute left-0 top-0 bottom-0 w-1/3 cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              handlePrevious();
+            }}
+            data-testid="button-previous-zone"
+          />
+          
           <div className="flex gap-1">
             {media.map((_, idx) => (
               <div
@@ -424,6 +453,16 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
               />
             ))}
           </div>
+          
+          {/* Right click zone for next */}
+          <div 
+            className="absolute right-0 top-0 bottom-0 w-1/3 cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleNext();
+            }}
+            data-testid="button-next-zone"
+          />
         </div>
       </div>
 
