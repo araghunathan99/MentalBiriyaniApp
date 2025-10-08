@@ -5,7 +5,8 @@ import confetti from "canvas-confetti";
 export default function Landing() {
   const [, setLocation] = useLocation();
   const [showText, setShowText] = useState(false);
-  const [showComet, setShowComet] = useState(false);
+  const [meteorKey, setMeteorKey] = useState(0);
+  const [meteorPosition, setMeteorPosition] = useState({ top: 10, left: 20 });
 
   // Generate random stars
   const stars = Array.from({ length: 50 }, (_, i) => ({
@@ -18,12 +19,7 @@ export default function Landing() {
   }));
 
   useEffect(() => {
-    // Show comet after 300ms
-    const cometTimer = setTimeout(() => {
-      setShowComet(true);
-    }, 300);
-
-    // Comet triggers confetti and text after it passes (1800ms total)
+    // Show text and confetti after initial delay
     const timer = setTimeout(() => {
       setShowText(true);
       
@@ -85,12 +81,28 @@ export default function Landing() {
       }, 250);
 
       return () => clearInterval(interval);
-    }, 1800);
+    }, 500);
 
-    return () => {
-      clearTimeout(cometTimer);
-      clearTimeout(timer);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Random meteor effect every 5-10 seconds
+  useEffect(() => {
+    const showMeteor = () => {
+      // Random position in top 30% of screen
+      setMeteorPosition({
+        top: Math.random() * 30,
+        left: Math.random() * 60 + 20, // Keep between 20-80%
+      });
+      setMeteorKey(prev => prev + 1);
+      
+      // Schedule next meteor
+      const nextDelay = (Math.random() * 5000) + 5000; // 5-10 seconds
+      return setTimeout(showMeteor, nextDelay);
     };
+
+    const timeout = showMeteor();
+    return () => clearTimeout(timeout);
   }, []);
 
   const handleClick = () => {
@@ -99,7 +111,7 @@ export default function Landing() {
 
   return (
     <div 
-      className="h-screen w-full bg-gradient-to-b from-black via-[#0f1729] via-30% via-[#1a2642] via-60% to-[#ff6b35] flex items-center justify-center p-6 cursor-pointer relative overflow-hidden"
+      className="h-screen w-full bg-gradient-to-b from-black via-[#0f1729] via-50% to-[#fbbf24] flex items-center justify-center p-6 cursor-pointer relative overflow-hidden"
       onClick={handleClick}
       data-testid="button-enter-app"
     >
@@ -119,15 +131,20 @@ export default function Landing() {
         />
       ))}
 
-      {/* Comet */}
-      {showComet && (
-        <div className="absolute top-[20%] -left-[10%] animate-comet">
-          <div className="relative">
-            <div className="w-3 h-3 bg-white rounded-full shadow-[0_0_20px_5px_rgba(255,255,255,0.8)]" />
-            <div className="absolute top-1/2 right-full h-[2px] w-[100px] bg-gradient-to-r from-white/80 to-transparent -translate-y-1/2" />
-          </div>
+      {/* Meteor */}
+      <div 
+        key={meteorKey}
+        className="absolute animate-meteor"
+        style={{
+          top: `${meteorPosition.top}%`,
+          left: `${meteorPosition.left}%`,
+        }}
+      >
+        <div className="relative">
+          <div className="w-2 h-2 bg-white rounded-full shadow-[0_0_15px_3px_rgba(255,255,255,0.9)]" />
+          <div className="absolute top-1/2 right-full h-[1px] w-[80px] bg-gradient-to-r from-white/70 to-transparent -translate-y-1/2" />
         </div>
-      )}
+      </div>
 
       <div 
         className={`text-center space-y-6 transition-all duration-1000 ${

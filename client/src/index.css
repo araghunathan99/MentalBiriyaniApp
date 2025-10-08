@@ -358,19 +358,19 @@
     50% { opacity: 0.3; }
   }
 
-  @keyframes comet {
+  @keyframes meteor {
     0% {
-      transform: translate(0, 0) rotate(-45deg);
+      transform: translate(0, 0) rotate(-30deg);
       opacity: 0;
     }
-    10% {
+    5% {
       opacity: 1;
     }
-    90% {
+    95% {
       opacity: 1;
     }
     100% {
-      transform: translate(120vw, 60vh) rotate(-45deg);
+      transform: translate(-150vw, 40vh) rotate(-30deg);
       opacity: 0;
     }
   }
@@ -379,7 +379,7 @@
     animation: twinkle 2s infinite;
   }
 
-  .animate-comet {
-    animation: comet 1.5s ease-in-out forwards;
+  .animate-meteor {
+    animation: meteor 1.2s ease-in forwards;
   }
 }
