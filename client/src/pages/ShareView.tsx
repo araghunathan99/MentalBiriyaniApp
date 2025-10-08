@@ -3,14 +3,14 @@ import { useParams, useLocation } from "wouter";
 import { ArrowLeft, Heart, Share2, Download } from "lucide-react";
 import { MediaItem } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
-import { getLikes, toggleLike } from "@/lib/localStorage";
+import { isMediaLiked, toggleMediaLike } from "@/lib/localStorage";
 import { useState } from "react";
 
 export default function ShareView() {
   const { id } = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const [isLiked, setIsLiked] = useState(() => getLikes().includes(id || ""));
+  const [isLiked, setIsLiked] = useState(() => isMediaLiked(id || ""));
 
   const { data: media, isLoading, error } = useQuery<MediaItem>({
     queryKey: ["/api/media", id],
@@ -19,7 +19,7 @@ export default function ShareView() {
 
   const handleToggleLike = () => {
     if (!id) return;
-    const newLikedState = toggleLike(id);
+    const newLikedState = toggleMediaLike(id);
     setIsLiked(newLikedState);
   };
 
