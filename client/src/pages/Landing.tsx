@@ -22,7 +22,35 @@ export default function Landing() {
         const timeLeft = animationEnd - Date.now();
 
         if (timeLeft <= 0) {
-          return clearInterval(interval);
+          clearInterval(interval);
+          
+          // Start gentle snowfall confetti
+          const snowfallInterval = setInterval(() => {
+            confetti({
+              particleCount: 3,
+              angle: 60,
+              spread: 55,
+              origin: { x: 0, y: 0 },
+              colors: ['#ffffff', '#a5d8ff', '#ffd43b'],
+              gravity: 0.4,
+              drift: 0.5,
+              ticks: 200,
+              zIndex: 0
+            });
+            confetti({
+              particleCount: 3,
+              angle: 120,
+              spread: 55,
+              origin: { x: 1, y: 0 },
+              colors: ['#ffffff', '#a5d8ff', '#ffd43b'],
+              gravity: 0.4,
+              drift: -0.5,
+              ticks: 200,
+              zIndex: 0
+            });
+          }, 300);
+          
+          return;
         }
 
         const particleCount = 50 * (timeLeft / duration);
@@ -64,7 +92,9 @@ export default function Landing() {
           className="text-4xl md:text-5xl font-bold text-primary mb-4"
           data-testid="text-title"
         >
-          Happy Birthday Div Papa!
+          Happy Birthday!!
+          <br />
+          Div Papa
         </h1>
         <p 
           className="text-lg md:text-xl text-foreground max-w-2xl leading-relaxed"
