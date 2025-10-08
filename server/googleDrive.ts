@@ -71,23 +71,23 @@ export async function listMediaFiles() {
     console.log(`✓ Found folder "MentalBiriyani" (ID: ${folderId})`);
     
     // Step 2: Fetch ALL media files from the folder using pagination
-    let allFiles: any[] = [];
-    let nextPageToken: string | undefined = undefined;
+    const allFiles: any[] = [];
+    let nextPageToken: string | null | undefined = undefined;
     let pageCount = 0;
     
     do {
-      const filesResponse = await drive.files.list({
+      pageCount++;
+      const response = await drive.files.list({
         q: `'${folderId}' in parents and (mimeType contains 'image/' or mimeType contains 'video/') and trashed=false`,
         fields: 'nextPageToken, files(id, name, mimeType, thumbnailLink, webContentLink, webViewLink, modifiedTime, size)',
         pageSize: 100,
         orderBy: 'modifiedTime desc',
-        pageToken: nextPageToken,
+        pageToken: nextPageToken || undefined,
       });
 
-      const files = filesResponse.data.files || [];
-      allFiles = allFiles.concat(files);
-      nextPageToken = filesResponse.data.nextPageToken || undefined;
-      pageCount++;
+      const files = response.data.files || [];
+      allFiles.push(...files);
+      nextPageToken = response.data.nextPageToken;
       
       console.log(`  Page ${pageCount}: Found ${files.length} files (total so far: ${allFiles.length})`);
     } while (nextPageToken);
