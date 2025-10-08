@@ -40,36 +40,27 @@ Preferred communication style: Simple, everyday language.
 - LocalStorage for persisting user preferences (liked media)
 - No global state management library needed
 
-### Backend Architecture
+### Architecture Model
 
-**Server Framework**
-- Express.js with TypeScript
-- Development: Vite middleware for HMR
-- Production: Static file serving from dist/public
-
-**API Structure**
-- RESTful endpoints under `/api` prefix
-- Mock data fallback for development/demo purposes
-- Minimal authentication (user schema exists but not fully implemented)
-
-**Database Layer**
-- Drizzle ORM for type-safe database queries
-- PostgreSQL as the target database (via Neon serverless connector)
-- Schema includes users table (id, username, password)
-- Media items are fetched from Google Drive, not stored in database
+**Fully Static Frontend Application**
+- No backend server required for production
+- All Google Drive API calls made directly from browser
+- Can be deployed to any static hosting (Netlify, Vercel, GitHub Pages, etc.)
+- Works as Progressive Web App (PWA) with offline capability
 
 ### External Dependencies
 
-**Google Drive Integration**
-- Google Drive API v3 for accessing media files
-- OAuth2 authentication via Replit Google Drive connector
-- Required scope: `https://www.googleapis.com/auth/drive.readonly` (plus photos.readonly, file, appdata, etc.)
+**Google Drive Integration (Frontend)**
+- Google Drive API v3 accessed directly from browser
+- Google Identity Services for OAuth2 authentication
+- User authenticates with their own Google account
+- Required scope: `https://www.googleapis.com/auth/drive.readonly`
+- **Configuration Required**: Google OAuth Client ID (see GOOGLE_SETUP.md)
 - **Folder-Specific Filtering**: Fetches ONLY from "MentalBiriyani" folder
-- **Unlimited Pagination**: Uses `nextPageToken` to fetch ALL media files (no 100-item limit)
+- **Unlimited Pagination**: Uses `nextPageToken` to fetch ALL media files
 - Fetches all photos and videos (image/* and video/* mimeTypes) from the folder
 - Sorted by modification time (newest first)
-- Currently serving 6 photos/videos from "MentalBiriyani" folder
-- Falls back to mock data if Drive API fails or folder not found
+- Direct media URLs use Google Drive API with access token parameter
 
 **Database Service**
 - Neon Serverless PostgreSQL via `@neondatabase/serverless`
@@ -88,13 +79,24 @@ Preferred communication style: Simple, everyday language.
 
 ### Data Flow
 
-1. **Media Loading**: 
+1. **Authentication Flow**:
+   - User opens app → Initialize Google API libraries
+   - Check if authenticated → If not, prompt for Google sign-in
+   - User authorizes app → Access token stored in browser session
+
+2. **Media Loading**: 
+   - Browser calls Google Drive API directly with access token
    - Search for "MentalBiriyani" folder by name → Get folder ID
    - Fetch ALL media files from folder using pagination (do-while loop with nextPageToken)
-   - Transform Drive metadata → Backend routes → TanStack Query → React components
-2. **User Interactions**: Component events → LocalStorage (likes) → UI updates
-3. **Sharing**: URL-based routing → ShareView page → Fetch specific media item
-4. **Authentication**: Replit Google Drive connector → OAuth access token → Drive client initialization
+   - Transform Drive metadata → React state → UI components
+   
+3. **Media Display**:
+   - Media URLs constructed with: `googleapis.com/drive/v3/files/{id}?alt=media&access_token={token}`
+   - Images and videos loaded directly from Google Drive with authentication
+   
+4. **User Interactions**: Component events → LocalStorage (likes) → UI updates
+
+5. **Sharing**: URL-based routing → ShareView page → Fetch specific media item
 
 ### Key Architectural Decisions
 
