@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import ReelsFeed from "@/components/ReelsFeed";
 import GridView from "@/components/GridView";
@@ -201,17 +201,59 @@ export default function Home() {
     );
   }
 
-  // Library viewer mode
+  // Library viewer mode with screen rotation support
   if (activeTab === "grid" && libraryViewerIndex !== null) {
     const currentMedia = media[libraryViewerIndex];
     const hasPrevious = libraryViewerIndex > 0;
     const hasNext = libraryViewerIndex < media.length - 1;
 
-    return (
-      <div className="h-screen w-full bg-background flex flex-col">
-        <div className="flex-1 flex items-center justify-center overflow-auto p-4">
+    const LibraryMediaViewer = () => {
+      const videoRef = useRef<HTMLVideoElement>(null);
+      const imageRef = useRef<HTMLImageElement>(null);
+
+      useEffect(() => {
+        const handleOrientationLock = () => {
+          if (!('orientation' in screen) || !screen.orientation) return;
+          
+          const checkAndLockOrientation = (element: HTMLVideoElement | HTMLImageElement | null) => {
+            if (!element) return;
+            
+            const aspectRatio = element.videoWidth 
+              ? element.videoWidth / element.videoHeight 
+              : element.naturalWidth / element.naturalHeight;
+            
+            if (aspectRatio > 1) {
+              screen.orientation.lock('landscape').catch(() => {});
+            } else {
+              screen.orientation.unlock();
+            }
+          };
+
+          if (currentMedia?.isVideo && videoRef.current) {
+            videoRef.current.addEventListener('loadedmetadata', () => {
+              checkAndLockOrientation(videoRef.current);
+            });
+          } else if (!currentMedia?.isVideo && imageRef.current) {
+            imageRef.current.addEventListener('load', () => {
+              checkAndLockOrientation(imageRef.current);
+            });
+          }
+        };
+
+        handleOrientationLock();
+
+        return () => {
+          if ('orientation' in screen && screen.orientation) {
+            screen.orientation.unlock();
+          }
+        };
+      }, []);
+
+      return (
+        <>
           {currentMedia.isImage && (
             <img
+              ref={imageRef}
               src={currentMedia.webContentLink || currentMedia.webViewLink || ""}
               alt={currentMedia.name}
               className="max-w-full max-h-full object-contain"
@@ -220,6 +262,7 @@ export default function Home() {
           )}
           {currentMedia.isVideo && (
             <video
+              ref={videoRef}
               src={currentMedia.webContentLink || currentMedia.webViewLink || ""}
               controls
               autoPlay
@@ -228,6 +271,14 @@ export default function Home() {
               data-testid={`video-library-media-${currentMedia.id}`}
             />
           )}
+        </>
+      );
+    };
+
+    return (
+      <div className="h-screen w-full bg-background flex flex-col">
+        <div className="flex-1 flex items-center justify-center overflow-auto p-4">
+          <LibraryMediaViewer />
         </div>
 
         <div className="sticky bottom-0 bg-background border-t border-border px-4 py-3 flex items-center justify-between">
