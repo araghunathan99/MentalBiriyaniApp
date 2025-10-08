@@ -108,3 +108,10 @@ Preferred communication style: Simple, everyday language.
 - Muted autoplay by default (mobile browser compliance)
 - Play/pause toggle on tap
 - Volume control available but not persistent
+
+**Media Caching**
+- LocalStorage-based caching with 4MB size limit
+- Automatic cache eviction when storage is full
+- Cache validity period: 24 hours
+- Stale-while-revalidate strategy for optimal performance
+- Cache automatically updated when fresh data is fetched

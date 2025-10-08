@@ -135,9 +135,19 @@ export default function Home() {
   // Cache the media data when it's fetched
   useEffect(() => {
     if (media && media.length > 0 && !isLoading) {
-      setCachedMedia(media);
+      const cached = setCachedMedia(media);
+      if (cached) {
+        console.log(`✓ Media cached: ${media.length} items`);
+      }
     }
   }, [media, isLoading]);
+
+  // Log cache status on mount
+  useEffect(() => {
+    if (cacheValid && cachedMedia) {
+      console.log(`✓ Using cached media: ${cachedMedia.length} items (cache valid)`);
+    }
+  }, []);
 
   const handleMediaClick = (index: number) => {
     setSelectedMediaIndex(index);
