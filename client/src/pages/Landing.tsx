@@ -111,7 +111,7 @@ export default function Landing() {
 
   return (
     <div 
-      className="h-screen w-full bg-gradient-to-b from-black via-[#0f1729] via-50% to-[#fbbf24] flex items-center justify-center p-6 cursor-pointer relative overflow-hidden"
+      className="h-screen w-full bg-gradient-to-b from-black to-[#1a2642] flex items-center justify-center p-6 cursor-pointer relative overflow-hidden"
       onClick={handleClick}
       data-testid="button-enter-app"
     >
