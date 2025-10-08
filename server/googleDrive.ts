@@ -50,120 +50,70 @@ export async function getGoogleDriveClient() {
 
 export async function listMediaFiles() {
   try {
-    const accessToken = await getAccessToken();
+    const drive = await getGoogleDriveClient();
     
-    // Step 1: Search for the "MentalBiriyani" album using Google Photos Library API
-    const albumsResponse = await fetch(
-      'https://photoslibrary.googleapis.com/v1/albums',
-      {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
+    // Search for files in Google Photos that are in an album named "MentalBiriyani"
+    // Using Drive API with spaces='photos' which works with drive.photos.readonly scope
+    const response = await drive.files.list({
+      spaces: 'photos',
+      q: "name contains 'MentalBiriyani'",
+      fields: 'files(id, name, mimeType, thumbnailLink, webContentLink, webViewLink, modifiedTime, size, parents)',
+      pageSize: 100,
+      orderBy: 'modifiedTime desc',
+    });
 
-    if (!albumsResponse.ok) {
-      throw new Error(`Failed to fetch albums: ${albumsResponse.statusText}`);
-    }
-
-    const albumsData = await albumsResponse.json();
-    const albums = albumsData.albums || [];
+    let files = response.data.files || [];
     
-    // Find the MentalBiriyani album (case-insensitive)
-    const targetAlbum = albums.find((album: any) => 
-      album.title?.toLowerCase() === 'mentalbiriyani'
-    );
-
-    if (!targetAlbum || !targetAlbum.id) {
-      console.log('Available albums:', albums.map((a: any) => a.title).join(', '));
-      throw new Error('Album "MentalBiriyani" not found in Google Photos');
+    if (files.length === 0) {
+      throw new Error('No files found with "MentalBiriyani" in the name. Make sure your album or photos include "MentalBiriyani" in their name/title.');
     }
 
-    console.log(`Found album "MentalBiriyani" with ID: ${targetAlbum.id}`);
-
-    // Step 2: Fetch media items from the MentalBiriyani album
-    const mediaResponse = await fetch(
-      'https://photoslibrary.googleapis.com/v1/mediaItems:search',
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          albumId: targetAlbum.id,
-          pageSize: 100
-        })
-      }
-    );
-
-    if (!mediaResponse.ok) {
-      throw new Error(`Failed to fetch media from album: ${mediaResponse.statusText}`);
-    }
-
-    const mediaData = await mediaResponse.json();
-    const mediaItems = mediaData.mediaItems || [];
-
-    if (mediaItems.length === 0) {
-      throw new Error('No media items found in "MentalBiriyani" album');
-    }
-
-    console.log(`Found ${mediaItems.length} media items in "MentalBiriyani" album`);
+    console.log(`Found ${files.length} media items with "MentalBiriyani" in Google Photos`);
     
-    return mediaItems.map((item: any) => ({
-      id: item.id || '',
-      name: item.filename || '',
-      mimeType: item.mimeType || '',
-      thumbnailLink: item.baseUrl,
-      webContentLink: item.baseUrl,
-      webViewLink: item.productUrl,
-      modifiedTime: item.mediaMetadata?.creationTime,
-      size: undefined,
-      isVideo: item.mimeType?.startsWith('video/') || false,
-      isImage: item.mimeType?.startsWith('image/') || false,
+    return files.map((file) => ({
+      id: file.id || '',
+      name: file.name || '',
+      mimeType: file.mimeType || '',
+      thumbnailLink: file.thumbnailLink,
+      webContentLink: file.webContentLink,
+      webViewLink: file.webViewLink,
+      modifiedTime: file.modifiedTime,
+      size: file.size,
+      isVideo: file.mimeType?.startsWith('video/') || false,
+      isImage: file.mimeType?.startsWith('image/') || false,
     }));
   } catch (error) {
-    console.error('Error fetching media from MentalBiriyani album:', error);
+    console.error('Error fetching Google Photos files:', error);
     throw error;
   }
 }
 
 export async function getFileById(fileId: string) {
   try {
-    const accessToken = await getAccessToken();
+    const drive = await getGoogleDriveClient();
     
-    // Fetch specific media item using Google Photos Library API
-    const response = await fetch(
-      `https://photoslibrary.googleapis.com/v1/mediaItems/${fileId}`,
-      {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
+    const response = await drive.files.get({
+      fileId,
+      fields: 'id, name, mimeType, thumbnailLink, webContentLink, webViewLink, modifiedTime, size',
+      supportsAllDrives: true,
+    });
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch media item: ${response.statusText}`);
-    }
-
-    const item = await response.json();
+    const file = response.data;
     
     return {
-      id: item.id || '',
-      name: item.filename || '',
-      mimeType: item.mimeType || '',
-      thumbnailLink: item.baseUrl,
-      webContentLink: item.baseUrl,
-      webViewLink: item.productUrl,
-      modifiedTime: item.mediaMetadata?.creationTime,
-      size: undefined,
-      isVideo: item.mimeType?.startsWith('video/') || false,
-      isImage: item.mimeType?.startsWith('image/') || false,
+      id: file.id || '',
+      name: file.name || '',
+      mimeType: file.mimeType || '',
+      thumbnailLink: file.thumbnailLink,
+      webContentLink: file.webContentLink,
+      webViewLink: file.webViewLink,
+      modifiedTime: file.modifiedTime,
+      size: file.size,
+      isVideo: file.mimeType?.startsWith('video/') || false,
+      isImage: file.mimeType?.startsWith('image/') || false,
     };
   } catch (error) {
-    console.error(`Error fetching media item ${fileId}:`, error);
+    console.error(`Error fetching file ${fileId}:`, error);
     throw error;
   }
 }
