@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import ReelsFeed from "@/components/ReelsFeed";
 import GridView from "@/components/GridView";
 import BottomNav from "@/components/BottomNav";
 import type { MediaItem } from "@shared/schema";
+import { getCachedMedia, setCachedMedia, isCacheValid } from "@/lib/mediaCache";
 
 // TODO: remove mock functionality
 const mockMedia: MediaItem[] = [
@@ -121,9 +122,22 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<"reels" | "grid">("reels");
   const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
 
-  const { data: media = [], isLoading, error } = useQuery<MediaItem[]>({
+  // Check for cached media on mount
+  const cachedMedia = getCachedMedia();
+  const cacheValid = isCacheValid(24 * 60 * 60 * 1000); // 24 hours
+
+  const { data: media = cachedMedia || [], isLoading, error } = useQuery<MediaItem[]>({
     queryKey: ["/api/media"],
+    initialData: cacheValid && cachedMedia ? cachedMedia : undefined,
+    staleTime: cacheValid ? 5 * 60 * 1000 : 0, // 5 minutes if cache is valid
   });
+
+  // Cache the media data when it's fetched
+  useEffect(() => {
+    if (media && media.length > 0 && !isLoading) {
+      setCachedMedia(media);
+    }
+  }, [media, isLoading]);
 
   const handleMediaClick = (index: number) => {
     setSelectedMediaIndex(index);
