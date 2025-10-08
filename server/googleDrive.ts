@@ -90,37 +90,27 @@ export async function listMediaFiles() {
 
 export async function getFileById(fileId: string) {
   try {
-    const accessToken = await getAccessToken();
+    const drive = await getGoogleDriveClient();
     
-    // Fetch specific media item using Google Photos Library API
-    const response = await fetch(
-      `https://photoslibrary.googleapis.com/v1/mediaItems/${fileId}`,
-      {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
+    // Fetch specific file from Google Drive
+    const response = await drive.files.get({
+      fileId: fileId,
+      fields: 'id, name, mimeType, thumbnailLink, webContentLink, webViewLink, modifiedTime, size',
+    });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Failed to fetch media item: ${response.status} ${response.statusText} - ${errorText}`);
-    }
-
-    const item = await response.json();
+    const file = response.data;
     
     return {
-      id: item.id || '',
-      name: item.filename || '',
-      mimeType: item.mimeType || '',
-      thumbnailLink: item.baseUrl,
-      webContentLink: item.baseUrl,
-      webViewLink: item.productUrl,
-      modifiedTime: item.mediaMetadata?.creationTime,
-      size: undefined,
-      isVideo: item.mimeType?.startsWith('video/') || false,
-      isImage: item.mimeType?.startsWith('image/') || false,
+      id: file.id || '',
+      name: file.name || '',
+      mimeType: file.mimeType || '',
+      thumbnailLink: file.thumbnailLink,
+      webContentLink: file.webContentLink,
+      webViewLink: file.webViewLink,
+      modifiedTime: file.modifiedTime,
+      size: file.size,
+      isVideo: file.mimeType?.startsWith('video/') || false,
+      isImage: file.mimeType?.startsWith('image/') || false,
     };
   } catch (error) {
     console.error(`Error fetching media item ${fileId}:`, error);
