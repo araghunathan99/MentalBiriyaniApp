@@ -97,7 +97,7 @@ export default function Landing() {
       setMeteorKey(prev => prev + 1);
       
       // Schedule next meteor
-      const nextDelay = (Math.random() * 5000) + 5000; // 5-10 seconds
+      const nextDelay = (Math.random() * 6000) + 12000; // 12-18 seconds
       return setTimeout(showMeteor, nextDelay);
     };
 
