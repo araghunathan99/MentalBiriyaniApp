@@ -8,10 +8,10 @@ export default function Landing() {
   const [meteorKey, setMeteorKey] = useState(0);
   const [meteorPosition, setMeteorPosition] = useState({ top: 10, left: 20 });
 
-  // Generate random stars
-  const stars = Array.from({ length: 50 }, (_, i) => ({
+  // Generate random stars across full screen
+  const stars = Array.from({ length: 100 }, (_, i) => ({
     id: i,
-    top: Math.random() * 40,
+    top: Math.random() * 100,
     left: Math.random() * 100,
     size: Math.random() * 2 + 1,
     delay: Math.random() * 3,
