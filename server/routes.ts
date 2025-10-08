@@ -68,6 +68,15 @@ const mockMedia = [
 ];
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Health check endpoints for deployment (fast response, no expensive operations)
+  app.get("/health", (_req, res) => {
+    res.status(200).json({ status: "ok", timestamp: Date.now() });
+  });
+  
+  app.get("/healthz", (_req, res) => {
+    res.status(200).json({ status: "ok", timestamp: Date.now() });
+  });
+
   // Get all media from Google Drive (with fallback to mock data)
   app.get("/api/media", async (req, res) => {
     try {
