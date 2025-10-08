@@ -31,6 +31,8 @@ Preferred communication style: Simple, everyday language.
 - Bottom navigation for tab switching
 - Toast notifications for user feedback
 - Responsive design with mobile-first approach
+- Tap-to-toggle controls: First tap shows controls, second tap hides them
+- Bottom slider navigation: Click left/right areas to navigate reels
 
 **State Management Strategy**
 - Local state with React hooks (useState, useRef)
