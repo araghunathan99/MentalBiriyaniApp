@@ -1,79 +1,99 @@
 import { google } from 'googleapis';
 
-// Initialize Google Drive API with OAuth2 client
-export async function getGoogleDriveClient() {
+// Initialize Google Photos API with OAuth2 client
+export async function getGooglePhotosClient() {
   // For Replit connector integration, we'll use environment-based auth
   // The Replit connector should provide authentication automatically
   
   const auth = new google.auth.GoogleAuth({
-    scopes: ['https://www.googleapis.com/auth/drive.readonly'],
+    scopes: ['https://www.googleapis.com/auth/photoslibrary.readonly'],
   });
 
   const authClient = await auth.getClient();
-  const drive = google.drive({ version: 'v3', auth: authClient as any });
+  const photos = (google as any).photoslibrary({ version: 'v1', auth: authClient });
   
-  return drive;
+  return photos;
+}
+
+// Legacy function name for backward compatibility
+export async function getGoogleDriveClient() {
+  return getGooglePhotosClient();
 }
 
 export async function listMediaFiles() {
   try {
-    const drive = await getGoogleDriveClient();
+    const photos = await getGooglePhotosClient();
     
-    // Search for image and video files
-    const imageTypes = 'mimeType contains "image/" or mimeType contains "video/"';
-    
-    const response = await drive.files.list({
-      q: imageTypes,
-      fields: 'files(id, name, mimeType, thumbnailLink, webContentLink, webViewLink, modifiedTime, size)',
-      pageSize: 100,
-      orderBy: 'modifiedTime desc',
+    // First, search for the album named "MentalBiriyani"
+    const albumsResponse = await photos.albums.list({
+      pageSize: 50,
     });
 
-    const files = response.data.files || [];
+    const albums = albumsResponse.data.albums || [];
+    const targetAlbum = albums.find((album: any) => 
+      album.title?.toLowerCase() === 'mentalbiriyani'
+    );
+
+    if (!targetAlbum || !targetAlbum.id) {
+      console.log('Album "MentalBiriyani" not found. Available albums:', 
+        albums.map((a: any) => a.title).join(', '));
+      throw new Error('Album "MentalBiriyani" not found in Google Photos');
+    }
+
+    console.log(`Found album "MentalBiriyani" with ID: ${targetAlbum.id}`);
+
+    // Fetch media items from the album
+    const mediaResponse = await photos.mediaItems.search({
+      requestBody: {
+        albumId: targetAlbum.id,
+        pageSize: 100,
+      },
+    });
+
+    const mediaItems = mediaResponse.data.mediaItems || [];
     
-    return files.map((file) => ({
-      id: file.id || '',
-      name: file.name || '',
-      mimeType: file.mimeType || '',
-      thumbnailLink: file.thumbnailLink,
-      webContentLink: file.webContentLink,
-      webViewLink: file.webViewLink,
-      modifiedTime: file.modifiedTime,
-      size: file.size,
-      isVideo: file.mimeType?.startsWith('video/') || false,
-      isImage: file.mimeType?.startsWith('image/') || false,
+    return mediaItems.map((item: any) => ({
+      id: item.id || '',
+      name: item.filename || '',
+      mimeType: item.mimeType || '',
+      thumbnailLink: item.baseUrl,
+      webContentLink: item.baseUrl,
+      webViewLink: item.productUrl,
+      modifiedTime: item.mediaMetadata?.creationTime,
+      size: undefined,
+      isVideo: item.mimeType?.startsWith('video/') || false,
+      isImage: item.mimeType?.startsWith('image/') || false,
     }));
   } catch (error) {
-    console.error('Error fetching Google Drive files:', error);
+    console.error('Error fetching Google Photos files:', error);
     throw error;
   }
 }
 
 export async function getFileById(fileId: string) {
   try {
-    const drive = await getGoogleDriveClient();
+    const photos = await getGooglePhotosClient();
     
-    const response = await drive.files.get({
-      fileId,
-      fields: 'id, name, mimeType, thumbnailLink, webContentLink, webViewLink, modifiedTime, size',
+    const response = await photos.mediaItems.get({
+      mediaItemId: fileId,
     });
 
-    const file = response.data;
+    const item = response.data;
     
     return {
-      id: file.id || '',
-      name: file.name || '',
-      mimeType: file.mimeType || '',
-      thumbnailLink: file.thumbnailLink,
-      webContentLink: file.webContentLink,
-      webViewLink: file.webViewLink,
-      modifiedTime: file.modifiedTime,
-      size: file.size,
-      isVideo: file.mimeType?.startsWith('video/') || false,
-      isImage: file.mimeType?.startsWith('image/') || false,
+      id: item.id || '',
+      name: item.filename || '',
+      mimeType: item.mimeType || '',
+      thumbnailLink: item.baseUrl,
+      webContentLink: item.baseUrl,
+      webViewLink: item.productUrl,
+      modifiedTime: item.mediaMetadata?.creationTime,
+      size: undefined,
+      isVideo: item.mimeType?.startsWith('video/') || false,
+      isImage: item.mimeType?.startsWith('image/') || false,
     };
   } catch (error) {
-    console.error(`Error fetching file ${fileId}:`, error);
+    console.error(`Error fetching media item ${fileId}:`, error);
     throw error;
   }
 }
