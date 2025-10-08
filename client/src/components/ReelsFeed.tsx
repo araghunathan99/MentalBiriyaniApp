@@ -76,7 +76,7 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
   };
 
   const handleShare = async () => {
-    const shareUrl = `${window.location.origin}/media/${currentMedia.id}`;
+    const shareUrl = `${window.location.origin}/share/${currentMedia.id}`;
     
     if (navigator.share) {
       try {

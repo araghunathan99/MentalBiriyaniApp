@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Landing from "@/pages/Landing";
 import Home from "@/pages/Home";
+import ShareView from "@/pages/ShareView";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -12,7 +13,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Landing} />
       <Route path="/home" component={Home} />
-      <Route path="/media/:id" component={Home} />
+      <Route path="/share/:id" component={ShareView} />
       <Route component={NotFound} />
     </Switch>
   );
