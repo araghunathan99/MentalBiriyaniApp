@@ -1,10 +1,18 @@
 import { useState, useEffect, useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
 import ReelsFeed from "@/components/ReelsFeed";
 import GridView from "@/components/GridView";
 import BottomNav from "@/components/BottomNav";
 import type { MediaItem } from "@shared/schema";
 import { getCachedMedia, setCachedMedia, isCacheValid } from "@/lib/mediaCache";
+import { 
+  initGoogleDrive, 
+  authenticateGoogleDrive, 
+  searchMentalBiriyaniFolder, 
+  fetchAllMediaFromFolder,
+  isAuthenticated,
+  getDirectImageUrl
+} from "@/lib/googleDrive";
+import { Button } from "@/components/ui/button";
 
 // TODO: remove mock functionality
 const mockMedia: MediaItem[] = [
@@ -122,33 +130,91 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<"reels" | "grid">("reels");
   const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
   const [libraryViewerIndex, setLibraryViewerIndex] = useState<number | null>(null);
+  const [media, setMedia] = useState<MediaItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [needsAuth, setNeedsAuth] = useState(false);
 
-  // Check for cached media on mount
-  const cachedMedia = getCachedMedia();
-  const cacheValid = isCacheValid(24 * 60 * 60 * 1000); // 24 hours
-
-  const { data: media = cachedMedia || [], isLoading, error } = useQuery<MediaItem[]>({
-    queryKey: ["/api/media"],
-    initialData: cacheValid && cachedMedia ? cachedMedia : undefined,
-    staleTime: cacheValid ? 5 * 60 * 1000 : 0, // 5 minutes if cache is valid
-  });
-
-  // Cache the media data when it's fetched
+  // Initialize Google Drive and fetch media
   useEffect(() => {
-    if (media && media.length > 0 && !isLoading) {
-      const cached = setCachedMedia(media);
-      if (cached) {
-        console.log(`✓ Media cached: ${media.length} items`);
+    async function initialize() {
+      try {
+        // Check cache first
+        const cachedMedia = getCachedMedia();
+        const cacheValid = isCacheValid(24 * 60 * 60 * 1000); // 24 hours
+        
+        if (cacheValid && cachedMedia && cachedMedia.length > 0) {
+          console.log(`✓ Using cached media: ${cachedMedia.length} items`);
+          setMedia(cachedMedia);
+          setIsLoading(false);
+        }
+
+        // Initialize Google APIs
+        await initGoogleDrive();
+
+        // Check if authenticated
+        if (!isAuthenticated()) {
+          setNeedsAuth(true);
+          setIsLoading(false);
+          return;
+        }
+
+        // Fetch fresh data from Google Drive
+        await fetchMedia();
+      } catch (err) {
+        console.error('Initialization error:', err);
+        setError('Failed to initialize Google Drive');
+        setIsLoading(false);
       }
     }
-  }, [media, isLoading]);
 
-  // Log cache status on mount
-  useEffect(() => {
-    if (cacheValid && cachedMedia) {
-      console.log(`✓ Using cached media: ${cachedMedia.length} items (cache valid)`);
-    }
+    initialize();
   }, []);
+
+  async function fetchMedia() {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      // Search for MentalBiriyani folder
+      const folderId = await searchMentalBiriyaniFolder();
+      
+      if (!folderId) {
+        setError('MentalBiriyani folder not found');
+        setIsLoading(false);
+        return;
+      }
+
+      // Fetch all media from folder
+      const mediaItems = await fetchAllMediaFromFolder(folderId);
+      
+      if (mediaItems.length === 0) {
+        setError('No media found in folder');
+        setIsLoading(false);
+        return;
+      }
+
+      setMedia(mediaItems);
+      setCachedMedia(mediaItems);
+      console.log(`✓ Fetched ${mediaItems.length} items from Google Drive`);
+      setIsLoading(false);
+    } catch (err) {
+      console.error('Error fetching media:', err);
+      setError('Failed to fetch media from Google Drive');
+      setIsLoading(false);
+    }
+  }
+
+  async function handleSignIn() {
+    try {
+      await authenticateGoogleDrive();
+      setNeedsAuth(false);
+      await fetchMedia();
+    } catch (err) {
+      console.error('Authentication error:', err);
+      setError('Failed to authenticate with Google');
+    }
+  }
 
   const handleMediaClick = (index: number) => {
     if (activeTab === "grid") {
@@ -175,6 +241,27 @@ export default function Home() {
     }
   };
 
+  if (needsAuth) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-background p-6 text-center">
+        <h2 className="text-2xl font-bold text-foreground mb-2">Sign in to Google Drive</h2>
+        <p className="text-muted-foreground mb-6 max-w-md">
+          Connect your Google account to view photos and videos from your Drive
+        </p>
+        <Button 
+          onClick={handleSignIn}
+          size="lg"
+          data-testid="button-google-signin"
+        >
+          Sign in with Google
+        </Button>
+        <p className="text-xs text-muted-foreground mt-8 max-w-md">
+          Need help? See GOOGLE_SETUP.md for configuration instructions
+        </p>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-background">
@@ -186,17 +273,16 @@ export default function Home() {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-background p-6 text-center">
-        <h2 className="text-xl font-semibold text-foreground mb-2">Connection error</h2>
+        <h2 className="text-xl font-semibold text-foreground mb-2">Error</h2>
         <p className="text-muted-foreground mb-4">
-          Failed to load media. Please try again.
+          {error}
         </p>
-        <button
+        <Button
           onClick={() => window.location.reload()}
-          className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover-elevate active-elevate-2"
           data-testid="button-retry"
         >
           Try Again
-        </button>
+        </Button>
       </div>
     );
   }
@@ -257,7 +343,7 @@ export default function Home() {
           {currentMedia.isImage && (
             <img
               ref={imageRef}
-              src={`/api/media/${currentMedia.id}/content`}
+              src={getDirectImageUrl(currentMedia.id)}
               alt={currentMedia.name}
               className="max-w-full max-h-full object-contain"
               data-testid={`img-library-media-${currentMedia.id}`}
@@ -266,7 +352,7 @@ export default function Home() {
           {currentMedia.isVideo && (
             <video
               ref={videoRef}
-              src={`/api/media/${currentMedia.id}/content`}
+              src={getDirectImageUrl(currentMedia.id)}
               controls
               autoPlay
               muted
