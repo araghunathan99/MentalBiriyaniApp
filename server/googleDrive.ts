@@ -134,25 +134,97 @@ export async function listMediaFiles() {
       // Fallback to Google Drive API (works with drive.photos.readonly scope)
       const drive = await getGoogleDriveClient();
       
-      console.log('Using Drive API fallback to search for "MentalBiriyani"...');
+      console.log('Searching for "MentalBiriyani" folder in Google Drive...');
       
-      const response = await drive.files.list({
-        spaces: 'photos',
-        q: "name contains 'MentalBiriyani'",
+      // Step 1: Search for a folder named "MentalBiriyani"
+      const folderResponse = await drive.files.list({
+        q: "name='MentalBiriyani' and mimeType='application/vnd.google-apps.folder'",
+        fields: 'files(id, name)',
+        pageSize: 10,
+      });
+
+      const folders = folderResponse.data.files || [];
+      
+      if (folders.length > 0) {
+        const folderId = folders[0].id;
+        console.log(`✓ Found folder "MentalBiriyani" (ID: ${folderId})`);
+        
+        // Step 2: List all media files in the folder
+        const filesResponse = await drive.files.list({
+          q: `'${folderId}' in parents and (mimeType contains 'image/' or mimeType contains 'video/')`,
+          fields: 'files(id, name, mimeType, thumbnailLink, webContentLink, webViewLink, modifiedTime, size)',
+          pageSize: 100,
+          orderBy: 'modifiedTime desc',
+        });
+
+        const files = filesResponse.data.files || [];
+        
+        if (files.length === 0) {
+          throw new Error(`Folder "MentalBiriyani" is empty`);
+        }
+
+        console.log(`✓ Found ${files.length} media items in "MentalBiriyani" folder`);
+        
+        return files.map((file) => ({
+          id: file.id || '',
+          name: file.name || '',
+          mimeType: file.mimeType || '',
+          thumbnailLink: file.thumbnailLink,
+          webContentLink: file.webContentLink,
+          webViewLink: file.webViewLink,
+          modifiedTime: file.modifiedTime,
+          size: file.size,
+          isVideo: file.mimeType?.startsWith('video/') || false,
+          isImage: file.mimeType?.startsWith('image/') || false,
+        }));
+      }
+      
+      // If no folder found, try listing all accessible Drive files
+      console.log('No folder found, listing all accessible files in Drive...');
+      const allFilesResponse = await drive.files.list({
+        q: "(mimeType contains 'image/' or mimeType contains 'video/')",
         fields: 'files(id, name, mimeType, thumbnailLink, webContentLink, webViewLink, modifiedTime, size)',
         pageSize: 100,
         orderBy: 'modifiedTime desc',
       });
 
-      const files = response.data.files || [];
+      const allFiles = allFilesResponse.data.files || [];
       
-      if (files.length === 0) {
-        throw new Error('No files found with "MentalBiriyani" in name via Drive API fallback');
+      if (allFiles.length === 0) {
+        console.log('No media files accessible in Drive. Trying photos space without query...');
+        
+        // Last attempt - try photos space without any query filter
+        const photosResponse = await drive.files.list({
+          spaces: 'photos',
+          fields: 'files(id, name, mimeType, thumbnailLink, webContentLink, webViewLink, modifiedTime, size)',
+          pageSize: 100,
+        });
+        
+        const photoFiles = photosResponse.data.files || [];
+        
+        if (photoFiles.length === 0) {
+          throw new Error('No media files found in Google Photos or Drive. Please check permissions or add photos to "MentalBiriyani" folder.');
+        }
+        
+        console.log(`✓ Found ${photoFiles.length} items in Google Photos (all photos)`);
+        
+        return photoFiles.map((file) => ({
+          id: file.id || '',
+          name: file.name || '',
+          mimeType: file.mimeType || '',
+          thumbnailLink: file.thumbnailLink,
+          webContentLink: file.webContentLink,
+          webViewLink: file.webViewLink,
+          modifiedTime: file.modifiedTime,
+          size: file.size,
+          isVideo: file.mimeType?.startsWith('video/') || false,
+          isImage: file.mimeType?.startsWith('image/') || false,
+        }));
       }
 
-      console.log(`✓ Found ${files.length} media items via Drive API fallback`);
+      console.log(`✓ Found ${allFiles.length} media items in Drive`);
       
-      return files.map((file) => ({
+      return allFiles.map((file) => ({
         id: file.id || '',
         name: file.name || '',
         mimeType: file.mimeType || '',
