@@ -6,6 +6,8 @@ import type { MediaItem } from "@shared/schema";
 import { getCachedMedia, setCachedMedia, isCacheValid } from "@/lib/mediaCache";
 import { fetchLocalMedia } from "@/lib/localMedia";
 import { Button } from "@/components/ui/button";
+import { isMediaLiked } from "@/lib/localStorage";
+import { ArrowLeft } from "lucide-react";
 
 // TODO: remove mock functionality
 const mockMedia: MediaItem[] = [
@@ -129,6 +131,18 @@ function shuffleArray<T>(array: T[]): T[] {
   return shuffled;
 }
 
+// Sort media by favorites (liked items first)
+function sortByFavorites(mediaItems: MediaItem[]): MediaItem[] {
+  return [...mediaItems].sort((a, b) => {
+    const aLiked = isMediaLiked(a.id);
+    const bLiked = isMediaLiked(b.id);
+    
+    if (aLiked && !bLiked) return -1;
+    if (!aLiked && bLiked) return 1;
+    return 0;
+  });
+}
+
 export default function Home() {
   const [activeTab, setActiveTab] = useState<"reels" | "grid">("reels");
   const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
@@ -228,15 +242,90 @@ export default function Home() {
     );
   }
 
-  // Library viewer mode with screen rotation support
+  // Library viewer mode with swipe and arrow controls
   if (activeTab === "grid" && libraryViewerIndex !== null) {
-    const currentMedia = media[libraryViewerIndex];
+    const sortedMedia = sortByFavorites(media);
+    const currentMedia = sortedMedia[libraryViewerIndex];
     const hasPrevious = libraryViewerIndex > 0;
-    const hasNext = libraryViewerIndex < media.length - 1;
+    const hasNext = libraryViewerIndex < sortedMedia.length - 1;
 
     const LibraryMediaViewer = () => {
       const videoRef = useRef<HTMLVideoElement>(null);
       const imageRef = useRef<HTMLImageElement>(null);
+      const containerRef = useRef<HTMLDivElement>(null);
+      const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+
+      // Handle swipe gestures for mobile
+      useEffect(() => {
+        const container = containerRef.current;
+        if (!container) return;
+
+        const handleTouchStart = (e: TouchEvent) => {
+          touchStartRef.current = {
+            x: e.touches[0].clientX,
+            y: e.touches[0].clientY,
+          };
+        };
+
+        const handleTouchEnd = (e: TouchEvent) => {
+          if (!touchStartRef.current) return;
+
+          const deltaX = e.changedTouches[0].clientX - touchStartRef.current.x;
+          const deltaY = e.changedTouches[0].clientY - touchStartRef.current.y;
+          const threshold = 50;
+
+          // Determine if swipe is more vertical or horizontal
+          if (Math.abs(deltaY) > Math.abs(deltaX)) {
+            // Vertical swipe
+            if (deltaY < -threshold && hasNext) {
+              // Swipe up = next
+              handleNextMedia();
+            } else if (deltaY > threshold && hasPrevious) {
+              // Swipe down = previous
+              handlePreviousMedia();
+            }
+          } else {
+            // Horizontal swipe
+            if (deltaX < -threshold && hasNext) {
+              // Swipe left = next
+              handleNextMedia();
+            } else if (deltaX > threshold && hasPrevious) {
+              // Swipe right = previous
+              handlePreviousMedia();
+            }
+          }
+
+          touchStartRef.current = null;
+        };
+
+        container.addEventListener('touchstart', handleTouchStart);
+        container.addEventListener('touchend', handleTouchEnd);
+
+        return () => {
+          container.removeEventListener('touchstart', handleTouchStart);
+          container.removeEventListener('touchend', handleTouchEnd);
+        };
+      }, [hasNext, hasPrevious]);
+
+      // Handle keyboard arrow controls for web
+      useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+          if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+            if (hasNext) {
+              e.preventDefault();
+              handleNextMedia();
+            }
+          } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+            if (hasPrevious) {
+              e.preventDefault();
+              handlePreviousMedia();
+            }
+          }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+      }, [hasNext, hasPrevious]);
 
       useEffect(() => {
         const handleOrientationLock = () => {
@@ -280,7 +369,7 @@ export default function Home() {
       }, []);
 
       return (
-        <>
+        <div ref={containerRef} className="flex-1 flex items-center justify-center overflow-auto p-4">
           {currentMedia.isImage && (
             <img
               ref={imageRef}
@@ -301,52 +390,23 @@ export default function Home() {
               data-testid={`video-library-media-${currentMedia.id}`}
             />
           )}
-        </>
+        </div>
       );
     };
 
     return (
       <div className="h-screen w-full bg-background flex flex-col">
-        <div className="flex-1 flex items-center justify-center overflow-auto p-4">
-          <LibraryMediaViewer />
-        </div>
-
-        <div className="sticky bottom-0 bg-background border-t border-border px-4 py-3 flex items-center justify-between">
+        <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-xl border-b border-border px-4 py-3">
           <button
             onClick={handleBackToLibrary}
-            className="px-4 py-2 text-sm font-medium text-foreground bg-secondary rounded-md hover-elevate active-elevate-2"
+            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-foreground bg-secondary rounded-md hover-elevate active-elevate-2"
             data-testid="button-back-to-library"
           >
+            <ArrowLeft className="h-4 w-4" />
             Back to Library
           </button>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handlePreviousMedia}
-              disabled={!hasPrevious}
-              className={`px-4 py-2 text-sm font-medium rounded-md hover-elevate active-elevate-2 ${
-                hasPrevious
-                  ? "text-foreground bg-secondary"
-                  : "text-muted-foreground bg-secondary/50 cursor-not-allowed"
-              }`}
-              data-testid="button-previous-media"
-            >
-              Previous
-            </button>
-            <button
-              onClick={handleNextMedia}
-              disabled={!hasNext}
-              className={`px-4 py-2 text-sm font-medium rounded-md hover-elevate active-elevate-2 ${
-                hasNext
-                  ? "text-foreground bg-secondary"
-                  : "text-muted-foreground bg-secondary/50 cursor-not-allowed"
-              }`}
-              data-testid="button-next-media"
-            >
-              Next
-            </button>
-          </div>
         </div>
+        <LibraryMediaViewer />
       </div>
     );
   }
@@ -357,7 +417,7 @@ export default function Home() {
         {activeTab === "reels" ? (
           <ReelsFeed media={shuffledMedia} initialIndex={selectedMediaIndex} />
         ) : (
-          <GridView media={media} onMediaClick={handleMediaClick} />
+          <GridView media={sortByFavorites(media)} onMediaClick={handleMediaClick} />
         )}
       </div>
       <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
