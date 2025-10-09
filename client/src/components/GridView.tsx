@@ -71,12 +71,22 @@ export default function GridView({ media, onMediaClick }: GridViewProps) {
                 className="relative aspect-square overflow-hidden bg-card hover-elevate active-elevate-2 rounded-sm"
                 data-testid={`button-media-${item.id}`}
               >
-                <img
-                  src={item.thumbnailLink || item.webContentLink || ""}
-                  alt={item.name}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
+                {item.isVideo ? (
+                  <video
+                    src={item.webContentLink || ""}
+                    className="w-full h-full object-cover"
+                    preload="metadata"
+                    muted
+                    playsInline
+                  />
+                ) : (
+                  <img
+                    src={item.thumbnailLink || item.webContentLink || ""}
+                    alt={item.name}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                )}
                 
                 {item.isVideo && (
                   <div className="absolute bottom-1 right-1 bg-black/60 rounded-full p-1">

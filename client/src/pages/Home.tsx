@@ -386,8 +386,13 @@ export default function Home() {
               controls
               autoPlay
               muted
+              playsInline
+              loop
               className="max-w-full max-h-full"
               data-testid={`video-library-media-${currentMedia.id}`}
+              onError={(e) => {
+                console.error('Video playback error:', e);
+              }}
             />
           )}
         </div>
