@@ -1,7 +1,7 @@
 const CACHE_NAME = 'drive-reels-v1';
 const urlsToCache = [
-  '/',
-  '/index.html'
+  '/MentalBiriyani',
+  '/MentalBiriyani/index.html'
 ];
 
 self.addEventListener('install', (event) => {
