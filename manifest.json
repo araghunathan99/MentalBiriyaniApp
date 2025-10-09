@@ -1,8 +1,8 @@
 {
-  "name": "Drive Reels - Photo & Video Feed",
-  "short_name": "Drive Reels",
+  "name": "MentalBiriyani",
+  "short_name": "MentalBiriyani",
   "description": "Instagram Reels-like mobile app for viewing photos and videos",
-  "start_url": "/",
+  "start_url": "/MentalBiriyani",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
