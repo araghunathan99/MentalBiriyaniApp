@@ -2,7 +2,7 @@
 
 ## Overview
 
-Drive Reels is an Instagram Reels-inspired mobile web application that displays photos and videos from Google Drive in an immersive, swipeable feed. The app features a dark-first UI with gesture-driven interactions, allowing users to view media in both a full-screen Reels view and a grid library view. Users can like media items, with preferences stored locally, and share individual items via unique URLs.
+Drive Reels is an Instagram Reels-inspired mobile web application that displays photos and videos from a local content folder in an immersive, swipeable feed. The app features a dark-first UI with gesture-driven interactions, allowing users to view media in both a full-screen Reels view and a grid library view. Users can like media items, with preferences stored locally, and share individual items via unique URLs.
 
 ## User Preferences
 
@@ -43,26 +43,22 @@ Preferred communication style: Simple, everyday language.
 ### Architecture Model
 
 **Fully Static Frontend Application**
-- No backend server required for production
-- All Google Drive API calls made directly from browser
+- No backend server or authentication required
+- All media loaded from local `public/content` folder
 - Can be deployed to any static hosting (Netlify, Vercel, GitHub Pages, etc.)
 - Works as Progressive Web App (PWA) with offline capability
+- Simple JSON-based media configuration
 
-### External Dependencies
+### Local Media System
 
-**Google Drive Integration (Frontend)**
-- Google Drive API v3 accessed directly from browser
-- Google Identity Services for OAuth2 authentication
-- User authenticates with their own Google account
-- Required scope: `https://www.googleapis.com/auth/drive.readonly`
-- **Configuration Required**: Google OAuth Client ID (see GOOGLE_SETUP.md)
-- **Folder-Specific Filtering**: Fetches ONLY from "MentalBiriyani" folder
-- **Unlimited Pagination**: Uses `nextPageToken` to fetch ALL media files
-- Fetches all photos and videos (image/* and video/* mimeTypes) from the folder
-- Sorted by modification time (newest first)
-- Direct media URLs use Google Drive API with access token parameter
+**Content Folder Structure**
+- Media files stored in `public/content/` folder
+- Configuration file: `public/content/media-list.json`
+- Supports images (jpg, png, webp) and videos (mp4, webm)
+- No external API dependencies
+- No authentication needed
 
-**Database Service**
+**Database Service** (Not Used for Media)
 - Neon Serverless PostgreSQL via `@neondatabase/serverless`
 - Connection managed through `DATABASE_URL` environment variable
 - Drizzle Kit for schema migrations (output: `./migrations`)
@@ -79,20 +75,16 @@ Preferred communication style: Simple, everyday language.
 
 ### Data Flow
 
-1. **Authentication Flow**:
-   - User opens app → Initialize Google API libraries
-   - Check if authenticated → If not, prompt for Google sign-in
-   - User authorizes app → Access token stored in browser session
-
-2. **Media Loading**: 
-   - Browser calls Google Drive API directly with access token
-   - Search for "MentalBiriyani" folder by name → Get folder ID
-   - Fetch ALL media files from folder using pagination (do-while loop with nextPageToken)
-   - Transform Drive metadata → React state → UI components
+1. **Media Loading**: 
+   - App fetches `public/content/media-list.json` on startup
+   - Parses JSON to get list of available media files
+   - Constructs local URLs: `/content/{filename}`
+   - Loads media into React state → UI components
    
-3. **Media Display**:
-   - Media URLs constructed with: `googleapis.com/drive/v3/files/{id}?alt=media&access_token={token}`
-   - Images and videos loaded directly from Google Drive with authentication
+2. **Media Display**:
+   - Images and videos loaded directly from `/content/` folder
+   - No authentication or API calls required
+   - All files served as static assets
    
 4. **User Interactions**: Component events → LocalStorage (likes) → UI updates
 
