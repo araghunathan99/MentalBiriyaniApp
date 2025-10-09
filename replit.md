@@ -117,9 +117,15 @@ Preferred communication style: Simple, everyday language.
 - Desktop: Scroll wheel navigation support
 - Progress bar validates video duration is finite before seeking
 
-**Media Caching**
-- LocalStorage-based caching with 4MB size limit
-- Automatic cache eviction when storage is full
+**Media Caching & Cache Invalidation**
+- LocalStorage-based caching with automatic size management
 - Cache validity period: 24 hours
-- Stale-while-revalidate strategy for optimal performance
-- Cache automatically updated when fresh data is fetched
+- Version-based cache invalidation:
+  - Detects changes via `version` or `lastModified` field in media-list.json
+  - Automatically clears cache when version changes
+  - Supports both versioned (object) and legacy (array) JSON formats
+- HTTP cache-busting:
+  - Timestamp query parameter prevents browser caching
+  - `no-store` and `no-cache` headers for fresh data
+- Automatic cache eviction when storage is full
+- Fallback to cached data when network fails
