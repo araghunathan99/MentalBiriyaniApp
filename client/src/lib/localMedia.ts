@@ -1,4 +1,5 @@
 import type { MediaItem } from "@shared/schema";
+import { getFullPath } from "./basePath";
 
 interface LocalMediaItem {
   id: string;
@@ -24,7 +25,7 @@ export async function fetchLocalMedia(): Promise<MediaItem[]> {
   try {
     // Add cache-busting timestamp to prevent browser caching
     const cacheBuster = Date.now();
-    const response = await fetch(`/content/media-list.json?t=${cacheBuster}`, {
+    const response = await fetch(getFullPath(`content/media-list.json?t=${cacheBuster}`), {
       cache: 'no-store', // Prevent browser caching
       headers: {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -68,9 +69,9 @@ export async function fetchLocalMedia(): Promise<MediaItem[]> {
       id: item.id,
       name: item.name,
       mimeType: item.mimeType,
-      thumbnailLink: `/content/${item.file}`,
-      webContentLink: `/content/${item.file}`,
-      webViewLink: `/content/${item.file}`,
+      thumbnailLink: getFullPath(`content/${item.file}`),
+      webContentLink: getFullPath(`content/${item.file}`),
+      webViewLink: getFullPath(`content/${item.file}`),
       modifiedTime: item.modifiedTime || new Date().toISOString(),
       size: "0",
       isVideo: item.mimeType.startsWith('video/'),
@@ -133,5 +134,5 @@ function clearMediaCache(): void {
 }
 
 export function getMediaUrl(filename: string): string {
-  return `/content/${filename}`;
+  return getFullPath(`content/${filename}`);
 }
