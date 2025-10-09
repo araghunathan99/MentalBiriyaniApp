@@ -115,14 +115,6 @@ export default function Landing() {
           showText ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
         }`}
       >
-        <div className="mb-6">
-          <h2 className="text-2xl md:text-3xl font-bold text-primary mb-2">
-            MentalBiriyani
-          </h2>
-          <p className="text-sm md:text-base text-muted-foreground italic">
-            A curated nostalgia ride that is like biriyani for the mind! #DD40
-          </p>
-        </div>
         <h1 
           className="text-4xl md:text-5xl font-bold text-foreground mb-4"
           data-testid="text-title"
@@ -131,6 +123,9 @@ export default function Landing() {
           <br />
           Div Papa
         </h1>
+        <p className="text-lg md:text-xl font-semibold italic" style={{ color: '#FFD700' }}>
+          Mental Biriyani - A curated nostalgia ride that is like biriyani for the soul! #DD40
+        </p>
         <p 
           className="text-lg md:text-xl text-foreground max-w-2xl leading-relaxed"
           data-testid="text-message"
