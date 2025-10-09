@@ -136,21 +136,26 @@ export async function fetchAllMediaFromFolder(folderId: string): Promise<MediaIt
 
 export function getDirectImageUrl(fileId: string): string {
   // Use Google Drive's direct download URL with the current access token
-  const token = window.gapi.client.getToken();
-  if (token && token.access_token) {
-    return `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&access_token=${token.access_token}`;
+  // Check if gapi is initialized before accessing it
+  if (window.gapi && window.gapi.client && typeof window.gapi.client.getToken === 'function') {
+    const token = window.gapi.client.getToken();
+    if (token && token.access_token) {
+      return `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&access_token=${token.access_token}`;
+    }
   }
   return '';
 }
 
 export function isAuthenticated(): boolean {
-  return window.gapi && window.gapi.client.getToken() !== null;
+  return window.gapi && window.gapi.client && typeof window.gapi.client.getToken === 'function' && window.gapi.client.getToken() !== null;
 }
 
 export function signOut(): void {
-  const token = window.gapi.client.getToken();
-  if (token !== null) {
-    window.google.accounts.oauth2.revoke(token.access_token);
-    window.gapi.client.setToken(null);
+  if (window.gapi && window.gapi.client && typeof window.gapi.client.getToken === 'function') {
+    const token = window.gapi.client.getToken();
+    if (token !== null) {
+      window.google.accounts.oauth2.revoke(token.access_token);
+      window.gapi.client.setToken(null);
+    }
   }
 }
