@@ -4,14 +4,7 @@ import GridView from "@/components/GridView";
 import BottomNav from "@/components/BottomNav";
 import type { MediaItem } from "@shared/schema";
 import { getCachedMedia, setCachedMedia, isCacheValid } from "@/lib/mediaCache";
-import { 
-  initGoogleDrive, 
-  authenticateGoogleDrive, 
-  searchMentalBiriyaniFolder, 
-  fetchAllMediaFromFolder,
-  isAuthenticated,
-  getDirectImageUrl
-} from "@/lib/googleDrive";
+import { fetchLocalMedia } from "@/lib/localMedia";
 import { Button } from "@/components/ui/button";
 
 // TODO: remove mock functionality
@@ -133,11 +126,10 @@ export default function Home() {
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [needsAuth, setNeedsAuth] = useState(false);
 
-  // Initialize Google Drive and fetch media
+  // Load media from local content folder
   useEffect(() => {
-    async function initialize() {
+    async function loadMedia() {
       try {
         // Check cache first
         const cachedMedia = getCachedMedia();
@@ -147,74 +139,31 @@ export default function Home() {
           console.log(`✓ Using cached media: ${cachedMedia.length} items`);
           setMedia(cachedMedia);
           setIsLoading(false);
+          return;
         }
 
-        // Initialize Google APIs
-        await initGoogleDrive();
-
-        // Check if authenticated
-        if (!isAuthenticated()) {
-          setNeedsAuth(true);
+        // Fetch from local content folder
+        const mediaItems = await fetchLocalMedia();
+        
+        if (mediaItems.length === 0) {
+          setError('No media found in content folder');
           setIsLoading(false);
           return;
         }
 
-        // Fetch fresh data from Google Drive
-        await fetchMedia();
+        setMedia(mediaItems);
+        setCachedMedia(mediaItems);
+        console.log(`✓ Loaded ${mediaItems.length} items from content folder`);
+        setIsLoading(false);
       } catch (err) {
-        console.error('Initialization error:', err);
-        setError('Failed to initialize Google Drive');
+        console.error('Error loading media:', err);
+        setError('Failed to load media from content folder');
         setIsLoading(false);
       }
     }
 
-    initialize();
+    loadMedia();
   }, []);
-
-  async function fetchMedia() {
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      // Search for MentalBiriyani folder
-      const folderId = await searchMentalBiriyaniFolder();
-      
-      if (!folderId) {
-        setError('MentalBiriyani folder not found');
-        setIsLoading(false);
-        return;
-      }
-
-      // Fetch all media from folder
-      const mediaItems = await fetchAllMediaFromFolder(folderId);
-      
-      if (mediaItems.length === 0) {
-        setError('No media found in folder');
-        setIsLoading(false);
-        return;
-      }
-
-      setMedia(mediaItems);
-      setCachedMedia(mediaItems);
-      console.log(`✓ Fetched ${mediaItems.length} items from Google Drive`);
-      setIsLoading(false);
-    } catch (err) {
-      console.error('Error fetching media:', err);
-      setError('Failed to fetch media from Google Drive');
-      setIsLoading(false);
-    }
-  }
-
-  async function handleSignIn() {
-    try {
-      await authenticateGoogleDrive();
-      setNeedsAuth(false);
-      await fetchMedia();
-    } catch (err) {
-      console.error('Authentication error:', err);
-      setError('Failed to authenticate with Google');
-    }
-  }
 
   const handleMediaClick = (index: number) => {
     if (activeTab === "grid") {
@@ -240,27 +189,6 @@ export default function Home() {
       setLibraryViewerIndex(libraryViewerIndex + 1);
     }
   };
-
-  if (needsAuth) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen bg-background p-6 text-center">
-        <h2 className="text-2xl font-bold text-foreground mb-2">Sign in to Google Drive</h2>
-        <p className="text-muted-foreground mb-6 max-w-md">
-          Connect your Google account to view photos and videos from your Drive
-        </p>
-        <Button 
-          onClick={handleSignIn}
-          size="lg"
-          data-testid="button-google-signin"
-        >
-          Sign in with Google
-        </Button>
-        <p className="text-xs text-muted-foreground mt-8 max-w-md">
-          Need help? See GOOGLE_SETUP.md for configuration instructions
-        </p>
-      </div>
-    );
-  }
 
   if (isLoading) {
     return (
@@ -343,7 +271,7 @@ export default function Home() {
           {currentMedia.isImage && (
             <img
               ref={imageRef}
-              src={getDirectImageUrl(currentMedia.id)}
+              src={currentMedia.webContentLink}
               alt={currentMedia.name}
               className="max-w-full max-h-full object-contain"
               data-testid={`img-library-media-${currentMedia.id}`}
@@ -352,7 +280,7 @@ export default function Home() {
           {currentMedia.isVideo && (
             <video
               ref={videoRef}
-              src={getDirectImageUrl(currentMedia.id)}
+              src={currentMedia.webContentLink}
               controls
               autoPlay
               muted
