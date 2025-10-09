@@ -29,8 +29,13 @@ Preferred communication style: Simple, everyday language.
   - Media randomized on each app load for variety
   - Different order every session using Fisher-Yates shuffle
 - Grid view with filtering (All/Photos/Videos)
-  - Maintains original chronological order
-- Library viewer for grid items with navigation controls (Back to Library, Previous, Next)
+  - Liked media automatically bubble to the top
+  - Favorite sorting applies to all filter views (All, Photos, Videos)
+- Library viewer for grid items with gesture and keyboard controls
+  - Mobile: Swipe up/left for next, swipe down/right for previous
+  - Web: Arrow keys (↑↓←→) for navigation
+  - Back to Library button in top-left corner
+  - Clean, minimal interface with no bottom controls
 - Bottom navigation for tab switching
 - Toast notifications for user feedback
 - Responsive design with mobile-first approach
@@ -104,6 +109,16 @@ Preferred communication style: Simple, everyday language.
 - LocalStorage for liked media (client-side only, no backend persistence)
 - Simplifies implementation and reduces server dependencies
 - Trade-off: likes don't sync across devices
+
+**Favorite Sorting**
+- Liked media automatically bubble to the top in Library view
+- Sorting uses `isMediaLiked()` to check localStorage
+- Applied consistently across all filter views:
+  - All: Liked items (photos + videos) appear first
+  - Photos: Liked photos appear before unliked photos
+  - Videos: Liked videos appear before unliked videos
+- Maintains original order within liked/unliked groups
+- Updates dynamically when likes are toggled in Reels view
 
 **Mobile-First Design**
 - Touch gesture handlers (swipe, tap, hold)
