@@ -26,7 +26,10 @@ Preferred communication style: Simple, everyday language.
 
 **Key UI Patterns**
 - Full-screen Reels feed with vertical swipe navigation
+  - Media randomized on each app load for variety
+  - Different order every session using Fisher-Yates shuffle
 - Grid view with filtering (All/Photos/Videos)
+  - Maintains original chronological order
 - Library viewer for grid items with navigation controls (Back to Library, Previous, Next)
 - Bottom navigation for tab switching
 - Toast notifications for user feedback

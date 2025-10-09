@@ -119,11 +119,22 @@ const mockMedia: MediaItem[] = [
   },
 ];
 
+// Fisher-Yates shuffle algorithm to randomize array
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
 export default function Home() {
   const [activeTab, setActiveTab] = useState<"reels" | "grid">("reels");
   const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
   const [libraryViewerIndex, setLibraryViewerIndex] = useState<number | null>(null);
   const [media, setMedia] = useState<MediaItem[]>([]);
+  const [shuffledMedia, setShuffledMedia] = useState<MediaItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -138,6 +149,7 @@ export default function Home() {
         if (cacheValid && cachedMedia && cachedMedia.length > 0) {
           console.log(`✓ Using cached media: ${cachedMedia.length} items`);
           setMedia(cachedMedia);
+          setShuffledMedia(shuffleArray(cachedMedia));
           setIsLoading(false);
           return;
         }
@@ -152,6 +164,7 @@ export default function Home() {
         }
 
         setMedia(mediaItems);
+        setShuffledMedia(shuffleArray(mediaItems));
         setCachedMedia(mediaItems);
         console.log(`✓ Loaded ${mediaItems.length} items from content folder`);
         setIsLoading(false);
@@ -342,7 +355,7 @@ export default function Home() {
     <div className="h-screen w-full overflow-hidden bg-background">
       <div className="h-full pb-14">
         {activeTab === "reels" ? (
-          <ReelsFeed media={media} initialIndex={selectedMediaIndex} />
+          <ReelsFeed media={shuffledMedia} initialIndex={selectedMediaIndex} />
         ) : (
           <GridView media={media} onMediaClick={handleMediaClick} />
         )}
