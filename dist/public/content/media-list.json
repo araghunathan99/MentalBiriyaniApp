@@ -1,0 +1,23 @@
+[
+  {
+    "id": "1",
+    "name": "Sample Photo 1",
+    "filename": "photo1.jpg",
+    "type": "image",
+    "mimeType": "image/jpeg"
+  },
+  {
+    "id": "2",
+    "name": "Sample Video 1",
+    "filename": "video1.mp4",
+    "type": "video",
+    "mimeType": "video/mp4"
+  },
+  {
+    "id": "3",
+    "name": "Sample Photo 2",
+    "filename": "photo2.jpg",
+    "type": "image",
+    "mimeType": "image/jpeg"
+  }
+]
