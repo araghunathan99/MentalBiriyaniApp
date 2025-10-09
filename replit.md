@@ -1,8 +1,8 @@
-# Drive Reels - Instagram-Like Mobile Media Feed
+# MentalBiriyani - A Curated Nostalgia Ride
 
 ## Overview
 
-Drive Reels is an Instagram Reels-inspired mobile web application that displays photos and videos from a local content folder in an immersive, swipeable feed. The app features a dark-first UI with gesture-driven interactions, allowing users to view media in both a full-screen Reels view and a grid library view. Users can like media items, with preferences stored locally, and share individual items via unique URLs.
+MentalBiriyani is "A curated nostalgia ride that is like biriyani for the mind! #DD40" - an Instagram Reels-inspired mobile web application that displays photos and videos from a local content folder in an immersive, swipeable feed. The app features a dark-first UI with gesture-driven interactions, allowing users to view media in both a full-screen Reels view and a grid library view. Users can like media items, with preferences stored locally, and share individual items via unique URLs.
 
 ## User Preferences
 
