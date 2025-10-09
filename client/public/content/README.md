@@ -11,28 +11,38 @@ This folder contains your media files that will be displayed in the Drive Reels 
 2. **Update `media-list.json`** to include your files:
 
 ```json
-[
-  {
-    "id": "unique-id-1",
-    "name": "My Photo.jpg",
-    "mimeType": "image/jpeg",
-    "file": "my-photo.jpg",
-    "createdTime": "2025-01-01T00:00:00.000Z",
-    "modifiedTime": "2025-01-01T00:00:00.000Z"
-  },
-  {
-    "id": "unique-id-2",
-    "name": "My Video.mp4",
-    "mimeType": "video/mp4",
-    "file": "my-video.mp4",
-    "createdTime": "2025-01-02T00:00:00.000Z",
-    "modifiedTime": "2025-01-02T00:00:00.000Z"
-  }
-]
+{
+  "version": "1.0.0",
+  "lastModified": "2025-10-09T12:00:00.000Z",
+  "items": [
+    {
+      "id": "unique-id-1",
+      "name": "My Photo.jpg",
+      "mimeType": "image/jpeg",
+      "file": "my-photo.jpg",
+      "createdTime": "2025-01-01T00:00:00.000Z",
+      "modifiedTime": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "unique-id-2",
+      "name": "My Video.mp4",
+      "mimeType": "video/mp4",
+      "file": "my-video.mp4",
+      "createdTime": "2025-01-02T00:00:00.000Z",
+      "modifiedTime": "2025-01-02T00:00:00.000Z"
+    }
+  ]
+}
 ```
 
 ## Media List JSON Structure
 
+**Top Level:**
+- **version**: Version number (increment when content changes to clear browser cache)
+- **lastModified**: ISO 8601 timestamp of last update
+- **items**: Array of media items
+
+**Each Media Item:**
 - **id**: A unique identifier for each media item (can be any string)
 - **name**: Display name for the media
 - **mimeType**: MIME type (e.g., "image/jpeg", "video/mp4")
@@ -45,17 +55,23 @@ This folder contains your media files that will be displayed in the Drive Reels 
 If you have a photo named `beach-sunset.jpg`, add it to this folder and update `media-list.json`:
 
 ```json
-[
-  {
-    "id": "beach-1",
-    "name": "Beach Sunset",
-    "mimeType": "image/jpeg",
-    "file": "beach-sunset.jpg",
-    "createdTime": "2025-10-09T12:00:00.000Z",
-    "modifiedTime": "2025-10-09T12:00:00.000Z"
-  }
-]
+{
+  "version": "1.0.1",
+  "lastModified": "2025-10-09T12:00:00.000Z",
+  "items": [
+    {
+      "id": "beach-1",
+      "name": "Beach Sunset",
+      "mimeType": "image/jpeg",
+      "file": "beach-sunset.jpg",
+      "createdTime": "2025-10-09T12:00:00.000Z",
+      "modifiedTime": "2025-10-09T12:00:00.000Z"
+    }
+  ]
+}
 ```
+
+**Important:** Increment the `version` number whenever you update the media list to ensure browser caches are refreshed.
 
 ## Folder Structure
 

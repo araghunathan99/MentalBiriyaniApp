@@ -1,23 +1,30 @@
-[
-  {
-    "id": "1",
-    "name": "Sample Photo 1",
-    "filename": "photo1.jpg",
-    "type": "image",
-    "mimeType": "image/jpeg"
-  },
-  {
-    "id": "2",
-    "name": "Sample Video 1",
-    "filename": "video1.mp4",
-    "type": "video",
-    "mimeType": "video/mp4"
-  },
-  {
-    "id": "3",
-    "name": "Sample Photo 2",
-    "filename": "photo2.jpg",
-    "type": "image",
-    "mimeType": "image/jpeg"
-  }
-]
+{
+  "version": "1.0.0",
+  "lastModified": "2025-10-09T06:00:00.000Z",
+  "items": [
+    {
+      "id": "1",
+      "name": "Sample Photo 1",
+      "file": "photo1.jpg",
+      "mimeType": "image/jpeg",
+      "createdTime": "2025-10-09T00:00:00.000Z",
+      "modifiedTime": "2025-10-09T00:00:00.000Z"
+    },
+    {
+      "id": "2",
+      "name": "Sample Video 1",
+      "file": "video1.mp4",
+      "mimeType": "video/mp4",
+      "createdTime": "2025-10-09T00:00:00.000Z",
+      "modifiedTime": "2025-10-09T00:00:00.000Z"
+    },
+    {
+      "id": "3",
+      "name": "Sample Photo 2",
+      "file": "photo2.jpg",
+      "mimeType": "image/jpeg",
+      "createdTime": "2025-10-09T00:00:00.000Z",
+      "modifiedTime": "2025-10-09T00:00:00.000Z"
+    }
+  ]
+}
