@@ -18,6 +18,7 @@ cp -r client/public/content dist/public/
 # Copy PWA files
 echo "📱 Step 4/5: Copying PWA configuration..."
 cp client/public/manifest.json client/public/sw.js dist/public/
+cp client/public/icon-*.svg dist/public/
 touch dist/public/.nojekyll
 
 # Copy documentation
