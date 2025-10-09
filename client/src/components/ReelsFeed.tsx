@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { toggleMediaLike, isMediaLiked } from "@/lib/localStorage";
 import type { MediaItem } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
-import { getDirectImageUrl } from "@/lib/googleDrive";
 
 interface ReelsFeedProps {
   media: MediaItem[];
@@ -328,7 +327,7 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
       {currentMedia.isVideo ? (
         <video
           ref={videoRef}
-          src={getDirectImageUrl(currentMedia.id)}
+          src={currentMedia.webContentLink}
           className="w-full h-full object-contain"
           loop
           muted={isMuted}
@@ -341,7 +340,7 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
       ) : (
         <img
           ref={imageRef}
-          src={getDirectImageUrl(currentMedia.id)}
+          src={currentMedia.webContentLink}
           alt={currentMedia.name}
           className="w-full h-full object-contain"
           onClick={handleTap}
