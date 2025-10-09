@@ -1,7 +1,7 @@
-const CACHE_NAME = 'drive-reels-v1';
+const CACHE_NAME = 'mental-biriyani-v1';
 const urlsToCache = [
-  '/',
-  '/index.html'
+  './',
+  './index.html'
 ];
 
 self.addEventListener('install', (event) => {

@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Router, Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -8,7 +8,7 @@ import Home from "@/pages/Home";
 import ShareView from "@/pages/ShareView";
 import NotFound from "@/pages/not-found";
 
-function Router() {
+function Routes() {
   return (
     <Switch>
       <Route path="/" component={Landing} />
@@ -20,11 +20,16 @@ function Router() {
 }
 
 function App() {
+  // Use base path for GitHub Pages deployment, empty for local dev
+  const basePath = import.meta.env.PROD ? "/MentalBiriyani" : "";
+  
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Router />
+        <Router base={basePath}>
+          <Toaster />
+          <Routes />
+        </Router>
       </TooltipProvider>
     </QueryClientProvider>
   );
