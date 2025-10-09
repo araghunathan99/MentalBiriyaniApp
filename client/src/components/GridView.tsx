@@ -11,6 +11,7 @@ interface GridViewProps {
 export default function GridView({ media, onMediaClick }: GridViewProps) {
   const [filter, setFilter] = useState<"all" | "photos" | "videos">("all");
 
+  // Note: media is already sorted by favorites from Home.tsx
   const filteredMedia = media.filter((item) => {
     if (filter === "photos") return item.isImage;
     if (filter === "videos") return item.isVideo;
