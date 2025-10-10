@@ -25,9 +25,20 @@ Preferred communication style: Simple, everyday language.
 - Mobile-optimized layout with gesture-based interactions (swipe navigation)
 
 **Key UI Patterns**
+- Loading screen on initial app load
+  - Displays artistic biriyani image with golden border (#FFD700)
+  - Spinning golden ring animation
+  - Floating particle effects
+  - Shows for 2 seconds before landing page
+  - Text: "Mental Biriyani - Preparing your nostalgia ride..."
 - Full-screen Reels feed with vertical swipe navigation
   - Media randomized on each app load for variety
   - Different order every session using Fisher-Yates shuffle
+  - Instagram-like swipe transitions (current item moves up with swipe)
+  - Reduced swipe threshold (50px) for faster, more responsive navigation
+  - Smooth 300ms ease-out animation on swipe completion
+  - Real-time transform applied during swipe gesture
+  - Automatic prefetching of next 10 media items in parallel for instant loading
 - Grid view with filtering (All/Photos/Videos)
   - Liked media automatically bubble to the top
   - Favorite sorting applies to all filter views (All, Photos, Videos)
@@ -83,20 +94,34 @@ Preferred communication style: Simple, everyday language.
 
 ### Data Flow
 
-1. **Media Loading**: 
+1. **App Initialization**:
+   - Loading screen displays for 2 seconds with biriyani image
+   - Landing page loads after loading screen
+   
+2. **Media Loading**: 
    - App fetches `public/content/media-list.json` on startup
    - Parses JSON to get list of available media files
    - Constructs local URLs: `/content/{filename}`
    - Loads media into React state → UI components
+   - Media randomized using Fisher-Yates shuffle
    
-2. **Media Display**:
+3. **Media Display**:
    - Images and videos loaded directly from `/content/` folder
    - No authentication or API calls required
    - All files served as static assets
    
-4. **User Interactions**: Component events → LocalStorage (likes) → UI updates
+4. **Media Prefetching** (Reels Mode):
+   - Automatically prefetches next 10 media items in parallel
+   - Tracks prefetched items using Set to avoid duplicates
+   - Videos: Creates video element with preload='auto', waits for loadeddata
+   - Images: Creates Image object, waits for onload
+   - Timeouts: 5 seconds for videos, 3 seconds for images
+   - Runs whenever current index changes
+   - Enables instant loading when swiping to next items
+   
+5. **User Interactions**: Component events → LocalStorage (likes) → UI updates
 
-5. **Sharing**: URL-based routing → ShareView page → Fetch specific media item
+6. **Sharing**: URL-based routing → ShareView page → Fetch specific media item
 
 ### Key Architectural Decisions
 
