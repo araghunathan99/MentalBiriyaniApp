@@ -203,8 +203,9 @@ Preferred communication style: Simple, everyday language.
 
 **Automated GitHub Pages Deployment**
 - One-command build and deploy: `./build-github-pages.sh --deploy`
+- Default repository: https://github.com/araghunathan99/MentalBiriyani.git
+- Override with GITHUB_PAGES_REPO environment variable if needed
 - Automated git repository initialization in `dist/public/`
-- Interactive or environment-based GitHub repository configuration
 - Timestamped commits for tracking deployments
 - Force push to GitHub Pages repository (main branch)
 - Command-line flags:

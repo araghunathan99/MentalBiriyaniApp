@@ -31,7 +31,7 @@ for arg in "$@"; do
       echo "  --help         Show this help message"
       echo ""
       echo "Environment Variables:"
-      echo "  GITHUB_PAGES_REPO   GitHub repository URL (e.g., https://github.com/username/MentalBiriyani.git)"
+      echo "  GITHUB_PAGES_REPO   GitHub repository URL (default: https://github.com/araghunathan99/MentalBiriyani.git)"
       echo ""
       echo "Examples:"
       echo "  ./build-github-pages.sh                    # Build only"
@@ -181,31 +181,14 @@ if [ "$AUTO_DEPLOY" = true ]; then
     git branch -M main
   fi
   
-  # Get GitHub repo URL from environment variable or prompt
+  # Get GitHub repo URL from environment variable or use default
   if [ -z "$GITHUB_PAGES_REPO" ]; then
+    # Use default repository
+    GITHUB_PAGES_REPO="https://github.com/araghunathan99/MentalBiriyani.git"
     echo ""
-    echo "📝 GitHub Repository Setup"
+    echo "📝 Using default GitHub repository: $GITHUB_PAGES_REPO"
+    echo "   (Set GITHUB_PAGES_REPO environment variable to override)"
     echo ""
-    echo "Please enter your GitHub Pages repository URL:"
-    echo "Example: https://github.com/username/MentalBiriyani.git"
-    echo ""
-    read -p "Repository URL: " GITHUB_PAGES_REPO
-    
-    if [ -z "$GITHUB_PAGES_REPO" ]; then
-      echo ""
-      echo "❌ Error: No repository URL provided"
-      echo "   Build complete but deployment skipped"
-      echo ""
-      echo "To deploy later:"
-      echo "  1. cd dist/public"
-      echo "  2. git init"
-      echo "  3. git add -A"
-      echo "  4. git commit -m 'Deploy to GitHub Pages'"
-      echo "  5. git remote add origin YOUR_REPO_URL"
-      echo "  6. git push -f origin main"
-      echo ""
-      exit 1
-    fi
   fi
   
   # Check if remote exists
