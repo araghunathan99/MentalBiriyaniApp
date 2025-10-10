@@ -134,6 +134,30 @@ Preferred communication style: Simple, everyday language.
 - Desktop: Keyboard navigation (Arrow Up/Down/Left/Right)
 - Desktop: Scroll wheel navigation support
 - Progress bar validates video duration is finite before seeking
+- Video attributes: `playsInline`, `loop` for optimal mobile experience
+
+**Automated Video Conversion**
+- Build-time conversion from QuickTime (.mov) to MP4 (H.264 + AAC)
+- FFmpeg installed as system dependency (v6.1.1)
+- Smart resolution handling:
+  - Downscales to max 1280px (720p equivalent) only if needed
+  - Preserves aspect ratio (landscape/portrait aware)
+  - Keeps videos < 1280px at original resolution
+- Conversion settings:
+  - Video codec: H.264 (libx264) with CRF 23
+  - Audio codec: AAC at 128kbps
+  - Preset: fast (balanced speed/quality)
+  - Web optimization: faststart flag for progressive streaming
+- Automatic media-list.json updates (file extensions and MIME types)
+- Old .mov files deleted after successful conversion
+- Scripts:
+  - `scripts/convert-videos.js` - Automatic conversion (runs during build)
+  - `convert-videos-manual.sh` - Manual conversion option
+  - `build-github-pages.sh` - Full pipeline with video conversion
+- Browser compatibility improvement:
+  - Before: Safari/iOS only (QuickTime .mov)
+  - After: All browsers (MP4/H.264)
+- File size reduction: ~35% smaller (164MB → 106MB for current videos)
 
 **Media Caching & Cache Invalidation**
 - LocalStorage-based caching with automatic size management
