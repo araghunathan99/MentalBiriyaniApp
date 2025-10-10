@@ -26,13 +26,14 @@ Preferred communication style: Simple, everyday language.
 
 **Key UI Patterns**
 - Loading screen on initial app load
-  - Full-screen biriyani.jpeg image (scaled to fit with object-cover)
-  - Dark gradient overlay for text visibility
-  - White heading text with drop shadow
-  - Golden yellow subtitle (#FFD700) with drop shadow
+  - Biriyani.jpg image scaled to fit screen (object-contain, no stretching)
+  - Black background for letterboxing areas
+  - Dark gradient overlay at bottom for text contrast
+  - Loading text positioned at bottom against dark area
+  - White heading "Mental Biriyani" with drop shadow
+  - Golden yellow subtitle (#FFD700) "Preparing your nostalgia ride..." with drop shadow
   - Floating particle effects
   - Shows for 2 seconds before landing page
-  - Text: "Mental Biriyani - Preparing your nostalgia ride..."
 - Full-screen Reels feed with vertical swipe navigation
   - Media randomized on each app load for variety
   - Different order every session using Fisher-Yates shuffle
