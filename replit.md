@@ -26,8 +26,10 @@ Preferred communication style: Simple, everyday language.
 
 **Key UI Patterns**
 - Loading screen on initial app load
-  - Displays artistic biriyani image with golden border (#FFD700)
-  - Spinning golden ring animation
+  - Full-screen biriyani.jpeg image (scaled to fit with object-cover)
+  - Dark gradient overlay for text visibility
+  - White heading text with drop shadow
+  - Golden yellow subtitle (#FFD700) with drop shadow
   - Floating particle effects
   - Shows for 2 seconds before landing page
   - Text: "Mental Biriyani - Preparing your nostalgia ride..."
