@@ -153,11 +153,36 @@ Preferred communication style: Simple, everyday language.
 - Scripts:
   - `scripts/convert-videos.js` - Automatic conversion (runs during build)
   - `convert-videos-manual.sh` - Manual conversion option
-  - `build-github-pages.sh` - Full pipeline with video conversion
+  - `build-github-pages.sh` - Full pipeline with video conversion and deployment
 - Browser compatibility improvement:
   - Before: Safari/iOS only (QuickTime .mov)
   - After: All browsers (MP4/H.264)
 - File size reduction: ~35% smaller (164MB → 106MB for current videos)
+
+**Automated GitHub Pages Deployment**
+- One-command build and deploy: `./build-github-pages.sh --deploy`
+- Automated git repository initialization in `dist/public/`
+- Interactive or environment-based GitHub repository configuration
+- Timestamped commits for tracking deployments
+- Force push to GitHub Pages repository (main branch)
+- Command-line flags:
+  - `--deploy` - Auto-deploy to GitHub after build
+  - `--skip-video` - Skip video conversion for faster builds
+  - `--help` - Show usage information
+- Environment variable support: `GITHUB_PAGES_REPO`
+- Build steps (7 total):
+  1. Video conversion (.mov → .mp4)
+  2. Vite build (optimized React app)
+  3. Path fixing (prepends /MentalBiriyani/ for GitHub Pages)
+  4. Media file copying
+  5. PWA configuration copying
+  6. Documentation copying
+  7. Git commit and push (if --deploy flag used)
+- Deployment output: Complete package in `dist/public/` ready for GitHub Pages
+- Documentation:
+  - `GITHUB_PAGES_DEPLOYMENT.md` - Complete deployment guide
+  - `BUILD_FOR_GITHUB_PAGES.md` - Build documentation
+  - Auto-generated `README.md` in dist/public with deployment instructions
 
 **Media Caching & Cache Invalidation**
 - LocalStorage-based caching with automatic size management

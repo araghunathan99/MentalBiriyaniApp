@@ -98,24 +98,66 @@ node scripts/fix-github-pages-paths.js
 
 ### 3. `build-github-pages.sh` 🚀
 
-Complete automated build pipeline for GitHub Pages deployment.
+Complete automated build and deployment pipeline for GitHub Pages.
 
-**Build steps:**
-1. **Video Conversion** - Converts .mov to .mp4 (720p max)
+**Features:**
+- Automated video conversion (.mov → .mp4)
+- Build optimization with Vite
+- Path fixing for GitHub Pages base path
+- Git repository initialization and deployment
+- Interactive or environment-based configuration
+- Timestamped commits
+- Force push to GitHub
+
+**Build Steps:**
+1. **Video Conversion** - Converts .mov to .mp4 (720p max) [Optional: `--skip-video`]
 2. **Vite Build** - Builds React app
 3. **Path Fixing** - Updates paths for GitHub Pages
 4. **Media Copy** - Copies content folder
 5. **PWA Files** - Copies manifest and icons
 6. **Documentation** - Copies deployment guides
+7. **Git Deployment** - Commits and pushes to GitHub [Optional: `--deploy`]
 
 **Usage:**
 ```bash
+# Build only (no deployment)
 ./build-github-pages.sh
+
+# Build and deploy
+./build-github-pages.sh --deploy
+
+# Skip video conversion (faster builds)
+./build-github-pages.sh --skip-video
+
+# Combine options
+./build-github-pages.sh --deploy --skip-video
+
+# Show help
+./build-github-pages.sh --help
 ```
+
+**Environment Variables:**
+```bash
+# Set GitHub repository URL
+export GITHUB_PAGES_REPO=https://github.com/username/MentalBiriyani.git
+
+# Then deploy
+./build-github-pages.sh --deploy
+```
+
+**Deployment Process:**
+1. Initializes git in `dist/public` (if needed)
+2. Prompts for repository URL (if not set via env var)
+3. Adds/updates GitHub remote
+4. Stages all files
+5. Creates commit with timestamp
+6. Force pushes to `main` branch
+7. Displays deployment status and site URL
 
 **Output:**
 - `dist/public/` - Complete deployment package
-- Ready to upload to GitHub Pages
+- Git repository initialized and pushed to GitHub
+- Ready for GitHub Pages (enable in Settings → Pages)
 
 ## Installing FFmpeg
 

@@ -187,24 +187,47 @@ After successful conversion:
 
 ## 🎯 Next Steps
 
-### Ready to Build?
+### Ready to Build and Deploy?
+
+**Option 1: Build and Deploy (One Command)**
 ```bash
-# One command does everything:
+# Build, convert videos, and deploy to GitHub
+./build-github-pages.sh --deploy
+
+# Or set environment variable first
+export GITHUB_PAGES_REPO=https://github.com/username/MentalBiriyani.git
+./build-github-pages.sh --deploy
+```
+
+**Option 2: Build Only (No Deployment)**
+```bash
+# Just build (deploy manually later)
 ./build-github-pages.sh
 ```
 
-This will:
+**Option 3: Skip Video Conversion (Faster)**
+```bash
+# If videos are already converted
+./build-github-pages.sh --deploy --skip-video
+```
+
+The automated script will:
 1. ✅ Convert videos to MP4 (if not already converted)
 2. ✅ Build React app with Vite
 3. ✅ Fix paths for GitHub Pages
 4. ✅ Copy all media files
 5. ✅ Copy PWA configuration
 6. ✅ Create deployment package in `dist/public/`
+7. ✅ Initialize git and push to GitHub (if `--deploy` flag used)
 
-### Then Deploy
+### Manual Deployment (Alternative)
 ```bash
 cd dist/public
-# Follow GITHUB_PAGES_DEPLOYMENT.md instructions
+git init
+git add -A
+git commit -m "Deploy to GitHub Pages"
+git remote add origin YOUR_REPO_URL
+git push -f origin main
 ```
 
 ## 📚 Additional Documentation

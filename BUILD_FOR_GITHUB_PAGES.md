@@ -1,28 +1,74 @@
 # Building MentalBiriyani for GitHub Pages
 
-This guide explains how to build the MentalBiriyani app for deployment to GitHub Pages at `https://YOUR-USERNAME.github.io/MentalBiriyani/`.
+This guide explains how to build and deploy the MentalBiriyani app to GitHub Pages at `https://YOUR-USERNAME.github.io/MentalBiriyani/`.
 
-## Quick Build
+## 🚀 Quick Deploy (Automated)
 
-To create a production build ready for GitHub Pages deployment:
+The easiest way to build and deploy:
 
 ```bash
-# 1. Build the app
-npm run build
+# Build and deploy in one command
+./build-github-pages.sh --deploy
 
-# 2. Fix paths for GitHub Pages
-node scripts/fix-github-pages-paths.js
-
-# 3. Copy required files to dist/public
-cp -r client/public/content dist/public/
-cp client/public/manifest.json client/public/sw.js dist/public/
-touch dist/public/.nojekyll
-
-# 4. Copy documentation (optional)
-cp DEPLOYMENT_PACKAGE.md GITHUB_PAGES_DEPLOYMENT.md PWA_INSTALLATION_GUIDE.md dist/public/
+# Or with environment variable
+export GITHUB_PAGES_REPO=https://github.com/username/MentalBiriyani.git
+./build-github-pages.sh --deploy
 ```
 
-The deployable package will be in `dist/public/` (~184 MB).
+This will:
+1. ✅ Convert videos to MP4 (720p max, universal browser support)
+2. ✅ Build optimized React app
+3. ✅ Fix asset paths for GitHub Pages
+4. ✅ Copy all media and configuration files
+5. ✅ Initialize git repository in dist/public
+6. ✅ Commit and push to GitHub
+7. ✅ Ready to enable GitHub Pages!
+
+## 📋 Build Options
+
+```bash
+# Show help
+./build-github-pages.sh --help
+
+# Build only (no deployment)
+./build-github-pages.sh
+
+# Build and deploy
+./build-github-pages.sh --deploy
+
+# Skip video conversion (faster builds)
+./build-github-pages.sh --skip-video
+
+# Combine flags
+./build-github-pages.sh --deploy --skip-video
+```
+
+## 🛠️ Manual Build (Advanced)
+
+If you prefer to build manually:
+
+```bash
+# 1. Convert videos (optional but recommended)
+node scripts/convert-videos.js
+
+# 2. Build the app
+npm run build
+
+# 3. Fix paths for GitHub Pages
+node scripts/fix-github-pages-paths.js
+
+# 4. Copy required files to dist/public
+cp -r client/public/content dist/public/
+cp client/public/manifest.json client/public/sw.js dist/public/
+cp client/public/icon-*.svg dist/public/
+touch dist/public/.nojekyll
+
+# 5. Copy documentation
+cp BUILD_FOR_GITHUB_PAGES.md dist/public/DEPLOYMENT_GUIDE.md
+cp VIDEO_CONVERSION_GUIDE.md PWA_INSTALLATION_GUIDE.md dist/public/
+```
+
+The deployable package will be in `dist/public/`.
 
 ## What Gets Built
 
@@ -181,43 +227,128 @@ After building, verify:
 **Cause**: Missing sw.js or manifest.json  
 **Solution**: Run `cp client/public/manifest.json client/public/sw.js dist/public/`
 
-## Automated Build Script (Optional)
+## 🎯 Automated Deployment Features
 
-You can create a single script to do everything:
+The `build-github-pages.sh` script includes powerful automation:
 
+### Video Conversion
+- Automatically converts `.mov` videos to `.mp4` format
+- Reduces file size by ~35% (164MB → 106MB)
+- Ensures universal browser compatibility
+- Can be skipped with `--skip-video` flag for faster builds
+
+### Git Deployment
+- Initializes git repository in `dist/public` (if needed)
+- Configures GitHub remote automatically
+- Creates timestamped commits
+- Force pushes to GitHub Pages repository
+- Handles both new and existing repositories
+
+### Environment Variable Support
+Set once, deploy many times:
 ```bash
-#!/bin/bash
-# build-github-pages.sh
+# Add to ~/.bashrc or ~/.zshrc
+export GITHUB_PAGES_REPO=https://github.com/username/MentalBiriyani.git
 
-echo "Building for GitHub Pages..."
-
-# Build
-npm run build
-
-# Fix paths
-node scripts/fix-github-pages-paths.js
-
-# Copy files
-cp -r client/public/content dist/public/
-cp client/public/manifest.json client/public/sw.js dist/public/
-touch dist/public/.nojekyll
-
-# Copy docs
-cp DEPLOYMENT_PACKAGE.md GITHUB_PAGES_DEPLOYMENT.md PWA_INSTALLATION_GUIDE.md dist/public/
-
-echo "✓ Build complete! Package ready at dist/public/"
-echo "Total size: $(du -sh dist/public | cut -f1)"
+# Then simply run
+./build-github-pages.sh --deploy
 ```
 
-Make it executable:
+### Command Line Options
 ```bash
-chmod +x build-github-pages.sh
+--deploy       # Auto-deploy to GitHub after build
+--skip-video   # Skip video conversion (faster builds)
+--help         # Show usage information
+```
+
+## 📝 First-Time Deployment
+
+### 1. Create GitHub Repository
+Create a new repository on GitHub named `MentalBiriyani` (or any name).
+
+### 2. Run Automated Deployment
+```bash
+# Option 1: Interactive (will prompt for repo URL)
+./build-github-pages.sh --deploy
+
+# Option 2: With environment variable
+export GITHUB_PAGES_REPO=https://github.com/username/MentalBiriyani.git
+./build-github-pages.sh --deploy
+```
+
+### 3. Enable GitHub Pages
+1. Go to your repository on GitHub
+2. Navigate to **Settings → Pages**
+3. Under **Source**, select:
+   - Branch: `main`
+   - Folder: `/ (root)`
+4. Click **Save**
+
+### 4. Access Your Site
+Your site will be live at:
+```
+https://YOUR-USERNAME.github.io/MentalBiriyani/
+```
+
+**Note**: It may take 1-2 minutes for the site to be available.
+
+## 🔄 Updating Your Site
+
+After making changes to content or code:
+
+```bash
+# Quick update with deployment
+./build-github-pages.sh --deploy
+
+# Or skip video conversion if videos haven't changed
+./build-github-pages.sh --deploy --skip-video
+```
+
+The script will:
+- Build your changes
+- Convert any new videos
+- Commit with timestamp
+- Push to GitHub
+- Update your live site automatically
+
+## 🛠️ Manual Deployment (Alternative)
+
+If you prefer manual control:
+
+```bash
+# 1. Build
 ./build-github-pages.sh
+
+# 2. Navigate to build folder
+cd dist/public
+
+# 3. Initialize git (first time only)
+git init
+git branch -M main
+
+# 4. Add remote (first time only)
+git remote add origin https://github.com/username/MentalBiriyani.git
+
+# 5. Commit and push
+git add -A
+git commit -m "Deploy to GitHub Pages"
+git push -f origin main
 ```
 
-## Next Steps
+## 📚 What Gets Deployed
 
-After building, follow the deployment instructions in `dist/public/README.md` to push to GitHub Pages.
+The `dist/public/` folder contains:
+- **index.html** - Main app entry point (paths fixed for GitHub Pages)
+- **assets/** - Optimized JS and CSS bundles
+- **content/** - All media files (photos and MP4 videos)
+- **manifest.json** - PWA configuration
+- **sw.js** - Service worker for offline support
+- **icon-*.svg** - PWA icons
+- **.nojekyll** - Prevents Jekyll processing
+- **README.md** - Deployment documentation
+- **DEPLOYMENT_GUIDE.md** - This guide
+- **VIDEO_CONVERSION_GUIDE.md** - Video conversion docs
+- **PWA_INSTALLATION_GUIDE.md** - PWA installation guide
 
 ---
 
