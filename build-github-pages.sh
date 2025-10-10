@@ -8,6 +8,17 @@ set -e  # Exit on error
 echo "🚀 Building MentalBiriyani for GitHub Pages..."
 echo ""
 
+# Convert videos to MP4 (720p max)
+echo "🎬 Step 1/6: Converting videos to MP4..."
+if node scripts/convert-videos.js; then
+  echo "✓ Video conversion complete"
+else
+  echo "⚠️  Video conversion failed or skipped"
+  echo "   Videos will be used as-is (.mov format)"
+  echo "   For universal browser support, install FFmpeg and run again"
+fi
+echo ""
+
 # Parse command line arguments
 AUTO_DEPLOY=false
 SKIP_VIDEO=false
@@ -65,100 +76,26 @@ npm run build
 echo ""
 
 # Fix paths for GitHub Pages
-echo "🔧 Step 3/7: Fixing asset paths..."
+echo "🔧 Step 2/5: Fixing asset paths..."
 node scripts/fix-github-pages-paths.js
 echo ""
 
 # Copy content folder
-echo "📁 Step 4/7: Copying media files..."
+echo "📁 Step 3/5: Copying media files..."
 cp -r client/public/content dist/public/
 echo ""
 
 # Copy PWA files
-echo "📱 Step 5/7: Copying PWA configuration..."
+echo "📱 Step 4/5: Copying PWA configuration..."
 cp client/public/manifest.json client/public/sw.js dist/public/
 cp client/public/icon-*.svg dist/public/
 touch dist/public/.nojekyll
 echo ""
 
 # Copy documentation
-echo "📚 Step 6/7: Copying documentation..."
-cp BUILD_FOR_GITHUB_PAGES.md dist/public/DEPLOYMENT_GUIDE.md 2>/dev/null || true
-cp VIDEO_CONVERSION_GUIDE.md dist/public/ 2>/dev/null || true
-cp PWA_INSTALLATION_GUIDE.md dist/public/ 2>/dev/null || true
-echo ""
+echo "📚 Step 5/5: Copying documentation..."
+cp DEPLOYMENT_PACKAGE.md GITHUB_PAGES_DEPLOYMENT.md PWA_INSTALLATION_GUIDE.md dist/public/
 
-# Create deployment README
-echo "📝 Creating deployment README..."
-cat > dist/public/README.md << 'EOF'
-# MentalBiriyani - GitHub Pages Deployment
-
-This is the built and optimized version of MentalBiriyani, ready for GitHub Pages deployment.
-
-## 🚀 Quick Deploy
-
-This repository is already configured and committed. To deploy:
-
-```bash
-# Push to GitHub (if you have push access)
-git push origin main
-
-# Or force push if needed
-git push -f origin main
-```
-
-Then enable GitHub Pages in your repository settings:
-1. Go to Settings → Pages
-2. Source: Deploy from a branch
-3. Branch: main / (root)
-4. Save
-
-Your site will be live at: `https://YOUR-USERNAME.github.io/MentalBiriyani/`
-
-## 📦 What's Included
-
-- Optimized React app bundle
-- All media files (photos & videos in MP4 format)
-- PWA configuration (manifest.json, service worker)
-- Documentation files
-
-## 🎬 Video Format
-
-Videos have been automatically converted to MP4 format for universal browser compatibility:
-- Format: H.264 + AAC
-- Max resolution: 720p/1280px
-- Web optimized with faststart flag
-- ~35% smaller file size
-
-## 📱 Progressive Web App
-
-This app can be installed as a PWA:
-1. Visit the deployed site
-2. Click "Install" or "Add to Home Screen"
-3. Enjoy offline access!
-
-See `PWA_INSTALLATION_GUIDE.md` for detailed instructions.
-
-## 📚 Documentation
-
-- `DEPLOYMENT_GUIDE.md` - Detailed build and deployment guide
-- `VIDEO_CONVERSION_GUIDE.md` - Video conversion documentation
-- `PWA_INSTALLATION_GUIDE.md` - PWA installation instructions
-
-## 🔄 Updating Content
-
-To update the site:
-
-1. Make changes in the main project
-2. Run: `./build-github-pages.sh --deploy`
-3. Changes will be automatically built and pushed
-
-## ℹ️ About
-
-**MentalBiriyani** - A curated nostalgia ride that is like biriyani for the mind! #DD40
-
-Built with ❤️ for Div Papa
-EOF
 echo ""
 
 echo "✅ Build complete!"
