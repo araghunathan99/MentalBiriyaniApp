@@ -18,15 +18,70 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
   const [isMuted, setIsMuted] = useState(true);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
+  const [swipeOffset, setSwipeOffset] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const [videoProgress, setVideoProgress] = useState(0);
   const [isDraggingProgress, setIsDraggingProgress] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const controlsTimeoutRef = useRef<NodeJS.Timeout>();
   const containerRef = useRef<HTMLDivElement>(null);
+  const prefetchedRef = useRef<Set<number>>(new Set());
   const { toast } = useToast();
 
   const currentMedia = media[currentIndex];
+
+  // Prefetch next 10 media items in parallel
+  useEffect(() => {
+    const prefetchMedia = async () => {
+      const itemsToPrefetch: number[] = [];
+      
+      // Get indices for next 10 items (wrapping around if needed)
+      for (let i = 1; i <= 10; i++) {
+        const nextIndex = (currentIndex + i) % media.length;
+        if (!prefetchedRef.current.has(nextIndex)) {
+          itemsToPrefetch.push(nextIndex);
+        }
+      }
+
+      // Prefetch in parallel
+      const prefetchPromises = itemsToPrefetch.map(async (index) => {
+        const item = media[index];
+        if (!item) return;
+
+        try {
+          if (item.isVideo) {
+            // Prefetch video
+            const video = document.createElement('video');
+            video.preload = 'auto';
+            video.src = item.webContentLink;
+            await new Promise((resolve) => {
+              video.addEventListener('loadeddata', resolve, { once: true });
+              // Timeout after 5 seconds to avoid blocking
+              setTimeout(resolve, 5000);
+            });
+          } else if (item.isImage) {
+            // Prefetch image
+            const img = new Image();
+            img.src = item.webContentLink;
+            await new Promise((resolve) => {
+              img.onload = resolve;
+              img.onerror = resolve;
+              // Timeout after 3 seconds
+              setTimeout(resolve, 3000);
+            });
+          }
+          prefetchedRef.current.add(index);
+        } catch (error) {
+          console.error(`Failed to prefetch item at index ${index}:`, error);
+        }
+      });
+
+      await Promise.all(prefetchPromises);
+    };
+
+    prefetchMedia();
+  }, [currentIndex, media]);
 
   useEffect(() => {
     if (currentMedia) {
@@ -226,23 +281,43 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchStart(e.targetTouches[0].clientY);
     setTouchEnd(e.targetTouches[0].clientY);
+    setSwipeOffset(0);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientY);
+    const currentY = e.targetTouches[0].clientY;
+    setTouchEnd(currentY);
+    
+    // Calculate swipe offset for smooth transition effect
+    const offset = touchStart - currentY;
+    // Limit the offset to screen height to prevent over-scrolling
+    const limitedOffset = Math.max(-window.innerHeight, Math.min(window.innerHeight, offset));
+    setSwipeOffset(limitedOffset);
   };
 
   const handleTouchEnd = () => {
     const swipeDistance = touchStart - touchEnd;
     
-    // Only navigate if swipe distance is significant (more than 75px)
-    // and there was actual movement (not just a tap)
-    if (Math.abs(swipeDistance) > 75) {
+    // Reduced threshold for faster, more responsive swipes (50px instead of 75px)
+    if (Math.abs(swipeDistance) > 50) {
+      setIsTransitioning(true);
+      
       if (swipeDistance > 0) {
+        // Swipe up - show next
         handleNext();
       } else {
+        // Swipe down - show previous
         handlePrevious();
       }
+      
+      // Reset transition after animation completes
+      setTimeout(() => {
+        setIsTransitioning(false);
+        setSwipeOffset(0);
+      }, 400);
+    } else {
+      // Snap back if swipe wasn't significant
+      setSwipeOffset(0);
     }
     
     // Reset touch values
@@ -316,6 +391,18 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
 
   if (!currentMedia) return null;
 
+  // Calculate transform for Instagram-like swipe effect
+  const getTransform = () => {
+    if (isTransitioning) {
+      return 'translateY(0)';
+    }
+    return `translateY(${-swipeOffset}px)`;
+  };
+
+  const transitionClass = isTransitioning || swipeOffset === 0 
+    ? 'transition-transform duration-300 ease-out' 
+    : '';
+
   return (
     <div 
       ref={containerRef}
@@ -324,30 +411,35 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      {currentMedia.isVideo ? (
-        <video
-          ref={videoRef}
-          src={currentMedia.webContentLink}
-          className="w-full h-full object-contain"
-          loop
-          muted={isMuted}
-          playsInline
-          autoPlay
-          onClick={handleTap}
-          onDoubleClick={handleDoubleTap}
-          data-testid="video-player"
-        />
-      ) : (
-        <img
-          ref={imageRef}
-          src={currentMedia.webContentLink}
-          alt={currentMedia.name}
-          className="w-full h-full object-contain"
-          onClick={handleTap}
-          onDoubleClick={handleDoubleTap}
-          data-testid="image-viewer"
-        />
-      )}
+      <div 
+        className={`w-full h-full ${transitionClass}`}
+        style={{ transform: getTransform() }}
+      >
+        {currentMedia.isVideo ? (
+          <video
+            ref={videoRef}
+            src={currentMedia.webContentLink}
+            className="w-full h-full object-contain"
+            loop
+            muted={isMuted}
+            playsInline
+            autoPlay
+            onClick={handleTap}
+            onDoubleClick={handleDoubleTap}
+            data-testid="video-player"
+          />
+        ) : (
+          <img
+            ref={imageRef}
+            src={currentMedia.webContentLink}
+            alt={currentMedia.name}
+            className="w-full h-full object-contain"
+            onClick={handleTap}
+            onDoubleClick={handleDoubleTap}
+            data-testid="image-viewer"
+          />
+        )}
+      </div>
 
       <div 
         className={`absolute top-0 left-0 right-0 p-4 pt-safe bg-gradient-to-b from-black/60 to-transparent transition-opacity duration-300 ${showControls ? "opacity-100" : "opacity-0 pointer-events-none"}`}
