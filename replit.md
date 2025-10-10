@@ -195,6 +195,12 @@ Preferred communication style: Simple, everyday language.
 - Apple touch icon configured
 - Manifest.json updated to use PNG icons
 
+**Search Engine Protection**
+- robots.txt blocks all crawlers (User-agent: *, Disallow: /)
+- HTML meta tags prevent indexing (noindex, nofollow)
+- Googlebot-specific directive included
+- Site remains private and unsearchable
+
 **Automated GitHub Pages Deployment**
 - One-command build and deploy: `./build-github-pages.sh --deploy`
 - Automated git repository initialization in `dist/public/`
