@@ -83,7 +83,7 @@ echo ""
 
 # Copy documentation
 echo "📚 Step 6/7: Copying documentation..."
-cp BUILD_FOR_GITHUB_PAGES.md dist/public/DEPLOYMENT_GUID ji<< E.md 2>/dev/null || true
+cp BUILD_FOR_GITHUB_PAGES.md dist/public/DEPLOYMENT_GUIDE.md 2>/dev/null || true
 cp VIDEO_CONVERSION_GUIDE.md dist/public/ 2>/dev/null || true
 cp PWA_INSTALLATION_GUIDE.md dist/public/ 2>/dev/null || true
 echo ""
