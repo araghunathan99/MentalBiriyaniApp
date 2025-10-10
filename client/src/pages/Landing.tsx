@@ -116,7 +116,8 @@ export default function Landing() {
         }`}
       >
         <h1 
-          className="text-4xl md:text-5xl font-bold text-foreground mb-4"
+          className="text-4xl md:text-5xl font-bold mb-4"
+          style={{ color: '#00BFFF' }}
           data-testid="text-title"
         >
           Happy Birthday!!
@@ -132,7 +133,7 @@ export default function Landing() {
         >
           Hope this bundle of memories shows how much we all love you and how far you have come along. Let's keep the good times going :)
         </p>
-        <p className="text-sm text-muted-foreground mt-8 animate-pulse">
+        <p className="text-sm mt-8 animate-pulse" style={{ color: '#FFD700' }}>
           Tap anywhere to continue
         </p>
       </div>
