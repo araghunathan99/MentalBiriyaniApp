@@ -187,6 +187,14 @@ Preferred communication style: Simple, everyday language.
   - After: All browsers (MP4/H.264)
 - File size reduction: ~35% smaller (164MB → 106MB for current videos)
 
+**PWA Icons and Favicon**
+- All icons generated from biriyani.jpg image
+- favicon.ico (32x32) for browser tabs
+- icon-192.png (192x192) for PWA installation
+- icon-512.png (512x512) for high-res devices
+- Apple touch icon configured
+- Manifest.json updated to use PNG icons
+
 **Automated GitHub Pages Deployment**
 - One-command build and deploy: `./build-github-pages.sh --deploy`
 - Automated git repository initialization in `dist/public/`
