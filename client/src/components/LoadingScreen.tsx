@@ -1,4 +1,4 @@
-import biriyaniImage from "@assets/stock_images/delicious_artistic_b_94775806.jpg";
+import biriyaniImage from "@assets/stock_images/biryani_watercolor_p_a76cd6b2.jpg";
 
 export default function LoadingScreen() {
   return (
