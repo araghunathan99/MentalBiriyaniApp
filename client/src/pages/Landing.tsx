@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import confetti from "canvas-confetti";
-import ImageLetters from "@/components/ImageLetters";
 
 export default function Landing() {
   const [, setLocation] = useLocation();
@@ -116,10 +115,14 @@ export default function Landing() {
           showText ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
         }`}
       >
-        <ImageLetters 
-          text={`Happy Birthday!!\nDiv Papa`}
-          className="mb-4"
-        />
+        <h1 
+          className="text-4xl md:text-5xl font-bold text-foreground mb-4"
+          data-testid="text-title"
+        >
+          Happy Birthday!!
+          <br />
+          Div Papa
+        </h1>
         <p className="text-lg md:text-xl font-semibold italic" style={{ color: '#FFD700' }}>
           Mental Biriyani - A curated nostalgia ride that is like biriyani for the soul! #DD40
         </p>
