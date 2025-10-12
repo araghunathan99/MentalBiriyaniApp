@@ -1,11 +1,21 @@
 #!/usr/bin/env node
 
 import { execSync } from 'child_process';
-import { readFileSync, writeFileSync, existsSync, unlinkSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, unlinkSync, statSync } from 'fs';
 import { join } from 'path';
 
 const CONTENT_DIR = 'client/public/content';
 const MEDIA_LIST_PATH = join(CONTENT_DIR, 'media-list.json');
+const MAX_FILE_SIZE_MB = 100;
+
+// Resolution tiers to try (largest to smallest)
+const RESOLUTION_TIERS = [
+  { name: '720p', maxDimension: 1280 },
+  { name: '540p', maxDimension: 960 },
+  { name: '480p', maxDimension: 854 },
+  { name: '360p', maxDimension: 640 },
+  { name: '240p', maxDimension: 426 }
+];
 
 // Check if FFmpeg is installed
 function checkFFmpeg() {
@@ -14,6 +24,17 @@ function checkFFmpeg() {
     return true;
   } catch (error) {
     return false;
+  }
+}
+
+// Get file size in MB
+function getFileSizeMB(filePath) {
+  try {
+    const stats = statSync(filePath);
+    return stats.size / (1024 * 1024); // Convert bytes to MB
+  } catch (error) {
+    console.error(`Error getting file size for ${filePath}:`, error.message);
+    return 0;
   }
 }
 
@@ -32,42 +53,82 @@ function getVideoResolution(videoPath) {
   }
 }
 
-// Convert video to MP4 with max 720p
-function convertVideo(inputPath, outputPath) {
+// Convert video with specific resolution
+function convertVideoAtResolution(inputPath, outputPath, maxDimension, resolutionName) {
   try {
-    console.log(`  Converting: ${inputPath}`);
-    
-    // Get current resolution
     const resolution = getVideoResolution(inputPath);
     
     let scaleFilter = '';
     if (resolution) {
-      // Determine if we need to scale based on the larger dimension
-      const maxDimension = Math.max(resolution.width, resolution.height);
+      const currentMaxDimension = Math.max(resolution.width, resolution.height);
       
-      if (maxDimension > 1280) {
-        // Scale down if any dimension > 1280 (720p equivalent)
+      if (currentMaxDimension > maxDimension) {
+        // Scale down if current dimension > target
         if (resolution.width > resolution.height) {
-          // Landscape: limit width to 1280
-          scaleFilter = '-vf scale=1280:-2';
-          console.log(`    Downscaling from ${resolution.width}x${resolution.height} to 720p landscape`);
+          // Landscape: limit width
+          scaleFilter = `-vf scale=${maxDimension}:-2`;
         } else {
-          // Portrait/Square: limit height to 1280
-          scaleFilter = '-vf scale=-2:1280';
-          console.log(`    Downscaling from ${resolution.width}x${resolution.height} to 720p portrait`);
+          // Portrait/Square: limit height
+          scaleFilter = `-vf scale=-2:${maxDimension}`;
         }
+        console.log(`    Scaling from ${resolution.width}x${resolution.height} to ${resolutionName}`);
       } else {
-        console.log(`    Keeping original resolution (${resolution.width}x${resolution.height})`);
+        console.log(`    Using ${resolutionName} (${resolution.width}x${resolution.height})`);
       }
+    } else {
+      // If we can't get resolution, still apply the scale filter
+      scaleFilter = `-vf scale='min(${maxDimension},iw)':-2`;
     }
     
     // Convert with H.264 codec, AAC audio, optimized for web
-    // Using 'fast' preset for quicker conversion (medium quality/size tradeoff)
     const command = `ffmpeg -i "${inputPath}" ${scaleFilter} -c:v libx264 -preset fast -crf 23 -c:a aac -b:a 128k -movflags +faststart "${outputPath}" -y`;
     
     execSync(command, { stdio: 'pipe' });
-    console.log(`    ✓ Created: ${outputPath}`);
     return true;
+  } catch (error) {
+    console.error(`    ✗ Error converting at ${resolutionName}:`, error.message);
+    return false;
+  }
+}
+
+// Convert video and reduce resolution if over 100MB
+function convertVideo(inputPath, outputPath) {
+  try {
+    console.log(`  Converting: ${inputPath}`);
+    
+    // Try each resolution tier until file is under 100MB
+    for (let i = 0; i < RESOLUTION_TIERS.length; i++) {
+      const tier = RESOLUTION_TIERS[i];
+      const isLastTier = i === RESOLUTION_TIERS.length - 1;
+      
+      console.log(`    Attempting ${tier.name}...`);
+      
+      const success = convertVideoAtResolution(inputPath, outputPath, tier.maxDimension, tier.name);
+      
+      if (!success) {
+        console.log(`    ✗ Failed at ${tier.name}`);
+        continue;
+      }
+      
+      // Check file size
+      const fileSizeMB = getFileSizeMB(outputPath);
+      console.log(`    File size: ${fileSizeMB.toFixed(2)} MB`);
+      
+      if (fileSizeMB <= MAX_FILE_SIZE_MB) {
+        console.log(`    ✓ Created: ${outputPath} (${tier.name}, ${fileSizeMB.toFixed(2)} MB)`);
+        return true;
+      } else if (isLastTier) {
+        // Last tier and still over 100MB - keep it anyway with warning
+        console.log(`    ⚠️  Warning: File is ${fileSizeMB.toFixed(2)} MB (over ${MAX_FILE_SIZE_MB} MB limit)`);
+        console.log(`    ✓ Created: ${outputPath} (${tier.name}, lowest resolution)`);
+        return true;
+      } else {
+        console.log(`    File too large (${fileSizeMB.toFixed(2)} MB > ${MAX_FILE_SIZE_MB} MB), trying lower resolution...`);
+        // Continue to next tier
+      }
+    }
+    
+    return false;
   } catch (error) {
     console.error(`    ✗ Error converting ${inputPath}:`, error.message);
     return false;
@@ -118,6 +179,9 @@ function updateMediaList(conversions) {
 async function main() {
   console.log('\n🎬 Video Conversion Script\n');
   console.log('='.repeat(50));
+  console.log(`📏 Max file size: ${MAX_FILE_SIZE_MB} MB`);
+  console.log(`📊 Resolution tiers: ${RESOLUTION_TIERS.map(t => t.name).join(' → ')}`);
+  console.log('='.repeat(50) + '\n');
   
   // Check FFmpeg
   if (!checkFFmpeg()) {
@@ -170,7 +234,8 @@ async function main() {
     
     // Skip if MP4 already exists
     if (existsSync(outputPath)) {
-      console.log(`  ✓ ${outputFile} already exists, skipping conversion`);
+      const sizeMB = getFileSizeMB(outputPath);
+      console.log(`  ✓ ${outputFile} already exists (${sizeMB.toFixed(2)} MB), skipping conversion`);
       conversions.push({ oldFile: item.file, newFile: outputFile });
       continue;
     }
@@ -208,7 +273,7 @@ async function main() {
     console.log('Summary:');
     console.log(`  - Converted: ${conversions.length} video(s)`);
     console.log(`  - Format: MP4 (H.264 + AAC)`);
-    console.log(`  - Max resolution: 720p`);
+    console.log(`  - Max file size: ${MAX_FILE_SIZE_MB} MB`);
     console.log(`  - Optimized for web streaming\n`);
   }
 }
