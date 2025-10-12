@@ -8,17 +8,6 @@ set -e  # Exit on error
 echo "🚀 Building MentalBiriyani for GitHub Pages..."
 echo ""
 
-# Convert videos to MP4 (720p max)
-echo "🎬 Step 1/6: Converting videos to MP4..."
-if node scripts/convert-videos.js; then
-  echo "✓ Video conversion complete"
-else
-  echo "⚠️  Video conversion failed or skipped"
-  echo "   Videos will be used as-is (.mov format)"
-  echo "   For universal browser support, install FFmpeg and run again"
-fi
-echo ""
-
 # Parse command line arguments
 AUTO_DEPLOY=false
 SKIP_VIDEO=false
