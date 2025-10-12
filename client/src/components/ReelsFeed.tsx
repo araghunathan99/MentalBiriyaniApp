@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { toggleMediaLike, isMediaLiked } from "@/lib/localStorage";
 import type { MediaItem } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
+import { useAudioPlaylist } from "@/hooks/useAudioPlaylist";
 
 interface ReelsFeedProps {
   media: MediaItem[];
@@ -22,14 +23,44 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
   const isTransitioningRef = useRef(false);
   const [videoProgress, setVideoProgress] = useState(0);
   const [isDraggingProgress, setIsDraggingProgress] = useState(false);
+  const [isBuffering, setIsBuffering] = useState(false);
+  const [hasError, setHasError] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const controlsTimeoutRef = useRef<NodeJS.Timeout>();
   const containerRef = useRef<HTMLDivElement>(null);
   const prefetchedRef = useRef<Set<number>>(new Set());
   const { toast } = useToast();
+  const audioPlaylist = useAudioPlaylist();
 
   const currentMedia = media[currentIndex];
+
+  // Start background music when component mounts
+  useEffect(() => {
+    // Start playing if first media is not a video
+    if (!currentMedia?.isVideo) {
+      audioPlaylist.play();
+    }
+  }, []);
+
+  // Manage background music based on media type
+  useEffect(() => {
+    if (!currentMedia) return;
+
+    if (currentMedia.isVideo) {
+      // Pause background music when showing a video
+      if (audioPlaylist.isPlaying) {
+        audioPlaylist.pause();
+        console.log('🎵 Paused background music for video');
+      }
+    } else if (currentMedia.isImage) {
+      // Resume background music when showing a photo
+      if (!audioPlaylist.isPlaying) {
+        audioPlaylist.resume();
+        console.log('🎵 Resumed background music for photo');
+      }
+    }
+  }, [currentMedia, audioPlaylist]);
 
   // Prefetch next 10 media items in parallel
   useEffect(() => {
@@ -44,6 +75,13 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
         }
       }
 
+      if (itemsToPrefetch.length > 0) {
+        console.log(`🔄 Prefetching ${itemsToPrefetch.length} items from index ${currentIndex}:`, itemsToPrefetch);
+      }
+
+      // Mark items as being prefetched IMMEDIATELY to prevent duplicate requests
+      itemsToPrefetch.forEach(index => prefetchedRef.current.add(index));
+
       // Prefetch in parallel
       const prefetchPromises = itemsToPrefetch.map(async (index) => {
         const item = media[index];
@@ -51,27 +89,53 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
 
         try {
           if (item.isVideo) {
-            // Prefetch video
+            // Prefetch video metadata only (faster, no timeout needed)
             const video = document.createElement('video');
-            video.preload = 'auto';
+            video.preload = 'metadata';
             video.src = item.webContentLink;
-            await new Promise((resolve) => {
-              video.addEventListener('loadeddata', resolve, { once: true });
-              // Timeout after 5 seconds to avoid blocking
-              setTimeout(resolve, 5000);
+            
+            await new Promise<void>((resolve, reject) => {
+              const timeout = setTimeout(() => {
+                console.warn(`⚠️ Prefetch timeout for video index ${index}: ${item.name}`);
+                resolve(); // Don't block on timeout
+              }, 15000); // 15 second timeout for videos
+              
+              video.addEventListener('loadedmetadata', () => {
+                clearTimeout(timeout);
+                console.log(`✓ Prefetched video metadata index ${index}: ${item.name}`);
+                resolve();
+              }, { once: true });
+              
+              video.addEventListener('error', (e) => {
+                clearTimeout(timeout);
+                console.error(`✗ Failed to prefetch video index ${index}:`, e);
+                resolve(); // Don't block on error
+              }, { once: true });
             });
           } else if (item.isImage) {
             // Prefetch image
             const img = new Image();
             img.src = item.webContentLink;
-            await new Promise((resolve) => {
-              img.onload = resolve;
-              img.onerror = resolve;
-              // Timeout after 3 seconds
-              setTimeout(resolve, 3000);
+            
+            await new Promise<void>((resolve) => {
+              const timeout = setTimeout(() => {
+                console.warn(`⚠️ Prefetch timeout for image index ${index}: ${item.name}`);
+                resolve();
+              }, 10000); // 10 second timeout for images
+              
+              img.onload = () => {
+                clearTimeout(timeout);
+                console.log(`✓ Prefetched image index ${index}: ${item.name}`);
+                resolve();
+              };
+              
+              img.onerror = () => {
+                clearTimeout(timeout);
+                console.error(`✗ Failed to prefetch image index ${index}`);
+                resolve();
+              };
             });
           }
-          prefetchedRef.current.add(index);
         } catch (error) {
           console.error(`Failed to prefetch item at index ${index}:`, error);
         }
@@ -86,8 +150,62 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
   useEffect(() => {
     if (currentMedia) {
       setIsLiked(isMediaLiked(currentMedia.id));
+      setHasError(false);
+      setIsBuffering(false);
     }
   }, [currentMedia]);
+
+  // Handle video buffering and error states
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !currentMedia?.isVideo) return;
+
+    const handleWaiting = () => {
+      console.log('📹 Video buffering...');
+      setIsBuffering(true);
+    };
+
+    const handleCanPlay = () => {
+      console.log('✓ Video can play');
+      setIsBuffering(false);
+      setHasError(false);
+    };
+
+    const handleError = (e: Event) => {
+      console.error('✗ Video error:', e);
+      setHasError(true);
+      setIsBuffering(false);
+      toast({
+        title: "Video Error",
+        description: "Failed to load video. Please try the next one.",
+        variant: "destructive",
+      });
+    };
+
+    const handleStalled = () => {
+      console.warn('⚠️ Video stalled');
+      setIsBuffering(true);
+    };
+
+    const handlePlaying = () => {
+      console.log('▶️ Video playing');
+      setIsBuffering(false);
+    };
+
+    video.addEventListener('waiting', handleWaiting);
+    video.addEventListener('canplay', handleCanPlay);
+    video.addEventListener('error', handleError);
+    video.addEventListener('stalled', handleStalled);
+    video.addEventListener('playing', handlePlaying);
+
+    return () => {
+      video.removeEventListener('waiting', handleWaiting);
+      video.removeEventListener('canplay', handleCanPlay);
+      video.removeEventListener('error', handleError);
+      video.removeEventListener('stalled', handleStalled);
+      video.removeEventListener('playing', handlePlaying);
+    };
+  }, [currentMedia, toast]);
 
   // Auto screen rotation based on media aspect ratio
   useEffect(() => {
@@ -221,12 +339,16 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
     setMediaOpacity(0);
     
     setTimeout(() => {
-      setCurrentIndex((prev) => (prev + 1) % media.length);
+      setCurrentIndex((prev) => {
+        const next = (prev + 1) % media.length;
+        console.log(`➡️ Next: ${prev} → ${next} | ${media[next]?.name}`);
+        return next;
+      });
       setTimeout(() => {
         setMediaOpacity(1);
         isTransitioningRef.current = false;
-      }, 50);
-    }, 400);
+      }, 30);
+    }, 150);
   };
 
   const handlePrevious = () => {
@@ -236,12 +358,16 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
     setMediaOpacity(0);
     
     setTimeout(() => {
-      setCurrentIndex((prev) => (prev - 1 + media.length) % media.length);
+      setCurrentIndex((prev) => {
+        const next = (prev - 1 + media.length) % media.length;
+        console.log(`⬅️ Previous: ${prev} → ${next} | ${media[next]?.name}`);
+        return next;
+      });
       setTimeout(() => {
         setMediaOpacity(1);
         isTransitioningRef.current = false;
-      }, 50);
-    }, 400);
+      }, 30);
+    }, 150);
   };
 
   const handleLike = () => {
@@ -408,25 +534,42 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
       onTouchEnd={handleTouchEnd}
     >
       {currentMedia.isVideo ? (
-        <video
-          ref={videoRef}
-          src={currentMedia.webContentLink}
-          className="w-full h-full object-contain transition-opacity duration-500 ease-in-out"
-          style={{ opacity: mediaOpacity }}
-          loop
-          muted={isMuted}
-          playsInline
-          autoPlay
-          onClick={handleTap}
-          onDoubleClick={handleDoubleTap}
-          data-testid="video-player"
-        />
+        <>
+          <video
+            ref={videoRef}
+            src={currentMedia.webContentLink}
+            className="w-full h-full object-contain transition-opacity duration-150 ease-in-out"
+            style={{ opacity: mediaOpacity }}
+            loop
+            muted={isMuted}
+            playsInline
+            autoPlay
+            preload="auto"
+            crossOrigin="anonymous"
+            onClick={handleTap}
+            onDoubleClick={handleDoubleTap}
+            data-testid="video-player"
+          />
+          {isBuffering && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+            </div>
+          )}
+          {hasError && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+              <div className="text-center text-white p-4">
+                <p className="text-lg font-semibold">Video Failed to Load</p>
+                <p className="text-sm opacity-70 mt-2">Swipe to next video</p>
+              </div>
+            </div>
+          )}
+        </>
       ) : (
         <img
           ref={imageRef}
           src={currentMedia.webContentLink}
           alt={currentMedia.name}
-          className="w-full h-full object-contain transition-opacity duration-500 ease-in-out"
+          className="w-full h-full object-contain transition-opacity duration-150 ease-in-out"
           style={{ opacity: mediaOpacity }}
           onClick={handleTap}
           onDoubleClick={handleDoubleTap}
@@ -435,7 +578,7 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
       )}
 
       <div 
-        className={`absolute top-0 left-0 right-0 p-4 pt-safe bg-gradient-to-b from-black/60 to-transparent transition-opacity duration-300 ${showControls ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+        className={`absolute top-0 left-0 right-0 p-4 pt-safe bg-gradient-to-b from-black/60 to-transparent transition-opacity duration-200 ${showControls ? "opacity-100" : "opacity-0 pointer-events-none"}`}
       >
         <div className="flex items-center gap-3">
           <div className="flex-1">
@@ -447,7 +590,7 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
         </div>
       </div>
 
-      <div className={`absolute right-4 bottom-24 flex flex-col gap-6 transition-opacity duration-300 ${showControls ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
+      <div className={`absolute right-4 bottom-24 flex flex-col gap-6 transition-opacity duration-200 ${showControls ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
         <div className="flex flex-col items-center">
           <Button
             size="icon"
@@ -498,7 +641,7 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
       </div>
 
       {currentMedia.isVideo && (
-        <div className={`absolute left-0 right-0 bottom-16 px-4 transition-opacity duration-300 ${showControls ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
+        <div className={`absolute left-0 right-0 bottom-16 px-4 transition-opacity duration-200 ${showControls ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
           <div
             id="video-progress-bar"
             className="relative h-1 bg-white/30 rounded-full cursor-pointer group"
@@ -520,7 +663,7 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
         </div>
       )}
 
-      <div className={`absolute left-0 right-0 bottom-0 p-4 pb-safe bg-gradient-to-t from-black/60 to-transparent transition-opacity duration-300 ${showControls ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
+      <div className={`absolute left-0 right-0 bottom-0 p-4 pb-safe bg-gradient-to-t from-black/60 to-transparent transition-opacity duration-200 ${showControls ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
         <div className="flex items-center justify-center gap-2 relative">
           {/* Left click zone for previous */}
           <div 
@@ -536,7 +679,7 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
             {media.map((_, idx) => (
               <div
                 key={idx}
-                className={`h-1 rounded-full transition-all duration-300 ${
+                className={`h-1 rounded-full transition-all duration-200 ${
                   idx === currentIndex ? "bg-white w-6" : "bg-white/40 w-1"
                 }`}
               />

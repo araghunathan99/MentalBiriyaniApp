@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Play, Heart } from "lucide-react";
 import { isMediaLiked } from "@/lib/localStorage";
 import type { MediaItem } from "@shared/schema";
+import SongsView from "./SongsView";
+import ChatView from "./ChatView";
 
 interface GridViewProps {
   media: MediaItem[];
@@ -9,7 +11,7 @@ interface GridViewProps {
 }
 
 export default function GridView({ media, onMediaClick }: GridViewProps) {
-  const [filter, setFilter] = useState<"all" | "photos" | "videos">("all");
+  const [filter, setFilter] = useState<"all" | "photos" | "videos" | "songs" | "chat">("all");
 
   // Note: media is already sorted by favorites from Home.tsx
   const filteredMedia = media.filter((item) => {
@@ -55,55 +57,83 @@ export default function GridView({ media, onMediaClick }: GridViewProps) {
           >
             Videos
           </button>
+          <button
+            onClick={() => setFilter("songs")}
+            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
+              filter === "songs"
+                ? "bg-card text-foreground"
+                : "bg-transparent text-muted-foreground hover-elevate"
+            }`}
+            data-testid="button-filter-songs"
+          >
+            Songs
+          </button>
+          <button
+            onClick={() => setFilter("chat")}
+            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
+              filter === "chat"
+                ? "bg-card text-foreground"
+                : "bg-transparent text-muted-foreground hover-elevate"
+            }`}
+            data-testid="button-filter-chat"
+          >
+            Chat
+          </button>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
-        <div className="grid grid-cols-3 gap-1 p-1">
-          {filteredMedia.map((item, idx) => {
-            const originalIndex = media.findIndex((m) => m.id === item.id);
-            const liked = isMediaLiked(item.id);
-            
-            return (
-              <button
-                key={item.id}
-                onClick={() => onMediaClick(originalIndex)}
-                className="relative aspect-square overflow-hidden bg-card hover-elevate active-elevate-2 rounded-sm"
-                data-testid={`button-media-${item.id}`}
-              >
-                {item.isVideo ? (
-                  <video
-                    src={item.webContentLink || ""}
-                    className="w-full h-full object-cover"
-                    preload="metadata"
-                    muted
-                    playsInline
-                  />
-                ) : (
-                  <img
-                    src={item.thumbnailLink || item.webContentLink || ""}
-                    alt={item.name}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
-                )}
-                
-                {item.isVideo && (
-                  <div className="absolute bottom-1 right-1 bg-black/60 rounded-full p-1">
-                    <Play className="h-3 w-3 text-white fill-white" />
-                  </div>
-                )}
-                
-                {liked && (
-                  <div className="absolute top-1 right-1 bg-black/60 rounded-full p-1">
-                    <Heart className="h-3 w-3 text-destructive fill-destructive" />
-                  </div>
-                )}
-              </button>
-            );
-          })}
+      {filter === "songs" ? (
+        <SongsView />
+      ) : filter === "chat" ? (
+        <ChatView />
+      ) : (
+        <div className="flex-1 overflow-y-auto">
+          <div className="grid grid-cols-3 gap-1 p-1">
+            {filteredMedia.map((item, idx) => {
+              const originalIndex = media.findIndex((m) => m.id === item.id);
+              const liked = isMediaLiked(item.id);
+              
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => onMediaClick(originalIndex)}
+                  className="relative aspect-square overflow-hidden bg-card hover-elevate active-elevate-2 rounded-sm"
+                  data-testid={`button-media-${item.id}`}
+                >
+                  {item.isVideo ? (
+                    <video
+                      src={item.webContentLink || ""}
+                      className="w-full h-full object-cover"
+                      preload="metadata"
+                      muted
+                      playsInline
+                    />
+                  ) : (
+                    <img
+                      src={item.thumbnailLink || item.webContentLink || ""}
+                      alt={item.name}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  )}
+                  
+                  {item.isVideo && (
+                    <div className="absolute bottom-1 right-1 bg-black/60 rounded-full p-1">
+                      <Play className="h-3 w-3 text-white fill-white" />
+                    </div>
+                  )}
+                  
+                  {liked && (
+                    <div className="absolute top-1 right-1 bg-black/60 rounded-full p-1">
+                      <Heart className="h-3 w-3 text-destructive fill-destructive" />
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

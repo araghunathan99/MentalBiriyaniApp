@@ -54,9 +54,19 @@ for arg in "$@"; do
   esac
 done
 
+# Generate content lists
+echo "📋 Step 1/10: Generating content lists..."
+node scripts/generate-content-lists.js
+echo ""
+
+# Parse chat conversations
+echo "💬 Step 2/10: Parsing chat conversations..."
+node scripts/parse-chat.js
+echo ""
+
 # Convert videos to MP4 (720p max)
 if [ "$SKIP_VIDEO" = false ]; then
-  echo "🎬 Step 1/7: Converting videos to MP4..."
+  echo "🎬 Step 3/10: Converting videos to MP4..."
   if node scripts/convert-videos.js; then
     echo "✓ Video conversion complete"
   else
@@ -66,35 +76,100 @@ if [ "$SKIP_VIDEO" = false ]; then
   fi
   echo ""
 else
-  echo "⏭️  Step 1/7: Skipping video conversion (--skip-video flag)"
+  echo "⏭️  Step 3/10: Skipping video conversion (--skip-video flag)"
   echo ""
 fi
 
 # Build the app
-echo "📦 Step 2/7: Building app with Vite..."
+echo "📦 Step 4/10: Building app with Vite..."
 npm run build
 echo ""
 
 # Fix paths for GitHub Pages
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
 echo "🔧 Step 2/5: Fixing asset paths..."
+=======
+echo "🔧 Step 3/8: Fixing asset paths..."
+>>>>>>> d9f894a (Improve asset loading on GitHub Pages with cache-busting)
+=======
+echo "🔧 Step 4/9: Fixing asset paths..."
+>>>>>>> d5031da (Add dynamic content loading and improve build process)
+=======
+echo "🔧 Step 5/10: Fixing asset paths..."
+>>>>>>> c46769e (Add chat conversations to the library view)
 node scripts/fix-github-pages-paths.js
 echo ""
 
 # Copy content folder
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
 echo "📁 Step 3/5: Copying media files..."
+=======
+echo "📁 Step 5/8: Copying media files..."
+>>>>>>> d9f894a (Improve asset loading on GitHub Pages with cache-busting)
+=======
+echo "📁 Step 4/8: Copying media files..."
+>>>>>>> f838057 (Improve how assets are cached to prevent stale content)
+=======
+echo "📁 Step 5/9: Copying media files..."
+>>>>>>> d5031da (Add dynamic content loading and improve build process)
+=======
+echo "📁 Step 6/10: Copying media files..."
+>>>>>>> c46769e (Add chat conversations to the library view)
 cp -r client/public/content dist/public/
 echo ""
 
 # Copy PWA files
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
 echo "📱 Step 4/5: Copying PWA configuration..."
+=======
+echo "📱 Step 6/8: Copying PWA configuration..."
+>>>>>>> d9f894a (Improve asset loading on GitHub Pages with cache-busting)
+=======
+echo "📱 Step 5/8: Copying PWA configuration..."
+>>>>>>> f838057 (Improve how assets are cached to prevent stale content)
+=======
+echo "📱 Step 6/9: Copying PWA configuration..."
+>>>>>>> d5031da (Add dynamic content loading and improve build process)
+=======
+echo "📱 Step 7/10: Copying PWA configuration..."
+>>>>>>> c46769e (Add chat conversations to the library view)
 cp client/public/manifest.json client/public/sw.js dist/public/
 cp client/public/icon-*.svg dist/public/
 touch dist/public/.nojekyll
 echo ""
 
+# Add cache-busting version parameters (AFTER copying files)
+echo "🔄 Step 8/10: Adding cache-busting version..."
+node scripts/add-cache-busting.js
+echo ""
+
 # Copy documentation
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
 echo "📚 Step 5/5: Copying documentation..."
 cp DEPLOYMENT_PACKAGE.md GITHUB_PAGES_DEPLOYMENT.md PWA_INSTALLATION_GUIDE.md dist/public/
+=======
+echo "📚 Step 7/8: Copying documentation..."
+=======
+echo "📚 Step 8/9: Copying documentation..."
+>>>>>>> d5031da (Add dynamic content loading and improve build process)
+=======
+echo "📚 Step 9/10: Copying documentation..."
+>>>>>>> c46769e (Add chat conversations to the library view)
+cp BUILD_FOR_GITHUB_PAGES.md dist/public/DEPLOYMENT_GUIDE.md 2>/dev/null || true
+cp VIDEO_CONVERSION_GUIDE.md dist/public/ 2>/dev/null || true
+cp PWA_INSTALLATION_GUIDE.md dist/public/ 2>/dev/null || true
+echo ""
+>>>>>>> d9f894a (Improve asset loading on GitHub Pages with cache-busting)
 
 echo ""
 
@@ -106,7 +181,7 @@ echo ""
 
 # Deploy to GitHub Pages if requested
 if [ "$AUTO_DEPLOY" = true ]; then
-  echo "🚀 Step 7/7: Deploying to GitHub Pages..."
+  echo "🚀 Step 10/10: Deploying to GitHub Pages..."
   echo ""
   
   cd dist/public

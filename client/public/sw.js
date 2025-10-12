@@ -1,4 +1,8 @@
-const CACHE_NAME = 'mental-biriyani-v1';
+// Dynamic cache name with timestamp - updates on each deployment
+const CACHE_VERSION = '__CACHE_VERSION__'; // Will be replaced during build
+const CACHE_NAME = `mental-biriyani-${CACHE_VERSION}`;
+
+// Only cache the app shell - let HTTP cache-busting handle assets
 const urlsToCache = [
   './',
   './index.html'

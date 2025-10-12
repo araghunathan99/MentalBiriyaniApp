@@ -4,7 +4,98 @@ This directory contains automated scripts for building and deploying MentalBiriy
 
 ## Scripts Overview
 
-### 1. `convert-videos.js` 🎬
+### 1. `generate-content-lists.js` 📋
+
+**NEW!** Automatically scans content folders and generates JSON manifests for dynamic content loading.
+
+**What it does:**
+1. Scans `client/public/content/` for photos and videos → creates `media-list.json`
+2. Scans `client/public/content/audio/` for songs → creates `audio-list.json`
+3. Extracts metadata (MIME types, dates, clean display names)
+
+**Usage:**
+```bash
+# Run manually
+node scripts/generate-content-lists.js
+
+# Automatically runs during build (Step 1/9)
+./build-github-pages.sh
+```
+
+**Adding New Content - No Code Changes Needed!**
+1. Add files to appropriate folder:
+   - Photos/Videos → `client/public/content/`
+   - Songs → `client/public/content/audio/`
+2. Rebuild: `./build-github-pages.sh`
+3. New content automatically included! ✨
+
+**Supported Formats:**
+- **Images**: .jpg, .jpeg, .png, .gif, .webp, .bmp
+- **Videos**: .mp4, .webm, .mov, .avi, .mkv
+- **Audio**: .mp3, .wav, .ogg, .m4a, .flac
+
+**Output:**
+- `client/public/content/media-list.json` (Photos + Videos)
+- `client/public/content/audio/audio-list.json` (Songs)
+
+---
+
+### 2. `parse-chat.js` 💬
+
+**NEW!** Parses Google Chat conversations from MBOX file and extracts conversations between specific participants.
+
+**What it does:**
+1. Reads `client/public/content/Chat.mbox` (Google Chat export file)
+2. Parses MBOX format to extract individual conversations
+3. Filters conversations between Ashwin Raghunathan and Divya Dharshini Chandrasekaran
+4. Extracts messages from HTML format in each conversation
+5. Generates `client/public/content/chat-list.json`
+
+**Usage:**
+```bash
+# Run manually
+node scripts/parse-chat.js
+
+# Automatically runs during build (Step 2/10)
+./build-github-pages.sh
+```
+
+**Input:**
+- `client/public/content/Chat.mbox` - Google Chat export in MBOX format
+
+**Output:**
+- `client/public/content/chat-list.json` - Filtered conversations with structured data
+
+**JSON Structure:**
+```json
+{
+  "totalConversations": 458,
+  "participants": ["Ashwin Raghunathan", "Divya Dharshini Chandrasekaran"],
+  "conversations": [
+    {
+      "fromName": "Divya Dharshini Chandrasekaran",
+      "fromEmail": "divya.dharsh@gmail.com",
+      "subject": "Chat with Divya Dharshini Chandrasekaran",
+      "date": "2025-10-12T09:04:42.888Z",
+      "messages": [
+        { "sender": "me", "text": "..." },
+        { "sender": "Divya", "text": "..." }
+      ]
+    }
+  ]
+}
+```
+
+**Features:**
+- Parses 6,787 total conversations from MBOX
+- Filters to 458 conversations with Divya
+- Sorts chronologically (newest first)
+- Preserves message sender and text
+- Handles HTML parsing and text extraction
+
+---
+
+### 3. `convert-videos.js` 🎬
 
 Automatically converts `.mov` videos to `.mp4` format with optimal web settings.
 
@@ -101,6 +192,7 @@ node scripts/fix-github-pages-paths.js
 Complete automated build and deployment pipeline for GitHub Pages.
 
 **Features:**
+- **Dynamic content generation** (NEW!)
 - Automated video conversion (.mov → .mp4)
 - Build optimization with Vite
 - Path fixing for GitHub Pages base path
@@ -109,14 +201,17 @@ Complete automated build and deployment pipeline for GitHub Pages.
 - Timestamped commits
 - Force push to GitHub
 
-**Build Steps:**
-1. **Video Conversion** - Converts .mov to .mp4 (720p max) [Optional: `--skip-video`]
-2. **Vite Build** - Builds React app
-3. **Path Fixing** - Updates paths for GitHub Pages
-4. **Media Copy** - Copies content folder
-5. **PWA Files** - Copies manifest and icons
-6. **Documentation** - Copies deployment guides
-7. **Git Deployment** - Commits and pushes to GitHub [Optional: `--deploy`]
+**Build Steps (10 steps):**
+1. **Content Generation** - Scans folders and creates media-list.json & audio-list.json
+2. **Chat Parsing** - Extracts conversations from Chat.mbox, creates chat-list.json
+3. **Video Conversion** - Converts .mov to .mp4 (720p max) [Optional: `--skip-video`]
+4. **Vite Build** - Builds React app
+5. **Path Fixing** - Updates paths for GitHub Pages
+6. **Media Copy** - Copies content folder
+7. **PWA Files** - Copies manifest and icons
+8. **Cache Busting** - Adds version timestamps
+9. **Documentation** - Copies deployment guides
+10. **Git Deployment** - Commits and pushes to GitHub [Optional: `--deploy`]
 
 **Usage:**
 ```bash

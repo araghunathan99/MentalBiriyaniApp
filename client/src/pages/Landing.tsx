@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import confetti from "canvas-confetti";
+import nightskyImg from "@assets/stock_images/nightsky.jpg";
 
 export default function Landing() {
   const [, setLocation] = useLocation();
@@ -90,10 +91,19 @@ export default function Landing() {
 
   return (
     <div 
-      className="h-screen w-full bg-gradient-to-b from-black to-[#1a2642] flex items-center justify-center p-6 cursor-pointer relative overflow-hidden"
+      className="h-screen w-full flex items-center justify-center p-6 cursor-pointer relative overflow-hidden"
       onClick={handleClick}
       data-testid="button-enter-app"
+      style={{
+        backgroundImage: `url(${nightskyImg})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
     >
+      {/* Dark overlay for better text contrast */}
+      <div className="absolute inset-0 bg-black/30" />
+      
       {/* Twinkling stars */}
       {stars.map((star) => (
         <div
@@ -111,7 +121,7 @@ export default function Landing() {
       ))}
 
       <div 
-        className={`text-center space-y-6 transition-all duration-1000 ${
+        className={`text-center space-y-6 transition-all duration-1000 relative z-10 ${
           showText ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
         }`}
       >
