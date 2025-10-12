@@ -86,61 +86,17 @@ npm run build
 echo ""
 
 # Fix paths for GitHub Pages
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-echo "🔧 Step 2/5: Fixing asset paths..."
-=======
-echo "🔧 Step 3/8: Fixing asset paths..."
->>>>>>> d9f894a (Improve asset loading on GitHub Pages with cache-busting)
-=======
-echo "🔧 Step 4/9: Fixing asset paths..."
->>>>>>> d5031da (Add dynamic content loading and improve build process)
-=======
 echo "🔧 Step 5/10: Fixing asset paths..."
->>>>>>> c46769e (Add chat conversations to the library view)
 node scripts/fix-github-pages-paths.js
 echo ""
 
 # Copy content folder
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-echo "📁 Step 3/5: Copying media files..."
-=======
-echo "📁 Step 5/8: Copying media files..."
->>>>>>> d9f894a (Improve asset loading on GitHub Pages with cache-busting)
-=======
-echo "📁 Step 4/8: Copying media files..."
->>>>>>> f838057 (Improve how assets are cached to prevent stale content)
-=======
-echo "📁 Step 5/9: Copying media files..."
->>>>>>> d5031da (Add dynamic content loading and improve build process)
-=======
 echo "📁 Step 6/10: Copying media files..."
->>>>>>> c46769e (Add chat conversations to the library view)
 cp -r client/public/content dist/public/
 echo ""
 
 # Copy PWA files
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-echo "📱 Step 4/5: Copying PWA configuration..."
-=======
-echo "📱 Step 6/8: Copying PWA configuration..."
->>>>>>> d9f894a (Improve asset loading on GitHub Pages with cache-busting)
-=======
-echo "📱 Step 5/8: Copying PWA configuration..."
->>>>>>> f838057 (Improve how assets are cached to prevent stale content)
-=======
-echo "📱 Step 6/9: Copying PWA configuration..."
->>>>>>> d5031da (Add dynamic content loading and improve build process)
-=======
 echo "📱 Step 7/10: Copying PWA configuration..."
->>>>>>> c46769e (Add chat conversations to the library view)
 cp client/public/manifest.json client/public/sw.js dist/public/
 cp client/public/icon-*.svg dist/public/
 touch dist/public/.nojekyll
@@ -152,24 +108,11 @@ node scripts/add-cache-busting.js
 echo ""
 
 # Copy documentation
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-echo "📚 Step 5/5: Copying documentation..."
-cp DEPLOYMENT_PACKAGE.md GITHUB_PAGES_DEPLOYMENT.md PWA_INSTALLATION_GUIDE.md dist/public/
-=======
-echo "📚 Step 7/8: Copying documentation..."
-=======
-echo "📚 Step 8/9: Copying documentation..."
->>>>>>> d5031da (Add dynamic content loading and improve build process)
-=======
 echo "📚 Step 9/10: Copying documentation..."
->>>>>>> c46769e (Add chat conversations to the library view)
 cp BUILD_FOR_GITHUB_PAGES.md dist/public/DEPLOYMENT_GUIDE.md 2>/dev/null || true
 cp VIDEO_CONVERSION_GUIDE.md dist/public/ 2>/dev/null || true
 cp PWA_INSTALLATION_GUIDE.md dist/public/ 2>/dev/null || true
 echo ""
->>>>>>> d9f894a (Improve asset loading on GitHub Pages with cache-busting)
 
 echo ""
 

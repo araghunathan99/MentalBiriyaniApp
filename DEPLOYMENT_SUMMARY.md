@@ -134,15 +134,18 @@ After making changes:
 - Audio: AAC 128kbps
 - Web optimized: faststart flag
 
-## 📦 Build Pipeline (7 Steps)
+## 📦 Build Pipeline (10 Steps)
 
-1. **Video Conversion** - .mov → .mp4 (can skip with --skip-video)
-2. **Vite Build** - Optimized React app
-3. **Path Fixing** - GitHub Pages base path (/MentalBiriyani/)
-4. **Media Copy** - All photos and videos
-5. **PWA Files** - Manifest, service worker, icons
-6. **Documentation** - All guide files
-7. **Git Deploy** - Commit and push (if --deploy flag)
+1. **Content Generation** - Scans folders and creates media-list.json & audio-list.json
+2. **Chat Parsing** - Extracts conversations from Chat.mbox, creates chat-list.json
+3. **Video Conversion** - .mov → .mp4 (720p max) [Optional: can skip with --skip-video]
+4. **Vite Build** - Optimized React app
+5. **Path Fixing** - GitHub Pages base path (/MentalBiriyani/)
+6. **Media Copy** - All photos, videos, and chat data
+7. **PWA Files** - Manifest, service worker, icons
+8. **Cache Busting** - Adds version timestamps to assets
+9. **Documentation** - All guide files
+10. **Git Deploy** - Commit and push to GitHub (if --deploy flag)
 
 ## 🛠️ Script Files
 

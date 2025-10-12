@@ -16,13 +16,16 @@ export GITHUB_PAGES_REPO=https://github.com/username/MentalBiriyani.git
 ```
 
 This will:
-1. ✅ Convert videos to MP4 (720p max, universal browser support)
-2. ✅ Build optimized React app
-3. ✅ Fix asset paths for GitHub Pages
-4. ✅ Copy all media and configuration files
-5. ✅ Initialize git repository in dist/public
-6. ✅ Commit and push to GitHub
-7. ✅ Ready to enable GitHub Pages!
+1. ✅ Generate content lists for dynamic media loading
+2. ✅ Parse chat conversations from MBOX file
+3. ✅ Convert videos to MP4 (720p max, universal browser support)
+4. ✅ Build optimized React app
+5. ✅ Fix asset paths for GitHub Pages
+6. ✅ Copy all media files and chat data
+7. ✅ Copy PWA configuration files
+8. ✅ Add cache-busting version parameters
+9. ✅ Copy documentation files
+10. ✅ Initialize git repository and deploy (if --deploy flag used)
 
 ## 📋 Build Options
 
@@ -48,24 +51,36 @@ This will:
 If you prefer to build manually:
 
 ```bash
-# 1. Convert videos (optional but recommended)
+# 1. Generate content lists
+node scripts/generate-content-lists.js
+
+# 2. Parse chat conversations
+node scripts/parse-chat.js
+
+# 3. Convert videos (optional but recommended)
 node scripts/convert-videos.js
 
-# 2. Build the app
+# 4. Build the app
 npm run build
 
-# 3. Fix paths for GitHub Pages
+# 5. Fix paths for GitHub Pages
 node scripts/fix-github-pages-paths.js
 
-# 4. Copy required files to dist/public
+# 6. Copy media files to dist/public
 cp -r client/public/content dist/public/
+
+# 7. Copy PWA configuration
 cp client/public/manifest.json client/public/sw.js dist/public/
 cp client/public/icon-*.svg dist/public/
 touch dist/public/.nojekyll
 
-# 5. Copy documentation
+# 8. Add cache-busting version
+node scripts/add-cache-busting.js
+
+# 9. Copy documentation
 cp BUILD_FOR_GITHUB_PAGES.md dist/public/DEPLOYMENT_GUIDE.md
-cp VIDEO_CONVERSION_GUIDE.md PWA_INSTALLATION_GUIDE.md dist/public/
+cp VIDEO_CONVERSION_GUIDE.md dist/public/
+cp PWA_INSTALLATION_GUIDE.md dist/public/
 ```
 
 The deployable package will be in `dist/public/`.
