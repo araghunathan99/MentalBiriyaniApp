@@ -6,268 +6,53 @@
 
 Found 10 .mov file(s) to convert:
 
-  Converting: client/public/content/IMG_0584.MOV
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0x65f180] moov atom not found
-client/public/content/IMG_0584.MOV: Invalid data found when processing input
-Error getting resolution for client/public/content/IMG_0584.MOV: Command failed: ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 "client/public/content/IMG_0584.MOV"
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0x65f180] moov atom not found
-client/public/content/IMG_0584.MOV: Invalid data found when processing input
-
-    ✗ Error converting client/public/content/IMG_0584.MOV: Command failed: ffmpeg -i "client/public/content/IMG_0584.MOV"  -c:v libx264 -preset fast -crf 23 -c:a aac -b:a 128k -movflags +faststart "client/public/content/IMG_0584.mp4" -y
-ffmpeg version 6.1.1 Copyright (c) 2000-2023 the FFmpeg developers
-  built with gcc 13.2.0 (GCC)
-  configuration: --disable-static --prefix=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1 --target_os=linux --arch=x86_64 --pkg-config=pkg-config --enable-gpl --enable-version3 --disable-nonfree --disable-static --enable-shared --enable-pic --disable-thumb --disable-small --enable-runtime-cpudetect --disable-gray --enable-swscale-alpha --enable-hardcoded-tables --enable-safe-bitstream-reader --enable-pthreads --disable-w32threads --disable-os2threads --enable-network --enable-pixelutils --datadir=/nix/store/71hcrwn1g6ncki859v14jq18i8fx84sk-ffmpeg-6.1.1-data/share/ffmpeg --enable-ffmpeg --enable-ffplay --enable-ffprobe --bindir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-bin/bin --enable-avcodec --enable-avdevice --enable-avfilter --enable-avformat --enable-avutil --enable-postproc --enable-swresample --enable-swscale --libdir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-lib/lib --incdir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-dev/include --enable-doc --enable-htmlpages --enable-manpages --mandir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-man/share/man --enable-podpages --enable-txtpages --docdir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-doc/share/doc/ffmpeg --enable-alsa --disable-libaom --disable-appkit --disable-libaribcaption --enable-libass --disable-audiotoolbox --disable-avfoundation --disable-avisynth --disable-libbluray --disable-libbs2b --enable-bzlib --disable-libcaca --disable-libcelt --disable-chromaprint --disable-libcodec2 --disable-coreimage --disable-cuda --disable-cuda-llvm --enable-cuvid --enable-libdav1d --disable-libdc1394 --enable-libdrm --disable-libfdk-aac --enable-ffnvcodec --disable-libflite --enable-fontconfig --enable-libfontconfig --enable-libfreetype --disable-frei0r --disable-libfribidi --disable-libgme --enable-gnutls --disable-libgsm --enable-libharfbuzz --enable-iconv --disable-libjack --disable-libjxl --disable-ladspa --enable-lzma --disable-libmfx --disable-libmodplug --enable-libmp3lame --disable-libmysofa --enable-nvdec --enable-nvenc --disable-openal --disable-opencl --disable-libopencore-amrnb --disable-libopencore-amrwb --disable-opengl --disable-libopenh264 --disable-libopenjpeg --disable-libopenmpt --enable-libopus --disable-libplacebo --enable-libpulse --disable-librav1e --disable-librtmp --disable-libsmbclient --enable-sdl2 --disable-libshaderc --enable-libsoxr --enable-libspeex --enable-libsrt --enable-libssh --disable-librsvg --enable-libsvtav1 --disable-libtensorflow --enable-libtheora --enable-libv4l2 --enable-v4l2-m2m --enable-vaapi --enable-vdpau --disable-libvpl --disable-videotoolbox --disable-libvidstab --disable-libvmaf --disable-libvo-amrwbenc --enable-libvorbis --enable-libvpx --enable-vulkan --disable-libwebp --enable-libx264 --enable-libx265 --disable-libxavs --disable-libxcb --disable-libxcb-shape --disable-libxcb-shm --disable-libxcb-xfixes --disable-xlib --disable-libxml2 --enable-libxvid --enable-libzimg --enable-zlib --disable-libzmq --disable-debug --enable-optimizations --disable-extra-warnings --disable-stripping
-  libavutil      58. 29.100 / 58. 29.100
-  libavcodec     60. 31.102 / 60. 31.102
-  libavformat    60. 16.100 / 60. 16.100
-  libavdevice    60.  3.100 / 60.  3.100
-  libavfilter     9. 12.100 /  9. 12.100
-  libswscale      7.  5.100 /  7.  5.100
-  libswresample   4. 12.100 /  4. 12.100
-  libpostproc    57.  3.100 / 57.  3.100
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0x1582840] Format mov,mp4,m4a,3gp,3g2,mj2 detected only with low score of 1, misdetection possible!
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0x1582840] moov atom not found
-[in#0 @ 0x1582740] Error opening input: Invalid data found when processing input
-Error opening input file client/public/content/IMG_0584.MOV.
-Error opening input files: Invalid data found when processing input
-
-  Converting: client/public/content/IMG_2524.MOV
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0x1e21180] moov atom not found
-client/public/content/IMG_2524.MOV: Invalid data found when processing input
-Error getting resolution for client/public/content/IMG_2524.MOV: Command failed: ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 "client/public/content/IMG_2524.MOV"
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0x1e21180] moov atom not found
-client/public/content/IMG_2524.MOV: Invalid data found when processing input
-
-    ✗ Error converting client/public/content/IMG_2524.MOV: Command failed: ffmpeg -i "client/public/content/IMG_2524.MOV"  -c:v libx264 -preset fast -crf 23 -c:a aac -b:a 128k -movflags +faststart "client/public/content/IMG_2524.mp4" -y
-ffmpeg version 6.1.1 Copyright (c) 2000-2023 the FFmpeg developers
-  built with gcc 13.2.0 (GCC)
-  configuration: --disable-static --prefix=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1 --target_os=linux --arch=x86_64 --pkg-config=pkg-config --enable-gpl --enable-version3 --disable-nonfree --disable-static --enable-shared --enable-pic --disable-thumb --disable-small --enable-runtime-cpudetect --disable-gray --enable-swscale-alpha --enable-hardcoded-tables --enable-safe-bitstream-reader --enable-pthreads --disable-w32threads --disable-os2threads --enable-network --enable-pixelutils --datadir=/nix/store/71hcrwn1g6ncki859v14jq18i8fx84sk-ffmpeg-6.1.1-data/share/ffmpeg --enable-ffmpeg --enable-ffplay --enable-ffprobe --bindir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-bin/bin --enable-avcodec --enable-avdevice --enable-avfilter --enable-avformat --enable-avutil --enable-postproc --enable-swresample --enable-swscale --libdir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-lib/lib --incdir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-dev/include --enable-doc --enable-htmlpages --enable-manpages --mandir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-man/share/man --enable-podpages --enable-txtpages --docdir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-doc/share/doc/ffmpeg --enable-alsa --disable-libaom --disable-appkit --disable-libaribcaption --enable-libass --disable-audiotoolbox --disable-avfoundation --disable-avisynth --disable-libbluray --disable-libbs2b --enable-bzlib --disable-libcaca --disable-libcelt --disable-chromaprint --disable-libcodec2 --disable-coreimage --disable-cuda --disable-cuda-llvm --enable-cuvid --enable-libdav1d --disable-libdc1394 --enable-libdrm --disable-libfdk-aac --enable-ffnvcodec --disable-libflite --enable-fontconfig --enable-libfontconfig --enable-libfreetype --disable-frei0r --disable-libfribidi --disable-libgme --enable-gnutls --disable-libgsm --enable-libharfbuzz --enable-iconv --disable-libjack --disable-libjxl --disable-ladspa --enable-lzma --disable-libmfx --disable-libmodplug --enable-libmp3lame --disable-libmysofa --enable-nvdec --enable-nvenc --disable-openal --disable-opencl --disable-libopencore-amrnb --disable-libopencore-amrwb --disable-opengl --disable-libopenh264 --disable-libopenjpeg --disable-libopenmpt --enable-libopus --disable-libplacebo --enable-libpulse --disable-librav1e --disable-librtmp --disable-libsmbclient --enable-sdl2 --disable-libshaderc --enable-libsoxr --enable-libspeex --enable-libsrt --enable-libssh --disable-librsvg --enable-libsvtav1 --disable-libtensorflow --enable-libtheora --enable-libv4l2 --enable-v4l2-m2m --enable-vaapi --enable-vdpau --disable-libvpl --disable-videotoolbox --disable-libvidstab --disable-libvmaf --disable-libvo-amrwbenc --enable-libvorbis --enable-libvpx --enable-vulkan --disable-libwebp --enable-libx264 --enable-libx265 --disable-libxavs --disable-libxcb --disable-libxcb-shape --disable-libxcb-shm --disable-libxcb-xfixes --disable-xlib --disable-libxml2 --enable-libxvid --enable-libzimg --enable-zlib --disable-libzmq --disable-debug --enable-optimizations --disable-extra-warnings --disable-stripping
-  libavutil      58. 29.100 / 58. 29.100
-  libavcodec     60. 31.102 / 60. 31.102
-  libavformat    60. 16.100 / 60. 16.100
-  libavdevice    60.  3.100 / 60.  3.100
-  libavfilter     9. 12.100 /  9. 12.100
-  libswscale      7.  5.100 /  7.  5.100
-  libswresample   4. 12.100 /  4. 12.100
-  libpostproc    57.  3.100 / 57.  3.100
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0xbde840] Format mov,mp4,m4a,3gp,3g2,mj2 detected only with low score of 1, misdetection possible!
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0xbde840] moov atom not found
-[in#0 @ 0xbde740] Error opening input: Invalid data found when processing input
-Error opening input file client/public/content/IMG_2524.MOV.
-Error opening input files: Invalid data found when processing input
-
-  Converting: client/public/content/IMG_2753.MOV
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0x1563180] moov atom not found
-client/public/content/IMG_2753.MOV: Invalid data found when processing input
-Error getting resolution for client/public/content/IMG_2753.MOV: Command failed: ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 "client/public/content/IMG_2753.MOV"
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0x1563180] moov atom not found
-client/public/content/IMG_2753.MOV: Invalid data found when processing input
-
-    ✗ Error converting client/public/content/IMG_2753.MOV: Command failed: ffmpeg -i "client/public/content/IMG_2753.MOV"  -c:v libx264 -preset fast -crf 23 -c:a aac -b:a 128k -movflags +faststart "client/public/content/IMG_2753.mp4" -y
-ffmpeg version 6.1.1 Copyright (c) 2000-2023 the FFmpeg developers
-  built with gcc 13.2.0 (GCC)
-  configuration: --disable-static --prefix=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1 --target_os=linux --arch=x86_64 --pkg-config=pkg-config --enable-gpl --enable-version3 --disable-nonfree --disable-static --enable-shared --enable-pic --disable-thumb --disable-small --enable-runtime-cpudetect --disable-gray --enable-swscale-alpha --enable-hardcoded-tables --enable-safe-bitstream-reader --enable-pthreads --disable-w32threads --disable-os2threads --enable-network --enable-pixelutils --datadir=/nix/store/71hcrwn1g6ncki859v14jq18i8fx84sk-ffmpeg-6.1.1-data/share/ffmpeg --enable-ffmpeg --enable-ffplay --enable-ffprobe --bindir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-bin/bin --enable-avcodec --enable-avdevice --enable-avfilter --enable-avformat --enable-avutil --enable-postproc --enable-swresample --enable-swscale --libdir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-lib/lib --incdir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-dev/include --enable-doc --enable-htmlpages --enable-manpages --mandir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-man/share/man --enable-podpages --enable-txtpages --docdir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-doc/share/doc/ffmpeg --enable-alsa --disable-libaom --disable-appkit --disable-libaribcaption --enable-libass --disable-audiotoolbox --disable-avfoundation --disable-avisynth --disable-libbluray --disable-libbs2b --enable-bzlib --disable-libcaca --disable-libcelt --disable-chromaprint --disable-libcodec2 --disable-coreimage --disable-cuda --disable-cuda-llvm --enable-cuvid --enable-libdav1d --disable-libdc1394 --enable-libdrm --disable-libfdk-aac --enable-ffnvcodec --disable-libflite --enable-fontconfig --enable-libfontconfig --enable-libfreetype --disable-frei0r --disable-libfribidi --disable-libgme --enable-gnutls --disable-libgsm --enable-libharfbuzz --enable-iconv --disable-libjack --disable-libjxl --disable-ladspa --enable-lzma --disable-libmfx --disable-libmodplug --enable-libmp3lame --disable-libmysofa --enable-nvdec --enable-nvenc --disable-openal --disable-opencl --disable-libopencore-amrnb --disable-libopencore-amrwb --disable-opengl --disable-libopenh264 --disable-libopenjpeg --disable-libopenmpt --enable-libopus --disable-libplacebo --enable-libpulse --disable-librav1e --disable-librtmp --disable-libsmbclient --enable-sdl2 --disable-libshaderc --enable-libsoxr --enable-libspeex --enable-libsrt --enable-libssh --disable-librsvg --enable-libsvtav1 --disable-libtensorflow --enable-libtheora --enable-libv4l2 --enable-v4l2-m2m --enable-vaapi --enable-vdpau --disable-libvpl --disable-videotoolbox --disable-libvidstab --disable-libvmaf --disable-libvo-amrwbenc --enable-libvorbis --enable-libvpx --enable-vulkan --disable-libwebp --enable-libx264 --enable-libx265 --disable-libxavs --disable-libxcb --disable-libxcb-shape --disable-libxcb-shm --disable-libxcb-xfixes --disable-xlib --disable-libxml2 --enable-libxvid --enable-libzimg --enable-zlib --disable-libzmq --disable-debug --enable-optimizations --disable-extra-warnings --disable-stripping
-  libavutil      58. 29.100 / 58. 29.100
-  libavcodec     60. 31.102 / 60. 31.102
-  libavformat    60. 16.100 / 60. 16.100
-  libavdevice    60.  3.100 / 60.  3.100
-  libavfilter     9. 12.100 /  9. 12.100
-  libswscale      7.  5.100 /  7.  5.100
-  libswresample   4. 12.100 /  4. 12.100
-  libpostproc    57.  3.100 / 57.  3.100
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0x1dcc840] Format mov,mp4,m4a,3gp,3g2,mj2 detected only with low score of 1, misdetection possible!
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0x1dcc840] moov atom not found
-[in#0 @ 0x1dcc740] Error opening input: Invalid data found when processing input
-Error opening input file client/public/content/IMG_2753.MOV.
-Error opening input files: Invalid data found when processing input
-
-  Converting: client/public/content/IMG_4765.MOV
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0x1d95180] moov atom not found
-client/public/content/IMG_4765.MOV: Invalid data found when processing input
-Error getting resolution for client/public/content/IMG_4765.MOV: Command failed: ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 "client/public/content/IMG_4765.MOV"
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0x1d95180] moov atom not found
-client/public/content/IMG_4765.MOV: Invalid data found when processing input
-
-    ✗ Error converting client/public/content/IMG_4765.MOV: Command failed: ffmpeg -i "client/public/content/IMG_4765.MOV"  -c:v libx264 -preset fast -crf 23 -c:a aac -b:a 128k -movflags +faststart "client/public/content/IMG_4765.mp4" -y
-ffmpeg version 6.1.1 Copyright (c) 2000-2023 the FFmpeg developers
-  built with gcc 13.2.0 (GCC)
-  configuration: --disable-static --prefix=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1 --target_os=linux --arch=x86_64 --pkg-config=pkg-config --enable-gpl --enable-version3 --disable-nonfree --disable-static --enable-shared --enable-pic --disable-thumb --disable-small --enable-runtime-cpudetect --disable-gray --enable-swscale-alpha --enable-hardcoded-tables --enable-safe-bitstream-reader --enable-pthreads --disable-w32threads --disable-os2threads --enable-network --enable-pixelutils --datadir=/nix/store/71hcrwn1g6ncki859v14jq18i8fx84sk-ffmpeg-6.1.1-data/share/ffmpeg --enable-ffmpeg --enable-ffplay --enable-ffprobe --bindir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-bin/bin --enable-avcodec --enable-avdevice --enable-avfilter --enable-avformat --enable-avutil --enable-postproc --enable-swresample --enable-swscale --libdir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-lib/lib --incdir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-dev/include --enable-doc --enable-htmlpages --enable-manpages --mandir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-man/share/man --enable-podpages --enable-txtpages --docdir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-doc/share/doc/ffmpeg --enable-alsa --disable-libaom --disable-appkit --disable-libaribcaption --enable-libass --disable-audiotoolbox --disable-avfoundation --disable-avisynth --disable-libbluray --disable-libbs2b --enable-bzlib --disable-libcaca --disable-libcelt --disable-chromaprint --disable-libcodec2 --disable-coreimage --disable-cuda --disable-cuda-llvm --enable-cuvid --enable-libdav1d --disable-libdc1394 --enable-libdrm --disable-libfdk-aac --enable-ffnvcodec --disable-libflite --enable-fontconfig --enable-libfontconfig --enable-libfreetype --disable-frei0r --disable-libfribidi --disable-libgme --enable-gnutls --disable-libgsm --enable-libharfbuzz --enable-iconv --disable-libjack --disable-libjxl --disable-ladspa --enable-lzma --disable-libmfx --disable-libmodplug --enable-libmp3lame --disable-libmysofa --enable-nvdec --enable-nvenc --disable-openal --disable-opencl --disable-libopencore-amrnb --disable-libopencore-amrwb --disable-opengl --disable-libopenh264 --disable-libopenjpeg --disable-libopenmpt --enable-libopus --disable-libplacebo --enable-libpulse --disable-librav1e --disable-librtmp --disable-libsmbclient --enable-sdl2 --disable-libshaderc --enable-libsoxr --enable-libspeex --enable-libsrt --enable-libssh --disable-librsvg --enable-libsvtav1 --disable-libtensorflow --enable-libtheora --enable-libv4l2 --enable-v4l2-m2m --enable-vaapi --enable-vdpau --disable-libvpl --disable-videotoolbox --disable-libvidstab --disable-libvmaf --disable-libvo-amrwbenc --enable-libvorbis --enable-libvpx --enable-vulkan --disable-libwebp --enable-libx264 --enable-libx265 --disable-libxavs --disable-libxcb --disable-libxcb-shape --disable-libxcb-shm --disable-libxcb-xfixes --disable-xlib --disable-libxml2 --enable-libxvid --enable-libzimg --enable-zlib --disable-libzmq --disable-debug --enable-optimizations --disable-extra-warnings --disable-stripping
-  libavutil      58. 29.100 / 58. 29.100
-  libavcodec     60. 31.102 / 60. 31.102
-  libavformat    60. 16.100 / 60. 16.100
-  libavdevice    60.  3.100 / 60.  3.100
-  libavfilter     9. 12.100 /  9. 12.100
-  libswscale      7.  5.100 /  7.  5.100
-  libswresample   4. 12.100 /  4. 12.100
-  libpostproc    57.  3.100 / 57.  3.100
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0x1431840] Format mov,mp4,m4a,3gp,3g2,mj2 detected only with low score of 1, misdetection possible!
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0x1431840] moov atom not found
-[in#0 @ 0x1431740] Error opening input: Invalid data found when processing input
-Error opening input file client/public/content/IMG_4765.MOV.
-Error opening input files: Invalid data found when processing input
-
-  Converting: client/public/content/IMG_7149.MOV
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0x1568180] moov atom not found
-client/public/content/IMG_7149.MOV: Invalid data found when processing input
-Error getting resolution for client/public/content/IMG_7149.MOV: Command failed: ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 "client/public/content/IMG_7149.MOV"
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0x1568180] moov atom not found
-client/public/content/IMG_7149.MOV: Invalid data found when processing input
-
-    ✗ Error converting client/public/content/IMG_7149.MOV: Command failed: ffmpeg -i "client/public/content/IMG_7149.MOV"  -c:v libx264 -preset fast -crf 23 -c:a aac -b:a 128k -movflags +faststart "client/public/content/IMG_7149.mp4" -y
-ffmpeg version 6.1.1 Copyright (c) 2000-2023 the FFmpeg developers
-  built with gcc 13.2.0 (GCC)
-  configuration: --disable-static --prefix=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1 --target_os=linux --arch=x86_64 --pkg-config=pkg-config --enable-gpl --enable-version3 --disable-nonfree --disable-static --enable-shared --enable-pic --disable-thumb --disable-small --enable-runtime-cpudetect --disable-gray --enable-swscale-alpha --enable-hardcoded-tables --enable-safe-bitstream-reader --enable-pthreads --disable-w32threads --disable-os2threads --enable-network --enable-pixelutils --datadir=/nix/store/71hcrwn1g6ncki859v14jq18i8fx84sk-ffmpeg-6.1.1-data/share/ffmpeg --enable-ffmpeg --enable-ffplay --enable-ffprobe --bindir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-bin/bin --enable-avcodec --enable-avdevice --enable-avfilter --enable-avformat --enable-avutil --enable-postproc --enable-swresample --enable-swscale --libdir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-lib/lib --incdir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-dev/include --enable-doc --enable-htmlpages --enable-manpages --mandir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-man/share/man --enable-podpages --enable-txtpages --docdir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-doc/share/doc/ffmpeg --enable-alsa --disable-libaom --disable-appkit --disable-libaribcaption --enable-libass --disable-audiotoolbox --disable-avfoundation --disable-avisynth --disable-libbluray --disable-libbs2b --enable-bzlib --disable-libcaca --disable-libcelt --disable-chromaprint --disable-libcodec2 --disable-coreimage --disable-cuda --disable-cuda-llvm --enable-cuvid --enable-libdav1d --disable-libdc1394 --enable-libdrm --disable-libfdk-aac --enable-ffnvcodec --disable-libflite --enable-fontconfig --enable-libfontconfig --enable-libfreetype --disable-frei0r --disable-libfribidi --disable-libgme --enable-gnutls --disable-libgsm --enable-libharfbuzz --enable-iconv --disable-libjack --disable-libjxl --disable-ladspa --enable-lzma --disable-libmfx --disable-libmodplug --enable-libmp3lame --disable-libmysofa --enable-nvdec --enable-nvenc --disable-openal --disable-opencl --disable-libopencore-amrnb --disable-libopencore-amrwb --disable-opengl --disable-libopenh264 --disable-libopenjpeg --disable-libopenmpt --enable-libopus --disable-libplacebo --enable-libpulse --disable-librav1e --disable-librtmp --disable-libsmbclient --enable-sdl2 --disable-libshaderc --enable-libsoxr --enable-libspeex --enable-libsrt --enable-libssh --disable-librsvg --enable-libsvtav1 --disable-libtensorflow --enable-libtheora --enable-libv4l2 --enable-v4l2-m2m --enable-vaapi --enable-vdpau --disable-libvpl --disable-videotoolbox --disable-libvidstab --disable-libvmaf --disable-libvo-amrwbenc --enable-libvorbis --enable-libvpx --enable-vulkan --disable-libwebp --enable-libx264 --enable-libx265 --disable-libxavs --disable-libxcb --disable-libxcb-shape --disable-libxcb-shm --disable-libxcb-xfixes --disable-xlib --disable-libxml2 --enable-libxvid --enable-libzimg --enable-zlib --disable-libzmq --disable-debug --enable-optimizations --disable-extra-warnings --disable-stripping
-  libavutil      58. 29.100 / 58. 29.100
-  libavcodec     60. 31.102 / 60. 31.102
-  libavformat    60. 16.100 / 60. 16.100
-  libavdevice    60.  3.100 / 60.  3.100
-  libavfilter     9. 12.100 /  9. 12.100
-  libswscale      7.  5.100 /  7.  5.100
-  libswresample   4. 12.100 /  4. 12.100
-  libpostproc    57.  3.100 / 57.  3.100
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0x1fd8840] Format mov,mp4,m4a,3gp,3g2,mj2 detected only with low score of 1, misdetection possible!
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0x1fd8840] moov atom not found
-[in#0 @ 0x1fd8740] Error opening input: Invalid data found when processing input
-Error opening input file client/public/content/IMG_7149.MOV.
-Error opening input files: Invalid data found when processing input
-
-  Converting: client/public/content/IMG_7236.MOV
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0x1375180] moov atom not found
-client/public/content/IMG_7236.MOV: Invalid data found when processing input
-Error getting resolution for client/public/content/IMG_7236.MOV: Command failed: ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 "client/public/content/IMG_7236.MOV"
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0x1375180] moov atom not found
-client/public/content/IMG_7236.MOV: Invalid data found when processing input
-
-    ✗ Error converting client/public/content/IMG_7236.MOV: Command failed: ffmpeg -i "client/public/content/IMG_7236.MOV"  -c:v libx264 -preset fast -crf 23 -c:a aac -b:a 128k -movflags +faststart "client/public/content/IMG_7236.mp4" -y
-ffmpeg version 6.1.1 Copyright (c) 2000-2023 the FFmpeg developers
-  built with gcc 13.2.0 (GCC)
-  configuration: --disable-static --prefix=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1 --target_os=linux --arch=x86_64 --pkg-config=pkg-config --enable-gpl --enable-version3 --disable-nonfree --disable-static --enable-shared --enable-pic --disable-thumb --disable-small --enable-runtime-cpudetect --disable-gray --enable-swscale-alpha --enable-hardcoded-tables --enable-safe-bitstream-reader --enable-pthreads --disable-w32threads --disable-os2threads --enable-network --enable-pixelutils --datadir=/nix/store/71hcrwn1g6ncki859v14jq18i8fx84sk-ffmpeg-6.1.1-data/share/ffmpeg --enable-ffmpeg --enable-ffplay --enable-ffprobe --bindir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-bin/bin --enable-avcodec --enable-avdevice --enable-avfilter --enable-avformat --enable-avutil --enable-postproc --enable-swresample --enable-swscale --libdir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-lib/lib --incdir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-dev/include --enable-doc --enable-htmlpages --enable-manpages --mandir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-man/share/man --enable-podpages --enable-txtpages --docdir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-doc/share/doc/ffmpeg --enable-alsa --disable-libaom --disable-appkit --disable-libaribcaption --enable-libass --disable-audiotoolbox --disable-avfoundation --disable-avisynth --disable-libbluray --disable-libbs2b --enable-bzlib --disable-libcaca --disable-libcelt --disable-chromaprint --disable-libcodec2 --disable-coreimage --disable-cuda --disable-cuda-llvm --enable-cuvid --enable-libdav1d --disable-libdc1394 --enable-libdrm --disable-libfdk-aac --enable-ffnvcodec --disable-libflite --enable-fontconfig --enable-libfontconfig --enable-libfreetype --disable-frei0r --disable-libfribidi --disable-libgme --enable-gnutls --disable-libgsm --enable-libharfbuzz --enable-iconv --disable-libjack --disable-libjxl --disable-ladspa --enable-lzma --disable-libmfx --disable-libmodplug --enable-libmp3lame --disable-libmysofa --enable-nvdec --enable-nvenc --disable-openal --disable-opencl --disable-libopencore-amrnb --disable-libopencore-amrwb --disable-opengl --disable-libopenh264 --disable-libopenjpeg --disable-libopenmpt --enable-libopus --disable-libplacebo --enable-libpulse --disable-librav1e --disable-librtmp --disable-libsmbclient --enable-sdl2 --disable-libshaderc --enable-libsoxr --enable-libspeex --enable-libsrt --enable-libssh --disable-librsvg --enable-libsvtav1 --disable-libtensorflow --enable-libtheora --enable-libv4l2 --enable-v4l2-m2m --enable-vaapi --enable-vdpau --disable-libvpl --disable-videotoolbox --disable-libvidstab --disable-libvmaf --disable-libvo-amrwbenc --enable-libvorbis --enable-libvpx --enable-vulkan --disable-libwebp --enable-libx264 --enable-libx265 --disable-libxavs --disable-libxcb --disable-libxcb-shape --disable-libxcb-shm --disable-libxcb-xfixes --disable-xlib --disable-libxml2 --enable-libxvid --enable-libzimg --enable-zlib --disable-libzmq --disable-debug --enable-optimizations --disable-extra-warnings --disable-stripping
-  libavutil      58. 29.100 / 58. 29.100
-  libavcodec     60. 31.102 / 60. 31.102
-  libavformat    60. 16.100 / 60. 16.100
-  libavdevice    60.  3.100 / 60.  3.100
-  libavfilter     9. 12.100 /  9. 12.100
-  libswscale      7.  5.100 /  7.  5.100
-  libswresample   4. 12.100 /  4. 12.100
-  libpostproc    57.  3.100 / 57.  3.100
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0x8a7840] Format mov,mp4,m4a,3gp,3g2,mj2 detected only with low score of 1, misdetection possible!
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0x8a7840] moov atom not found
-[in#0 @ 0x8a7740] Error opening input: Invalid data found when processing input
-Error opening input file client/public/content/IMG_7236.MOV.
-Error opening input files: Invalid data found when processing input
-
-  Converting: client/public/content/IMG_7238.MOV
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0xc32180] moov atom not found
-client/public/content/IMG_7238.MOV: Invalid data found when processing input
-Error getting resolution for client/public/content/IMG_7238.MOV: Command failed: ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 "client/public/content/IMG_7238.MOV"
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0xc32180] moov atom not found
-client/public/content/IMG_7238.MOV: Invalid data found when processing input
-
-    ✗ Error converting client/public/content/IMG_7238.MOV: Command failed: ffmpeg -i "client/public/content/IMG_7238.MOV"  -c:v libx264 -preset fast -crf 23 -c:a aac -b:a 128k -movflags +faststart "client/public/content/IMG_7238.mp4" -y
-ffmpeg version 6.1.1 Copyright (c) 2000-2023 the FFmpeg developers
-  built with gcc 13.2.0 (GCC)
-  configuration: --disable-static --prefix=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1 --target_os=linux --arch=x86_64 --pkg-config=pkg-config --enable-gpl --enable-version3 --disable-nonfree --disable-static --enable-shared --enable-pic --disable-thumb --disable-small --enable-runtime-cpudetect --disable-gray --enable-swscale-alpha --enable-hardcoded-tables --enable-safe-bitstream-reader --enable-pthreads --disable-w32threads --disable-os2threads --enable-network --enable-pixelutils --datadir=/nix/store/71hcrwn1g6ncki859v14jq18i8fx84sk-ffmpeg-6.1.1-data/share/ffmpeg --enable-ffmpeg --enable-ffplay --enable-ffprobe --bindir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-bin/bin --enable-avcodec --enable-avdevice --enable-avfilter --enable-avformat --enable-avutil --enable-postproc --enable-swresample --enable-swscale --libdir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-lib/lib --incdir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-dev/include --enable-doc --enable-htmlpages --enable-manpages --mandir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-man/share/man --enable-podpages --enable-txtpages --docdir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-doc/share/doc/ffmpeg --enable-alsa --disable-libaom --disable-appkit --disable-libaribcaption --enable-libass --disable-audiotoolbox --disable-avfoundation --disable-avisynth --disable-libbluray --disable-libbs2b --enable-bzlib --disable-libcaca --disable-libcelt --disable-chromaprint --disable-libcodec2 --disable-coreimage --disable-cuda --disable-cuda-llvm --enable-cuvid --enable-libdav1d --disable-libdc1394 --enable-libdrm --disable-libfdk-aac --enable-ffnvcodec --disable-libflite --enable-fontconfig --enable-libfontconfig --enable-libfreetype --disable-frei0r --disable-libfribidi --disable-libgme --enable-gnutls --disable-libgsm --enable-libharfbuzz --enable-iconv --disable-libjack --disable-libjxl --disable-ladspa --enable-lzma --disable-libmfx --disable-libmodplug --enable-libmp3lame --disable-libmysofa --enable-nvdec --enable-nvenc --disable-openal --disable-opencl --disable-libopencore-amrnb --disable-libopencore-amrwb --disable-opengl --disable-libopenh264 --disable-libopenjpeg --disable-libopenmpt --enable-libopus --disable-libplacebo --enable-libpulse --disable-librav1e --disable-librtmp --disable-libsmbclient --enable-sdl2 --disable-libshaderc --enable-libsoxr --enable-libspeex --enable-libsrt --enable-libssh --disable-librsvg --enable-libsvtav1 --disable-libtensorflow --enable-libtheora --enable-libv4l2 --enable-v4l2-m2m --enable-vaapi --enable-vdpau --disable-libvpl --disable-videotoolbox --disable-libvidstab --disable-libvmaf --disable-libvo-amrwbenc --enable-libvorbis --enable-libvpx --enable-vulkan --disable-libwebp --enable-libx264 --enable-libx265 --disable-libxavs --disable-libxcb --disable-libxcb-shape --disable-libxcb-shm --disable-libxcb-xfixes --disable-xlib --disable-libxml2 --enable-libxvid --enable-libzimg --enable-zlib --disable-libzmq --disable-debug --enable-optimizations --disable-extra-warnings --disable-stripping
-  libavutil      58. 29.100 / 58. 29.100
-  libavcodec     60. 31.102 / 60. 31.102
-  libavformat    60. 16.100 / 60. 16.100
-  libavdevice    60.  3.100 / 60.  3.100
-  libavfilter     9. 12.100 /  9. 12.100
-  libswscale      7.  5.100 /  7.  5.100
-  libswresample   4. 12.100 /  4. 12.100
-  libpostproc    57.  3.100 / 57.  3.100
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0x1b87840] Format mov,mp4,m4a,3gp,3g2,mj2 detected only with low score of 1, misdetection possible!
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0x1b87840] moov atom not found
-[in#0 @ 0x1b87740] Error opening input: Invalid data found when processing input
-Error opening input file client/public/content/IMG_7238.MOV.
-Error opening input files: Invalid data found when processing input
-
-  Converting: client/public/content/IMG_7268.MOV
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0x6d7180] moov atom not found
-client/public/content/IMG_7268.MOV: Invalid data found when processing input
-Error getting resolution for client/public/content/IMG_7268.MOV: Command failed: ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 "client/public/content/IMG_7268.MOV"
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0x6d7180] moov atom not found
-client/public/content/IMG_7268.MOV: Invalid data found when processing input
-
-    ✗ Error converting client/public/content/IMG_7268.MOV: Command failed: ffmpeg -i "client/public/content/IMG_7268.MOV"  -c:v libx264 -preset fast -crf 23 -c:a aac -b:a 128k -movflags +faststart "client/public/content/IMG_7268.mp4" -y
-ffmpeg version 6.1.1 Copyright (c) 2000-2023 the FFmpeg developers
-  built with gcc 13.2.0 (GCC)
-  configuration: --disable-static --prefix=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1 --target_os=linux --arch=x86_64 --pkg-config=pkg-config --enable-gpl --enable-version3 --disable-nonfree --disable-static --enable-shared --enable-pic --disable-thumb --disable-small --enable-runtime-cpudetect --disable-gray --enable-swscale-alpha --enable-hardcoded-tables --enable-safe-bitstream-reader --enable-pthreads --disable-w32threads --disable-os2threads --enable-network --enable-pixelutils --datadir=/nix/store/71hcrwn1g6ncki859v14jq18i8fx84sk-ffmpeg-6.1.1-data/share/ffmpeg --enable-ffmpeg --enable-ffplay --enable-ffprobe --bindir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-bin/bin --enable-avcodec --enable-avdevice --enable-avfilter --enable-avformat --enable-avutil --enable-postproc --enable-swresample --enable-swscale --libdir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-lib/lib --incdir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-dev/include --enable-doc --enable-htmlpages --enable-manpages --mandir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-man/share/man --enable-podpages --enable-txtpages --docdir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-doc/share/doc/ffmpeg --enable-alsa --disable-libaom --disable-appkit --disable-libaribcaption --enable-libass --disable-audiotoolbox --disable-avfoundation --disable-avisynth --disable-libbluray --disable-libbs2b --enable-bzlib --disable-libcaca --disable-libcelt --disable-chromaprint --disable-libcodec2 --disable-coreimage --disable-cuda --disable-cuda-llvm --enable-cuvid --enable-libdav1d --disable-libdc1394 --enable-libdrm --disable-libfdk-aac --enable-ffnvcodec --disable-libflite --enable-fontconfig --enable-libfontconfig --enable-libfreetype --disable-frei0r --disable-libfribidi --disable-libgme --enable-gnutls --disable-libgsm --enable-libharfbuzz --enable-iconv --disable-libjack --disable-libjxl --disable-ladspa --enable-lzma --disable-libmfx --disable-libmodplug --enable-libmp3lame --disable-libmysofa --enable-nvdec --enable-nvenc --disable-openal --disable-opencl --disable-libopencore-amrnb --disable-libopencore-amrwb --disable-opengl --disable-libopenh264 --disable-libopenjpeg --disable-libopenmpt --enable-libopus --disable-libplacebo --enable-libpulse --disable-librav1e --disable-librtmp --disable-libsmbclient --enable-sdl2 --disable-libshaderc --enable-libsoxr --enable-libspeex --enable-libsrt --enable-libssh --disable-librsvg --enable-libsvtav1 --disable-libtensorflow --enable-libtheora --enable-libv4l2 --enable-v4l2-m2m --enable-vaapi --enable-vdpau --disable-libvpl --disable-videotoolbox --disable-libvidstab --disable-libvmaf --disable-libvo-amrwbenc --enable-libvorbis --enable-libvpx --enable-vulkan --disable-libwebp --enable-libx264 --enable-libx265 --disable-libxavs --disable-libxcb --disable-libxcb-shape --disable-libxcb-shm --disable-libxcb-xfixes --disable-xlib --disable-libxml2 --enable-libxvid --enable-libzimg --enable-zlib --disable-libzmq --disable-debug --enable-optimizations --disable-extra-warnings --disable-stripping
-  libavutil      58. 29.100 / 58. 29.100
-  libavcodec     60. 31.102 / 60. 31.102
-  libavformat    60. 16.100 / 60. 16.100
-  libavdevice    60.  3.100 / 60.  3.100
-  libavfilter     9. 12.100 /  9. 12.100
-  libswscale      7.  5.100 /  7.  5.100
-  libswresample   4. 12.100 /  4. 12.100
-  libpostproc    57.  3.100 / 57.  3.100
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0xb10840] Format mov,mp4,m4a,3gp,3g2,mj2 detected only with low score of 1, misdetection possible!
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0xb10840] moov atom not found
-[in#0 @ 0xb10740] Error opening input: Invalid data found when processing input
-Error opening input file client/public/content/IMG_7268.MOV.
-Error opening input files: Invalid data found when processing input
-
-  Converting: client/public/content/IMG_8903.MOV
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0x87a180] moov atom not found
-client/public/content/IMG_8903.MOV: Invalid data found when processing input
-Error getting resolution for client/public/content/IMG_8903.MOV: Command failed: ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 "client/public/content/IMG_8903.MOV"
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0x87a180] moov atom not found
-client/public/content/IMG_8903.MOV: Invalid data found when processing input
-
-    ✗ Error converting client/public/content/IMG_8903.MOV: Command failed: ffmpeg -i "client/public/content/IMG_8903.MOV"  -c:v libx264 -preset fast -crf 23 -c:a aac -b:a 128k -movflags +faststart "client/public/content/IMG_8903.mp4" -y
-ffmpeg version 6.1.1 Copyright (c) 2000-2023 the FFmpeg developers
-  built with gcc 13.2.0 (GCC)
-  configuration: --disable-static --prefix=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1 --target_os=linux --arch=x86_64 --pkg-config=pkg-config --enable-gpl --enable-version3 --disable-nonfree --disable-static --enable-shared --enable-pic --disable-thumb --disable-small --enable-runtime-cpudetect --disable-gray --enable-swscale-alpha --enable-hardcoded-tables --enable-safe-bitstream-reader --enable-pthreads --disable-w32threads --disable-os2threads --enable-network --enable-pixelutils --datadir=/nix/store/71hcrwn1g6ncki859v14jq18i8fx84sk-ffmpeg-6.1.1-data/share/ffmpeg --enable-ffmpeg --enable-ffplay --enable-ffprobe --bindir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-bin/bin --enable-avcodec --enable-avdevice --enable-avfilter --enable-avformat --enable-avutil --enable-postproc --enable-swresample --enable-swscale --libdir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-lib/lib --incdir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-dev/include --enable-doc --enable-htmlpages --enable-manpages --mandir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-man/share/man --enable-podpages --enable-txtpages --docdir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-doc/share/doc/ffmpeg --enable-alsa --disable-libaom --disable-appkit --disable-libaribcaption --enable-libass --disable-audiotoolbox --disable-avfoundation --disable-avisynth --disable-libbluray --disable-libbs2b --enable-bzlib --disable-libcaca --disable-libcelt --disable-chromaprint --disable-libcodec2 --disable-coreimage --disable-cuda --disable-cuda-llvm --enable-cuvid --enable-libdav1d --disable-libdc1394 --enable-libdrm --disable-libfdk-aac --enable-ffnvcodec --disable-libflite --enable-fontconfig --enable-libfontconfig --enable-libfreetype --disable-frei0r --disable-libfribidi --disable-libgme --enable-gnutls --disable-libgsm --enable-libharfbuzz --enable-iconv --disable-libjack --disable-libjxl --disable-ladspa --enable-lzma --disable-libmfx --disable-libmodplug --enable-libmp3lame --disable-libmysofa --enable-nvdec --enable-nvenc --disable-openal --disable-opencl --disable-libopencore-amrnb --disable-libopencore-amrwb --disable-opengl --disable-libopenh264 --disable-libopenjpeg --disable-libopenmpt --enable-libopus --disable-libplacebo --enable-libpulse --disable-librav1e --disable-librtmp --disable-libsmbclient --enable-sdl2 --disable-libshaderc --enable-libsoxr --enable-libspeex --enable-libsrt --enable-libssh --disable-librsvg --enable-libsvtav1 --disable-libtensorflow --enable-libtheora --enable-libv4l2 --enable-v4l2-m2m --enable-vaapi --enable-vdpau --disable-libvpl --disable-videotoolbox --disable-libvidstab --disable-libvmaf --disable-libvo-amrwbenc --enable-libvorbis --enable-libvpx --enable-vulkan --disable-libwebp --enable-libx264 --enable-libx265 --disable-libxavs --disable-libxcb --disable-libxcb-shape --disable-libxcb-shm --disable-libxcb-xfixes --disable-xlib --disable-libxml2 --enable-libxvid --enable-libzimg --enable-zlib --disable-libzmq --disable-debug --enable-optimizations --disable-extra-warnings --disable-stripping
-  libavutil      58. 29.100 / 58. 29.100
-  libavcodec     60. 31.102 / 60. 31.102
-  libavformat    60. 16.100 / 60. 16.100
-  libavdevice    60.  3.100 / 60.  3.100
-  libavfilter     9. 12.100 /  9. 12.100
-  libswscale      7.  5.100 /  7.  5.100
-  libswresample   4. 12.100 /  4. 12.100
-  libpostproc    57.  3.100 / 57.  3.100
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0x789840] Format mov,mp4,m4a,3gp,3g2,mj2 detected only with low score of 1, misdetection possible!
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0x789840] moov atom not found
-[in#0 @ 0x789740] Error opening input: Invalid data found when processing input
-Error opening input file client/public/content/IMG_8903.MOV.
-Error opening input files: Invalid data found when processing input
-
-  Converting: client/public/content/IMG_9329.MOV
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0x1d31180] moov atom not found
-client/public/content/IMG_9329.MOV: Invalid data found when processing input
-Error getting resolution for client/public/content/IMG_9329.MOV: Command failed: ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 "client/public/content/IMG_9329.MOV"
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0x1d31180] moov atom not found
-client/public/content/IMG_9329.MOV: Invalid data found when processing input
-
-    ✗ Error converting client/public/content/IMG_9329.MOV: Command failed: ffmpeg -i "client/public/content/IMG_9329.MOV"  -c:v libx264 -preset fast -crf 23 -c:a aac -b:a 128k -movflags +faststart "client/public/content/IMG_9329.mp4" -y
-ffmpeg version 6.1.1 Copyright (c) 2000-2023 the FFmpeg developers
-  built with gcc 13.2.0 (GCC)
-  configuration: --disable-static --prefix=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1 --target_os=linux --arch=x86_64 --pkg-config=pkg-config --enable-gpl --enable-version3 --disable-nonfree --disable-static --enable-shared --enable-pic --disable-thumb --disable-small --enable-runtime-cpudetect --disable-gray --enable-swscale-alpha --enable-hardcoded-tables --enable-safe-bitstream-reader --enable-pthreads --disable-w32threads --disable-os2threads --enable-network --enable-pixelutils --datadir=/nix/store/71hcrwn1g6ncki859v14jq18i8fx84sk-ffmpeg-6.1.1-data/share/ffmpeg --enable-ffmpeg --enable-ffplay --enable-ffprobe --bindir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-bin/bin --enable-avcodec --enable-avdevice --enable-avfilter --enable-avformat --enable-avutil --enable-postproc --enable-swresample --enable-swscale --libdir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-lib/lib --incdir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-dev/include --enable-doc --enable-htmlpages --enable-manpages --mandir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-man/share/man --enable-podpages --enable-txtpages --docdir=/nix/store/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-ffmpeg-6.1.1-doc/share/doc/ffmpeg --enable-alsa --disable-libaom --disable-appkit --disable-libaribcaption --enable-libass --disable-audiotoolbox --disable-avfoundation --disable-avisynth --disable-libbluray --disable-libbs2b --enable-bzlib --disable-libcaca --disable-libcelt --disable-chromaprint --disable-libcodec2 --disable-coreimage --disable-cuda --disable-cuda-llvm --enable-cuvid --enable-libdav1d --disable-libdc1394 --enable-libdrm --disable-libfdk-aac --enable-ffnvcodec --disable-libflite --enable-fontconfig --enable-libfontconfig --enable-libfreetype --disable-frei0r --disable-libfribidi --disable-libgme --enable-gnutls --disable-libgsm --enable-libharfbuzz --enable-iconv --disable-libjack --disable-libjxl --disable-ladspa --enable-lzma --disable-libmfx --disable-libmodplug --enable-libmp3lame --disable-libmysofa --enable-nvdec --enable-nvenc --disable-openal --disable-opencl --disable-libopencore-amrnb --disable-libopencore-amrwb --disable-opengl --disable-libopenh264 --disable-libopenjpeg --disable-libopenmpt --enable-libopus --disable-libplacebo --enable-libpulse --disable-librav1e --disable-librtmp --disable-libsmbclient --enable-sdl2 --disable-libshaderc --enable-libsoxr --enable-libspeex --enable-libsrt --enable-libssh --disable-librsvg --enable-libsvtav1 --disable-libtensorflow --enable-libtheora --enable-libv4l2 --enable-v4l2-m2m --enable-vaapi --enable-vdpau --disable-libvpl --disable-videotoolbox --disable-libvidstab --disable-libvmaf --disable-libvo-amrwbenc --enable-libvorbis --enable-libvpx --enable-vulkan --disable-libwebp --enable-libx264 --enable-libx265 --disable-libxavs --disable-libxcb --disable-libxcb-shape --disable-libxcb-shm --disable-libxcb-xfixes --disable-xlib --disable-libxml2 --enable-libxvid --enable-libzimg --enable-zlib --disable-libzmq --disable-debug --enable-optimizations --disable-extra-warnings --disable-stripping
-  libavutil      58. 29.100 / 58. 29.100
-  libavcodec     60. 31.102 / 60. 31.102
-  libavformat    60. 16.100 / 60. 16.100
-  libavdevice    60.  3.100 / 60.  3.100
-  libavfilter     9. 12.100 /  9. 12.100
-  libswscale      7.  5.100 /  7.  5.100
-  libswresample   4. 12.100 /  4. 12.100
-  libpostproc    57.  3.100 / 57.  3.100
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0x13d8840] Format mov,mp4,m4a,3gp,3g2,mj2 detected only with low score of 1, misdetection possible!
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0x13d8840] moov atom not found
-[in#0 @ 0x13d8740] Error opening input: Invalid data found when processing input
-Error opening input file client/public/content/IMG_9329.MOV.
-Error opening input files: Invalid data found when processing input
-
+  ✓ IMG_0584.mp4 already exists, skipping conversion
+  ✓ IMG_2524.mp4 already exists, skipping conversion
+  ✓ IMG_2753.mp4 already exists, skipping conversion
+  ✓ IMG_4765.mp4 already exists, skipping conversion
+  ✓ IMG_7149.mp4 already exists, skipping conversion
+  ✓ IMG_7236.mp4 already exists, skipping conversion
+  ✓ IMG_7238.mp4 already exists, skipping conversion
+  ✓ IMG_7268.mp4 already exists, skipping conversion
+  ✓ IMG_8903.mp4 already exists, skipping conversion
+  ✓ IMG_9329.mp4 already exists, skipping conversion
 
 ==================================================
 
 📝 Updating media-list.json...
 
-
-No conversions to update in media-list.json
+  Updated: IMG_0584.MOV → IMG_0584.mp4
+  Updated: IMG_2524.MOV → IMG_2524.mp4
+  Updated: IMG_2753.MOV → IMG_2753.mp4
+  Updated: IMG_4765.MOV → IMG_4765.mp4
+  Updated: IMG_7149.MOV → IMG_7149.mp4
+  Updated: IMG_7236.MOV → IMG_7236.mp4
+  Updated: IMG_7238.MOV → IMG_7238.mp4
+  Updated: IMG_7268.MOV → IMG_7268.mp4
+  Updated: IMG_8903.MOV → IMG_8903.mp4
+  Updated: IMG_9329.MOV → IMG_9329.mp4
+✓ Updated client/public/content/media-list.json
 
 🗑️  Cleaning up old .mov files...
 
+  ✓ Deleted: IMG_0584.MOV
+  ✓ Deleted: IMG_2524.MOV
+  ✓ Deleted: IMG_2753.MOV
+  ✓ Deleted: IMG_4765.MOV
+  ✓ Deleted: IMG_7149.MOV
+  ✓ Deleted: IMG_7236.MOV
+  ✓ Deleted: IMG_7238.MOV
+  ✓ Deleted: IMG_7268.MOV
+  ✓ Deleted: IMG_8903.MOV
+  ✓ Deleted: IMG_9329.MOV
 
 ==================================================
 
 ✅ Video conversion complete!
+
+Summary:
+  - Converted: 10 video(s)
+  - Format: MP4 (H.264 + AAC)
+  - Max resolution: 720p
+  - Optimized for web streaming
 
