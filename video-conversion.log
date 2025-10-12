@@ -1,4 +1,121 @@
-=== Video Conversion Script ===
-Converting videos to MP4 (H.264/AAC) at 720p max
 
-[0;31m✗ Video directory not found: client/public/content/videos[0m
+🎬 Video Conversion Script
+
+==================================================
+✓ FFmpeg is installed
+
+Found 98 .mov file(s) to convert:
+
+  ⚠️  Skipping mentalbiriyani - 101 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 102 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 103 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 106 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 110 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 115 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 116 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 117 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 120 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 172 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 177 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 178 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 179 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 27 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 298 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 299 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 300 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 301 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 302 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 303 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 304 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 305 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 306 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 308 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 309 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 312 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 313 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 314 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 315 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 316 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 318 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 319 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 320 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 321 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 323 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 331 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 332 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 333 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 334 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 335 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 336 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 337 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 338 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 339 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 340 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 341 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 343 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 344 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 345 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 346 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 347 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 348 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 352 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 353 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 354 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 355 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 356 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 357 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 358 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 359 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 36 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 360 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 43 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 44 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 45 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 46 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 49 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 50 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 54 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 57 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 62 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 65 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 66 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 67 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 68 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 69 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 71 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 72 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 73 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 75 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 77 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 78 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 79 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 80 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 81 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 82 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 83 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 84 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 86 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 89 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 90 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 91 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 92 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 94 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 95 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 96 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 97 of 360.mov (file not found)
+  ⚠️  Skipping mentalbiriyani - 98 of 360.mov (file not found)
+
+==================================================
+
+📝 Updating media-list.json...
+
+
+No conversions to update in media-list.json
+
+🗑️  Cleaning up old .mov files...
+
+
+==================================================
+
+✅ Video conversion complete!
+
