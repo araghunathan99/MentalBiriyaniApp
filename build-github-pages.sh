@@ -131,92 +131,19 @@ if [ "$AUTO_DEPLOY" = true ]; then
   echo "🚀 Step 12/11: Deploying to GitHub Pages..."
   echo ""
   
-  cd dist/public
-  
-  # Check if git repo exists
-  if [ ! -d ".git" ]; then
-    echo "Initializing git repository..."
-    git init
-    git branch -M main
-  fi
-  
-  # Get GitHub repo URL from environment variable or use default
-  if [ -z "$GITHUB_PAGES_REPO" ]; then
-    # Use default repository
-    GITHUB_PAGES_REPO="https://github.com/araghunathan99/MentalBiriyani.git"
-    echo ""
-    echo "📝 Using default GitHub repository: $GITHUB_PAGES_REPO"
-    echo "   (Set GITHUB_PAGES_REPO environment variable to override)"
-    echo ""
-  fi
-  
-  # Check if remote exists
-  if git remote | grep -q "origin"; then
-    # Update existing remote
-    git remote set-url origin "$GITHUB_PAGES_REPO"
-    echo "Updated remote origin to: $GITHUB_PAGES_REPO"
-  else
-    # Add new remote
-    git remote add origin "$GITHUB_PAGES_REPO"
-    echo "Added remote origin: $GITHUB_PAGES_REPO"
-  fi
-  
-  # Stage all files
-  echo ""
-  echo "Staging files..."
-  git add -A
-  
-  # Create commit with timestamp
-  TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
-  echo "Creating commit..."
-  git commit -m "Deploy to GitHub Pages - $TIMESTAMP" || echo "No changes to commit"
-  
-  # Push to GitHub
-  echo ""
-  echo "Pushing to GitHub..."
-  if git push -f origin main; then
-    echo ""
-    echo "✅ Successfully deployed to GitHub Pages!"
-    echo ""
-    echo "🌐 Your site will be live at:"
-    echo "   https://YOUR-USERNAME.github.io/MentalBiriyani/"
-    echo ""
-    echo "⏱️  Note: It may take 1-2 minutes for changes to appear"
-    echo ""
-    echo "🔧 Don't forget to enable GitHub Pages in repository settings:"
-    echo "   Settings → Pages → Source: main branch"
-    echo ""
-  else
-    echo ""
-    echo "❌ Push failed. Please check:"
-    echo "   - Repository URL is correct"
-    echo "   - You have push access to the repository"
-    echo "   - GitHub credentials are configured"
-    echo ""
-    echo "To retry deployment:"
-    echo "  cd dist/public"
-    echo "  git push -f origin main"
-    echo ""
-    exit 1
-  fi
-  
-  cd ../..
+  # Use the deployment script
+  bash scripts/deploy-github-pages.sh
 else
   echo "📋 Build complete - deployment skipped"
   echo ""
   echo "To deploy to GitHub Pages:"
+  echo "  bash scripts/deploy-github-pages.sh"
+  echo ""
+  echo "Or run full build with deployment:"
   echo "  ./build-github-pages.sh --deploy"
   echo ""
-  echo "Or set GITHUB_PAGES_REPO and deploy:"
+  echo "Set custom repository (optional):"
   echo "  export GITHUB_PAGES_REPO=https://github.com/username/MentalBiriyani.git"
-  echo "  ./build-github-pages.sh --deploy"
-  echo ""
-  echo "Or deploy manually:"
-  echo "  cd dist/public"
-  echo "  git init"
-  echo "  git add -A"
-  echo "  git commit -m 'Deploy to GitHub Pages'"
-  echo "  git remote add origin YOUR_REPO_URL"
-  echo "  git push -f origin main"
+  echo "  bash scripts/deploy-github-pages.sh"
   echo ""
 fi
