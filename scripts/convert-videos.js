@@ -8,6 +8,9 @@ const CONTENT_DIR = 'client/public/content';
 const MEDIA_LIST_PATH = join(CONTENT_DIR, 'media-list.json');
 const MAX_FILE_SIZE_MB = 100;
 
+// Video formats to convert to MP4
+const VIDEO_FORMATS = ['.mov', '.avi', '.mkv', '.webm', '.flv', '.wmv', '.m4v', '.mpeg', '.mpg', '.3gp', '.ogv'];
+
 // Resolution tiers to try (largest to smallest)
 const RESOLUTION_TIERS = [
   { name: '720p', maxDimension: 1280 },
@@ -207,36 +210,68 @@ async function main() {
   const mediaList = JSON.parse(mediaListContent);
   const items = Array.isArray(mediaList) ? mediaList : mediaList.items || [];
   
-  // Find .mov files
-  const movFiles = items.filter(item => 
-    item.file && item.file.toLowerCase().endsWith('.mov')
-  );
+  // Find all video files
+  const allVideoFiles = items.filter(item => {
+    if (!item.file) return false;
+    const lowerFile = item.file.toLowerCase();
+    // Include MP4s and other video formats
+    return lowerFile.endsWith('.mp4') || VIDEO_FORMATS.some(ext => lowerFile.endsWith(ext));
+  });
   
-  if (movFiles.length === 0) {
-    console.log('✓ No .mov files found, skipping conversion\n');
+  if (allVideoFiles.length === 0) {
+    console.log('✓ No video files found, skipping conversion\n');
     process.exit(0);
   }
   
-  console.log(`Found ${movFiles.length} .mov file(s) to convert:\n`);
+  // Separate into videos needing conversion
+  const videosToConvert = [];
+  const largeMp4s = [];
+  
+  for (const item of allVideoFiles) {
+    const filePath = join(CONTENT_DIR, item.file);
+    const lowerFile = item.file.toLowerCase();
+    
+    if (!existsSync(filePath)) continue;
+    
+    if (lowerFile.endsWith('.mp4')) {
+      // Check if MP4 is over 100MB
+      const sizeMB = getFileSizeMB(filePath);
+      if (sizeMB > MAX_FILE_SIZE_MB) {
+        largeMp4s.push({ item, sizeMB });
+      }
+    } else {
+      // Non-MP4 video formats
+      videosToConvert.push(item);
+    }
+  }
+  
+  const totalToProcess = videosToConvert.length + largeMp4s.length;
+  
+  if (totalToProcess === 0) {
+    console.log('✓ All videos are already optimized (MP4 under 100MB)\n');
+    process.exit(0);
+  }
+  
+  console.log(`Found ${totalToProcess} video file(s) to process:\n`);
+  if (videosToConvert.length > 0) {
+    const formats = [...new Set(videosToConvert.map(v => v.file.split('.').pop().toUpperCase()))].join(', ');
+    console.log(`  - ${videosToConvert.length} non-MP4 videos to convert (${formats})`);
+  }
+  if (largeMp4s.length > 0) {
+    console.log(`  - ${largeMp4s.length} MP4 videos over 100MB to optimize`);
+  }
+  console.log('');
   
   const conversions = [];
   
-  // Convert each video
-  for (const item of movFiles) {
+  // Convert non-MP4 videos
+  for (const item of videosToConvert) {
     const inputPath = join(CONTENT_DIR, item.file);
-    const outputFile = item.file.replace(/\.mov$/i, '.mp4');
+    const outputFile = item.file.replace(/\.(mov|avi|mkv|webm|flv|wmv|m4v|mpeg|mpg|3gp|ogv)$/i, '.mp4');
     const outputPath = join(CONTENT_DIR, outputFile);
     
     if (!existsSync(inputPath)) {
       console.log(`  ⚠️  Skipping ${item.file} (file not found)`);
-      continue;
-    }
-    
-    // Skip if MP4 already exists
-    if (existsSync(outputPath)) {
-      const sizeMB = getFileSizeMB(outputPath);
-      console.log(`  ✓ ${outputFile} already exists (${sizeMB.toFixed(2)} MB), skipping conversion`);
-      conversions.push({ oldFile: item.file, newFile: outputFile });
       continue;
     }
     
@@ -246,22 +281,50 @@ async function main() {
     }
   }
   
+  // Optimize large MP4 files
+  for (const { item, sizeMB } of largeMp4s) {
+    const inputPath = join(CONTENT_DIR, item.file);
+    const tempOutputPath = join(CONTENT_DIR, `temp_optimized_${item.file}`);
+    
+    console.log(`  Optimizing: ${item.file} (${sizeMB.toFixed(2)} MB)`);
+    
+    const success = convertVideo(inputPath, tempOutputPath);
+    if (success) {
+      // Replace original with optimized version
+      try {
+        unlinkSync(inputPath);
+        execSync(`mv "${tempOutputPath}" "${inputPath}"`);
+        console.log(`    ✓ Replaced with optimized version`);
+        conversions.push({ oldFile: item.file, newFile: item.file }); // Same filename
+      } catch (error) {
+        console.error(`    ✗ Error replacing file:`, error.message);
+        // Clean up temp file
+        if (existsSync(tempOutputPath)) {
+          unlinkSync(tempOutputPath);
+        }
+      }
+    }
+  }
+  
   console.log('\n' + '='.repeat(50));
   console.log('\n📝 Updating media-list.json...\n');
   
   // Update media-list.json
   updateMediaList(conversions);
   
-  // Optionally delete old .mov files
-  console.log('\n🗑️  Cleaning up old .mov files...\n');
-  conversions.forEach(({ oldFile }) => {
-    const oldPath = join(CONTENT_DIR, oldFile);
-    if (existsSync(oldPath)) {
-      try {
-        unlinkSync(oldPath);
-        console.log(`  ✓ Deleted: ${oldFile}`);
-      } catch (error) {
-        console.log(`  ⚠️  Could not delete: ${oldFile}`);
+  // Delete old non-MP4 video files (don't delete MP4s that were just optimized)
+  console.log('\n🗑️  Cleaning up original video files...\n');
+  conversions.forEach(({ oldFile, newFile }) => {
+    // Only delete if old and new filenames are different (non-MP4 conversions)
+    if (oldFile !== newFile) {
+      const oldPath = join(CONTENT_DIR, oldFile);
+      if (existsSync(oldPath)) {
+        try {
+          unlinkSync(oldPath);
+          console.log(`  ✓ Deleted: ${oldFile}`);
+        } catch (error) {
+          console.log(`  ⚠️  Could not delete: ${oldFile}`);
+        }
       }
     }
   });
