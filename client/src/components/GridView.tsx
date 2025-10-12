@@ -1,17 +1,32 @@
 import { useState } from "react";
-import { Play, Heart } from "lucide-react";
+import { Play, Heart, Lock } from "lucide-react";
 import { isMediaLiked } from "@/lib/localStorage";
 import type { MediaItem } from "@shared/schema";
 import SongsView from "./SongsView";
 import ChatView from "./ChatView";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface GridViewProps {
   media: MediaItem[];
   onMediaClick: (index: number) => void;
 }
 
+const CHAT_PASSWORD = "17161209";
+
 export default function GridView({ media, onMediaClick }: GridViewProps) {
   const [filter, setFilter] = useState<"all" | "photos" | "videos" | "songs" | "chat">("all");
+  const [isChatUnlocked, setIsChatUnlocked] = useState(false);
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [passwordInput, setPasswordInput] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
   // Note: media is already sorted by favorites from Home.tsx
   const filteredMedia = media.filter((item) => {
@@ -69,14 +84,23 @@ export default function GridView({ media, onMediaClick }: GridViewProps) {
             Songs
           </button>
           <button
-            onClick={() => setFilter("chat")}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
+            onClick={() => {
+              if (isChatUnlocked) {
+                setFilter("chat");
+              } else {
+                setShowPasswordDialog(true);
+                setPasswordError("");
+                setPasswordInput("");
+              }
+            }}
+            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap flex items-center gap-1.5 ${
               filter === "chat"
                 ? "bg-card text-foreground"
                 : "bg-transparent text-muted-foreground hover-elevate"
             }`}
             data-testid="button-filter-chat"
           >
+            {!isChatUnlocked && <Lock className="w-3.5 h-3.5" />}
             Chat
           </button>
         </div>
@@ -84,7 +108,7 @@ export default function GridView({ media, onMediaClick }: GridViewProps) {
 
       {filter === "songs" ? (
         <SongsView />
-      ) : filter === "chat" ? (
+      ) : filter === "chat" && isChatUnlocked ? (
         <ChatView />
       ) : (
         <div className="flex-1 overflow-y-auto">
@@ -134,6 +158,74 @@ export default function GridView({ media, onMediaClick }: GridViewProps) {
           </div>
         </div>
       )}
+
+      <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Lock className="w-5 h-5" />
+              Chat Access
+            </DialogTitle>
+            <DialogDescription>
+              Enter the password to access chat conversations.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <Input
+              type="password"
+              placeholder="Enter password"
+              value={passwordInput}
+              onChange={(e) => {
+                setPasswordInput(e.target.value);
+                setPasswordError("");
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  if (passwordInput === CHAT_PASSWORD) {
+                    setIsChatUnlocked(true);
+                    setFilter("chat");
+                    setShowPasswordDialog(false);
+                    setPasswordInput("");
+                  } else {
+                    setPasswordError("Incorrect password");
+                  }
+                }
+              }}
+              className={passwordError ? "border-destructive" : ""}
+              autoFocus
+            />
+            {passwordError && (
+              <p className="text-sm text-destructive">{passwordError}</p>
+            )}
+          </div>
+          <div className="flex gap-2 justify-end">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowPasswordDialog(false);
+                setPasswordInput("");
+                setPasswordError("");
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                if (passwordInput === CHAT_PASSWORD) {
+                  setIsChatUnlocked(true);
+                  setFilter("chat");
+                  setShowPasswordDialog(false);
+                  setPasswordInput("");
+                } else {
+                  setPasswordError("Incorrect password");
+                }
+              }}
+            >
+              Unlock
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

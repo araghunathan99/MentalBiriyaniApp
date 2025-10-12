@@ -5,11 +5,19 @@
 ### 1. Merge Conflicts Resolved
 **File:** `build-github-pages.sh`
 - ✅ Cleaned up all merge conflict markers (<<<<<<, =======, >>>>>>>)
-- ✅ Updated all step numbers to reflect correct 10-step build process:
-  - Step 5: Fixing asset paths
-  - Step 6: Copying media files
-  - Step 7: Copying PWA configuration
-  - Step 9: Copying documentation
+- ✅ Removed legacy video conversion block (old Step 1/6)
+- ✅ Fixed duplicate video conversion issue
+- ✅ Corrected all step numbers to reflect proper 10-step build process:
+  - Step 1: Generate content lists
+  - Step 2: Parse chat conversations
+  - Step 3: Convert videos (respects --skip-video flag)
+  - Step 4: Build app with Vite
+  - Step 5: Fix asset paths
+  - Step 6: Copy media files
+  - Step 7: Copy PWA configuration
+  - Step 8: Add cache-busting
+  - Step 9: Copy documentation
+  - Step 10: Deploy to GitHub (only with --deploy flag)
 
 ### 2. Documentation Updated
 **Files Updated:**
