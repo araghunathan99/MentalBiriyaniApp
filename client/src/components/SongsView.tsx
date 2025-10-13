@@ -62,18 +62,6 @@ export default function SongsView() {
       audioRef.current = new Audio();
       audioRef.current.volume = 0.5;
       audioRef.current.preload = 'auto';
-
-      // Auto-play next track in playlist when current one ends
-      audioRef.current.addEventListener('ended', () => {
-        if (isPlaylistMode && playlistSongs.length > 0) {
-          const nextIndex = (currentPlaylistIndex + 1) % playlistSongs.length;
-          setCurrentPlaylistIndex(nextIndex);
-          const nextSong = playlistSongs[nextIndex];
-          if (nextSong) {
-            playSong(nextSong.id);
-          }
-        }
-      });
     }
 
     return () => {
@@ -82,11 +70,39 @@ export default function SongsView() {
         audioRef.current.src = '';
       }
     };
+  }, []);
+
+  // Handle playlist auto-advance
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const handleEnded = () => {
+      if (isPlaylistMode && playlistSongs.length > 0) {
+        const nextIndex = (currentPlaylistIndex + 1) % playlistSongs.length;
+        setCurrentPlaylistIndex(nextIndex);
+        const nextSong = playlistSongs[nextIndex];
+        if (nextSong) {
+          playSong(nextSong.id);
+        }
+      }
+    };
+
+    audio.addEventListener('ended', handleEnded);
+    return () => audio.removeEventListener('ended', handleEnded);
   }, [isPlaylistMode, playlistSongs, currentPlaylistIndex]);
 
   const playSong = async (songId: string) => {
-    const song = songs.find(s => s.id === songId);
-    if (!song || !audioRef.current) return;
+    // Search in both main songs list and playlist songs
+    let song = songs.find(s => s.id === songId);
+    if (!song && isPlaylistMode) {
+      song = playlistSongs.find(s => s.id === songId);
+    }
+    
+    if (!song || !audioRef.current) {
+      console.error('Song not found:', songId);
+      return;
+    }
 
     if (currentPlayingSong === songId) {
       // Pause if currently playing

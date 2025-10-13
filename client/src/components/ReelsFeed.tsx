@@ -16,7 +16,7 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
   const [isLiked, setIsLiked] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [isPlaying, setIsPlaying] = useState(true);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
   const [mediaOpacity, setMediaOpacity] = useState(1);
@@ -88,7 +88,7 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
         if (!item) return;
 
         try {
-          if (item.isVideo) {
+          if (item.isVideo && item.webContentLink) {
             // Prefetch video metadata only (faster, no timeout needed)
             const video = document.createElement('video');
             video.preload = 'metadata';
@@ -112,7 +112,7 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
                 resolve(); // Don't block on error
               }, { once: true });
             });
-          } else if (item.isImage) {
+          } else if (item.isImage && item.webContentLink) {
             // Prefetch image
             const img = new Image();
             img.src = item.webContentLink;

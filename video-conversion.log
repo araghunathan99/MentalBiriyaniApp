@@ -2,57 +2,11 @@
 🎬 Video Conversion Script
 
 ==================================================
+📏 Max file size: 100 MB
+📊 Resolution tiers: 720p → 540p → 480p → 360p → 240p
+==================================================
+
 ✓ FFmpeg is installed
 
-Found 10 .mov file(s) to convert:
-
-  ✓ IMG_0584.mp4 already exists, skipping conversion
-  ✓ IMG_2524.mp4 already exists, skipping conversion
-  ✓ IMG_2753.mp4 already exists, skipping conversion
-  ✓ IMG_4765.mp4 already exists, skipping conversion
-  ✓ IMG_7149.mp4 already exists, skipping conversion
-  ✓ IMG_7236.mp4 already exists, skipping conversion
-  ✓ IMG_7238.mp4 already exists, skipping conversion
-  ✓ IMG_7268.mp4 already exists, skipping conversion
-  ✓ IMG_8903.mp4 already exists, skipping conversion
-  ✓ IMG_9329.mp4 already exists, skipping conversion
-
-==================================================
-
-📝 Updating media-list.json...
-
-  Updated: IMG_0584.MOV → IMG_0584.mp4
-  Updated: IMG_2524.MOV → IMG_2524.mp4
-  Updated: IMG_2753.MOV → IMG_2753.mp4
-  Updated: IMG_4765.MOV → IMG_4765.mp4
-  Updated: IMG_7149.MOV → IMG_7149.mp4
-  Updated: IMG_7236.MOV → IMG_7236.mp4
-  Updated: IMG_7238.MOV → IMG_7238.mp4
-  Updated: IMG_7268.MOV → IMG_7268.mp4
-  Updated: IMG_8903.MOV → IMG_8903.mp4
-  Updated: IMG_9329.MOV → IMG_9329.mp4
-✓ Updated client/public/content/media-list.json
-
-🗑️  Cleaning up old .mov files...
-
-  ✓ Deleted: IMG_0584.MOV
-  ✓ Deleted: IMG_2524.MOV
-  ✓ Deleted: IMG_2753.MOV
-  ✓ Deleted: IMG_4765.MOV
-  ✓ Deleted: IMG_7149.MOV
-  ✓ Deleted: IMG_7236.MOV
-  ✓ Deleted: IMG_7238.MOV
-  ✓ Deleted: IMG_7268.MOV
-  ✓ Deleted: IMG_8903.MOV
-  ✓ Deleted: IMG_9329.MOV
-
-==================================================
-
-✅ Video conversion complete!
-
-Summary:
-  - Converted: 10 video(s)
-  - Format: MP4 (H.264 + AAC)
-  - Max resolution: 720p
-  - Optimized for web streaming
+✓ All videos are already optimized (MP4 under 100MB)
 

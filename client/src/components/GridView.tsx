@@ -19,7 +19,7 @@ interface GridViewProps {
   onMediaClick: (index: number) => void;
 }
 
-const CHAT_PASSWORD = "17161209";
+const CHAT_PASSWORD = "greyhound";
 
 export default function GridView({ media, onMediaClick }: GridViewProps) {
   const [filter, setFilter] = useState<"all" | "photos" | "videos" | "songs" | "chat">("all");
@@ -112,7 +112,7 @@ export default function GridView({ media, onMediaClick }: GridViewProps) {
         <ChatView />
       ) : (
         <div className="flex-1 overflow-y-auto">
-          <div className="grid grid-cols-3 gap-1 p-1">
+          <div className="grid grid-cols-4 gap-1 p-1">
             {filteredMedia.map((item, idx) => {
               const originalIndex = media.findIndex((m) => m.id === item.id);
               const liked = isMediaLiked(item.id);

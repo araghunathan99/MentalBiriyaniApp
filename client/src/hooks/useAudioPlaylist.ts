@@ -21,6 +21,7 @@ export function useAudioPlaylist() {
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const savedTimeRef = useRef<number>(0); // Save playback position when pausing
 
   // Load audio files dynamically from audio-list.json
   useEffect(() => {
@@ -83,9 +84,19 @@ export function useAudioPlaylist() {
     const currentTrack = playlist[currentTrackIndex];
     if (!currentTrack) return;
 
-    audioRef.current.src = currentTrack.url;
+    // Only change source if it's a different track
+    if (audioRef.current.src !== currentTrack.url) {
+      audioRef.current.src = currentTrack.url;
+      savedTimeRef.current = 0; // Reset saved time for new track
+    }
     
     if (isPlaying) {
+      // Restore saved position if resuming
+      if (savedTimeRef.current > 0) {
+        audioRef.current.currentTime = savedTimeRef.current;
+        savedTimeRef.current = 0;
+      }
+      
       audioRef.current.play().catch(err => {
         console.error('Failed to play audio:', err);
       });
@@ -104,8 +115,11 @@ export function useAudioPlaylist() {
 
   const pause = useCallback(() => {
     if (audioRef.current) {
+      // Save current playback position before pausing
+      savedTimeRef.current = audioRef.current.currentTime;
       audioRef.current.pause();
       setIsPlaying(false);
+      console.log('🎵 Paused at:', savedTimeRef.current.toFixed(2), 'seconds');
     }
   }, []);
 
