@@ -160,21 +160,36 @@ export default function Home() {
   const wasPlayingBeforeLibraryRef = useRef(false);
   const initialLoadRef = useRef(true);
 
-  // Redirect to landing page on hard refresh
+  // Redirect to landing page on hard refresh (skip on direct navigation from landing)
   useEffect(() => {
     const SESSION_KEY = 'mental-biriyani-session-active';
     
-    // Check if this is a fresh page load (hard refresh)
-    const isSessionActive = sessionStorage.getItem(SESSION_KEY);
+    // iOS Safari Private Mode workaround: use a global flag
+    const hasNavigatedFromLanding = (window as any).__fromLanding;
     
-    if (!isSessionActive) {
-      // First time loading the app in this session - redirect to landing
-      console.log('🔄 Fresh page load detected - redirecting to landing page');
-      setLocation('/');
-    } else {
-      // Mark session as active for subsequent navigations
-      sessionStorage.setItem(SESSION_KEY, 'true');
+    // Check if this is a fresh page load (hard refresh)
+    let isSessionActive = null;
+    try {
+      isSessionActive = sessionStorage.getItem(SESSION_KEY);
+      console.log('🔍 Home: Checking session storage, value:', isSessionActive);
+    } catch (error) {
+      console.error('❌ Home: Failed to read session storage:', error);
+      // If sessionStorage fails (iOS Private Mode), check global flag
+      if (hasNavigatedFromLanding) {
+        console.log('✅ Home: Using fallback flag (iOS Private Mode)');
+        return;
+      }
     }
+    
+    if (!isSessionActive && !hasNavigatedFromLanding) {
+      // First time loading the app in this session - redirect to landing
+      console.log('🔄 Home: No session found, redirecting to landing page');
+      setLocation('/');
+      return;
+    }
+    
+    // Session is active or came from landing, continue loading
+    console.log('✅ Home: Session active or came from landing, loading home page');
   }, [setLocation]);
 
   // Load media from local content folder
@@ -320,7 +335,10 @@ export default function Home() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-background">
-        <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent mx-auto mb-2" />
+          <p className="text-sm text-muted-foreground">Loading your memories...</p>
+        </div>
       </div>
     );
   }
@@ -511,6 +529,25 @@ export default function Home() {
           </button>
         </div>
         <LibraryMediaViewer />
+      </div>
+    );
+  }
+
+  // Safeguard: ensure we have media to display
+  if (media.length === 0 || shuffledMedia.length === 0) {
+    console.error('❌ No media available to display');
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-background p-6 text-center">
+        <h2 className="text-xl font-semibold text-foreground mb-2">No Media Found</h2>
+        <p className="text-muted-foreground mb-4">
+          Unable to load any media content. Please check your connection and try again.
+        </p>
+        <Button
+          onClick={() => window.location.reload()}
+          data-testid="button-retry"
+        >
+          Reload
+        </Button>
       </div>
     );
   }

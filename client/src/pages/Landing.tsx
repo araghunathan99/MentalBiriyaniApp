@@ -87,7 +87,17 @@ export default function Landing() {
 
   const handleClick = () => {
     // Mark session as active before navigating to home
-    sessionStorage.setItem('mental-biriyani-session-active', 'true');
+    try {
+      sessionStorage.setItem('mental-biriyani-session-active', 'true');
+      console.log('✅ Landing: Session storage set, navigating to /home');
+    } catch (error) {
+      console.error('❌ Landing: Failed to set session storage (iOS Private Mode?):', error);
+    }
+    
+    // iOS Safari Private Mode fallback: set global flag
+    (window as any).__fromLanding = true;
+    console.log('✅ Landing: Set global flag for iOS fallback');
+    
     setLocation("/home");
   };
 

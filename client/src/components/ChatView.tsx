@@ -29,21 +29,36 @@ export default function ChatView() {
   const [chatData, setChatData] = useState<ChatData | null>(null);
   const [expandedConvIndex, setExpandedConvIndex] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadChats() {
       try {
-        const response = await fetch(getFullPath('content/chat-list.json'));
+        console.log('🔄 ChatView: Starting to load conversations...');
+        const timestamp = new Date().getTime();
+        const url = getFullPath(`content/chat-list.json?v=${timestamp}`);
+        console.log('🔄 ChatView: Fetching from:', url);
+        
+        const response = await fetch(url);
+        console.log('🔄 ChatView: Response status:', response.status);
+        
         if (!response.ok) {
-          console.error('Failed to load chat conversations');
+          const errorMsg = `HTTP ${response.status}: ${response.statusText}`;
+          console.error('❌ ChatView: Failed to load:', errorMsg);
+          setError(errorMsg);
           return;
         }
 
         const data = await response.json();
-        setChatData(data);
+        console.log('✅ ChatView: JSON parsed successfully');
         console.log('💬 Loaded', data.totalConversations, 'chat conversations');
+        console.log('📊 First conversation:', data.conversations[0]?.displayDate || data.conversations[0]?.date);
+        
+        setChatData(data);
       } catch (error) {
-        console.error('Error loading chat conversations:', error);
+        const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+        console.error('❌ ChatView: Error loading chat conversations:', error);
+        setError(errorMsg);
       } finally {
         setLoading(false);
       }
@@ -99,12 +114,25 @@ export default function ChatView() {
     );
   }
 
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center max-w-md px-4">
+          <MessageCircle className="w-12 h-12 mx-auto mb-4 text-destructive" />
+          <p className="text-destructive font-medium mb-2">Error loading conversations</p>
+          <p className="text-sm text-muted-foreground">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!chatData || chatData.conversations.length === 0) {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
           <MessageCircle className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
           <p className="text-muted-foreground">No conversations found</p>
+          <p className="text-xs text-muted-foreground mt-2">Data loaded but no conversations available</p>
         </div>
       </div>
     );
