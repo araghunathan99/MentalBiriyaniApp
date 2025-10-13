@@ -39,7 +39,10 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
   useEffect(() => {
     // Start playing if first media is not a video
     if (!currentMedia?.isVideo) {
+      console.log('🎵 Starting audio for photo on mount');
       audio.play();
+    } else {
+      console.log('🎵 First media is video, not starting audio');
     }
   }, []);
 
@@ -60,7 +63,7 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
         console.log('🎵 Resumed background music for photo');
       }
     }
-  }, [currentMedia?.id, currentMedia?.isVideo, currentMedia?.isImage, audio.isPlaying, audio.pause, audio.resume]);
+  }, [currentMedia?.id, currentMedia?.isVideo, currentMedia?.isImage]);
 
   // Prefetch next 10 media items in parallel
   useEffect(() => {

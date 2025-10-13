@@ -84,17 +84,22 @@ export function useAudioPlaylist() {
     const currentTrack = playlist[currentTrackIndex];
     if (!currentTrack) return;
 
-    // Only change source if it's a different track
-    if (audioRef.current.src !== currentTrack.url) {
+    // Check if we need to load a new source
+    const currentSrc = audioRef.current.src;
+    const trackUrl = currentTrack.url;
+    const needsNewSource = !currentSrc || !currentSrc.endsWith(trackUrl.split('/').pop() || '');
+    
+    if (needsNewSource) {
+      console.log('🎵 Loading new track:', currentTrack.filename);
       audioRef.current.src = currentTrack.url;
       savedTimeRef.current = 0; // Reset saved time for new track
     }
     
     if (isPlaying) {
-      // Restore saved position if resuming
-      if (savedTimeRef.current > 0) {
+      // Restore saved position if resuming (but not on new track load)
+      if (savedTimeRef.current > 0 && !needsNewSource) {
         audioRef.current.currentTime = savedTimeRef.current;
-        savedTimeRef.current = 0;
+        console.log('🎵 Restored position to:', savedTimeRef.current.toFixed(2), 'seconds');
       }
       
       audioRef.current.play().catch(err => {
@@ -105,19 +110,23 @@ export function useAudioPlaylist() {
   }, [currentTrackIndex, playlist, isPlaying]);
 
   const play = useCallback(() => {
+    console.log('🎵 play() called, playlist length:', playlist.length);
     if (audioRef.current && playlist.length > 0) {
       // Just set isPlaying to true, let the useEffect handle playback
       setIsPlaying(true);
+    } else {
+      console.log('🎵 Cannot play - audioRef or playlist missing');
     }
   }, [playlist.length]);
 
   const pause = useCallback(() => {
     if (audioRef.current) {
       // Save current playback position before pausing
-      savedTimeRef.current = audioRef.current.currentTime;
+      const currentTime = audioRef.current.currentTime;
+      savedTimeRef.current = currentTime;
       audioRef.current.pause();
       setIsPlaying(false);
-      console.log('🎵 Paused at:', savedTimeRef.current.toFixed(2), 'seconds');
+      console.log('🎵 Paused at:', currentTime.toFixed(2), 'seconds (saved for resume)');
     }
   }, []);
 
