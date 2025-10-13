@@ -44,7 +44,7 @@ for arg in "$@"; do
 done
 
 # Download LFS files if needed
-echo "📥 Step 1/11: Downloading Git LFS files..."
+echo "📥 Step 1/8: Downloading Git LFS files..."
 if python3 scripts/download-lfs-files.py; then
   echo "✓ LFS files downloaded successfully"
 else
@@ -52,72 +52,51 @@ else
 fi
 echo ""
 
-# Convert videos to MP4 (720p max) with better handling
+# Convert videos to MP4 (720p max)
 if [ "$SKIP_VIDEO" = false ]; then
-  echo "🎬 Step 2/11: Converting videos to MP4 (H.264, 720p)..."
-  chmod +x scripts/convert-videos.sh
-  if bash scripts/convert-videos.sh; then
+  echo "🎬 Step 2/8: Converting videos to MP4 (H.264, 720p)..."
+  if node scripts/convert-videos.js 2>&1 | tee video-conversion.log; then
     echo "✓ Video conversion complete"
   else
     echo "⚠️  Some videos failed conversion (check video-conversion.log)"
-    echo "   Failed videos will be skipped in the app"
   fi
   echo ""
 else
-  echo "⏭️  Step 2/11: Skipping video conversion (--skip-video flag)"
+  echo "⏭️  Step 2/8: Skipping video conversion (--skip-video flag)"
   echo ""
 fi
 
-# Generate all JSON content lists
-echo "📋 Step 3/11: Generating content lists..."
-python3 scripts/generate-media-lists.py
-echo ""
-
-# Generate content lists (legacy support)
-echo "📋 Step 4/11: Generating legacy content lists..."
-node scripts/generate-content-lists.js 2>/dev/null || echo "  (Legacy script not found, skipping)"
+# Generate content lists (media, audio, chat)
+echo "📋 Step 3/8: Generating content lists..."
+node scripts/generate-content-lists.js
 echo ""
 
 # Parse chat conversations
-echo "💬 Step 5/11: Parsing chat conversations..."
+echo "💬 Step 4/8: Parsing chat conversations..."
 node scripts/parse-chat.js
 echo ""
 
-# Build the app
-echo "📦 Step 6/11: Building app with Vite..."
+# Build the app with Vite
+echo "📦 Step 5/8: Building app with Vite..."
 npm run build
 echo ""
 
-# Fix paths for GitHub Pages
-echo "🔧 Step 7/11: Fixing asset paths..."
+# Fix paths for GitHub Pages base path
+echo "🔧 Step 6/8: Fixing asset paths for /MentalBiriyani/ base..."
 node scripts/fix-github-pages-paths.js
 echo ""
 
-# Copy content folder
-echo "📁 Step 8/11: Copying media files..."
+# Copy static assets to dist
+echo "📁 Step 7/8: Copying static assets..."
 cp -r client/public/content dist/public/
-echo ""
-
-# Copy PWA files
-echo "📱 Step 9/11: Copying PWA configuration..."
 cp client/public/manifest.json client/public/sw.js dist/public/
-cp client/public/icon-*.svg dist/public/
+cp client/public/icon-*.png client/public/apple-touch-icon.png client/public/favicon.ico client/public/og-image.png dist/public/
 touch dist/public/.nojekyll
 echo ""
 
-# Add cache-busting version parameters (AFTER copying files)
-echo "🔄 Step 10/11: Adding cache-busting version..."
+# Add cache-busting version parameters
+echo "🔄 Step 8/8: Adding cache-busting version..."
 node scripts/add-cache-busting.js
-echo ""
-
-# Copy documentation
-echo "📚 Step 11/11: Copying documentation..."
-cp BUILD_FOR_GITHUB_PAGES.md dist/public/DEPLOYMENT_GUIDE.md 2>/dev/null || true
-cp VIDEO_CONVERSION_GUIDE.md dist/public/ 2>/dev/null || true
-cp PWA_INSTALLATION_GUIDE.md dist/public/ 2>/dev/null || true
-cp video-conversion.log dist/public/ 2>/dev/null || true
-echo ""
-
 echo ""
 
 echo "✅ Build complete!"
@@ -128,10 +107,8 @@ echo ""
 
 # Deploy to GitHub Pages if requested
 if [ "$AUTO_DEPLOY" = true ]; then
-  echo "🚀 Step 12/11: Deploying to GitHub Pages..."
+  echo "🚀 Deploying to GitHub Pages..."
   echo ""
-  
-  # Use the deployment script
   bash scripts/deploy-github-pages.sh
 else
   echo "📋 Build complete - deployment skipped"
@@ -141,9 +118,5 @@ else
   echo ""
   echo "Or run full build with deployment:"
   echo "  ./build-github-pages.sh --deploy"
-  echo ""
-  echo "Set custom repository (optional):"
-  echo "  export GITHUB_PAGES_REPO=https://github.com/username/MentalBiriyani.git"
-  echo "  bash scripts/deploy-github-pages.sh"
   echo ""
 fi
