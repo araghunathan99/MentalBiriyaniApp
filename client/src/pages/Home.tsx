@@ -6,7 +6,7 @@ import BottomNav from "@/components/BottomNav";
 import type { MediaItem } from "@shared/schema";
 import { getCachedMedia, setCachedMedia, isCacheValid } from "@/lib/mediaCache";
 import { fetchLocalMedia } from "@/lib/localMedia";
-import { getStorageQuota } from "@/lib/mediaBlobCache";
+import { getStorageQuota, fetchAndCacheMedia } from "@/lib/mediaBlobCache";
 import { Button } from "@/components/ui/button";
 import { isMediaLiked } from "@/lib/localStorage";
 import { ArrowLeft } from "lucide-react";
@@ -372,6 +372,66 @@ export default function Home() {
       const imageRef = useRef<HTMLImageElement>(null);
       const containerRef = useRef<HTMLDivElement>(null);
       const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+      const [cachedMediaUrl, setCachedMediaUrl] = useState<string>("");
+      const [isLoadingMedia, setIsLoadingMedia] = useState(true);
+      const [hasMediaError, setHasMediaError] = useState(false);
+      const cachedBlobRef = useRef<string | null>(null);
+
+      // Load cached media URL when current media changes
+      useEffect(() => {
+        if (!currentMedia?.webContentLink) {
+          // Revoke previous blob URL
+          if (cachedBlobRef.current && cachedBlobRef.current.startsWith('blob:')) {
+            URL.revokeObjectURL(cachedBlobRef.current);
+            cachedBlobRef.current = null;
+          }
+          setCachedMediaUrl("");
+          setIsLoadingMedia(false);
+          return;
+        }
+
+        console.log('📚 Library: Loading media', currentMedia.name);
+        setIsLoadingMedia(true);
+        setHasMediaError(false);
+        let cancelled = false;
+        
+        fetchAndCacheMedia(currentMedia.webContentLink)
+          .then((url) => {
+            if (!cancelled) {
+              // Revoke previous blob URL before setting new one
+              if (cachedBlobRef.current && cachedBlobRef.current.startsWith('blob:') && cachedBlobRef.current !== url) {
+                URL.revokeObjectURL(cachedBlobRef.current);
+              }
+              
+              cachedBlobRef.current = url;
+              setCachedMediaUrl(url);
+              setIsLoadingMedia(false);
+              console.log('✓ Library: Media loaded', currentMedia.name);
+            } else {
+              // If cancelled, revoke the new URL we just created
+              if (url && url.startsWith('blob:')) {
+                URL.revokeObjectURL(url);
+              }
+            }
+          })
+          .catch((error) => {
+            console.error('❌ Library: Error loading cached media:', error);
+            if (!cancelled) {
+              // Fallback to original URL
+              setCachedMediaUrl(currentMedia.webContentLink);
+              setIsLoadingMedia(false);
+              setHasMediaError(true);
+            }
+          });
+
+        return () => {
+          cancelled = true;
+          if (cachedBlobRef.current && cachedBlobRef.current.startsWith('blob:')) {
+            URL.revokeObjectURL(cachedBlobRef.current);
+            cachedBlobRef.current = null;
+          }
+        };
+      }, [currentMedia?.webContentLink, currentMedia?.name]);
 
       // Handle swipe gestures for mobile
       useEffect(() => {
@@ -484,23 +544,41 @@ export default function Home() {
             screen.orientation.unlock();
           }
         };
-      }, []);
+      }, [currentMedia?.isVideo]);
 
       return (
-        <div ref={containerRef} className="flex-1 flex items-center justify-center overflow-auto p-4">
-          {currentMedia.isImage && (
+        <div ref={containerRef} className="flex-1 flex items-center justify-center overflow-auto p-4 bg-black">
+          {isLoadingMedia && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-2 border-white border-t-transparent mx-auto mb-2" />
+                <p className="text-sm text-white">Loading media...</p>
+              </div>
+            </div>
+          )}
+          {!isLoadingMedia && cachedMediaUrl && currentMedia.isImage && (
             <img
               ref={imageRef}
-              src={currentMedia.webContentLink}
+              src={cachedMediaUrl}
               alt={currentMedia.name}
               className="max-w-full max-h-full object-contain"
               data-testid={`img-library-media-${currentMedia.id}`}
+              onError={(e) => {
+                console.error('❌ Library: Image error');
+                // iOS blob URL fallback: if blob URL fails, try original URL
+                if (cachedMediaUrl && cachedMediaUrl.startsWith('blob:') && cachedMediaUrl !== currentMedia.webContentLink) {
+                  console.warn('⚠️ Library: Blob URL failed, falling back to original URL');
+                  setCachedMediaUrl(currentMedia.webContentLink);
+                } else {
+                  setHasMediaError(true);
+                }
+              }}
             />
           )}
-          {currentMedia.isVideo && (
+          {!isLoadingMedia && cachedMediaUrl && currentMedia.isVideo && (
             <video
               ref={videoRef}
-              src={currentMedia.webContentLink}
+              src={cachedMediaUrl}
               controls
               autoPlay
               playsInline
@@ -508,9 +586,24 @@ export default function Home() {
               className="max-w-full max-h-full"
               data-testid={`video-library-media-${currentMedia.id}`}
               onError={(e) => {
-                console.error('Video playback error:', e);
+                console.error('❌ Library: Video playback error:', e);
+                // iOS blob URL fallback: if blob URL fails, try original URL
+                if (cachedMediaUrl && cachedMediaUrl.startsWith('blob:') && cachedMediaUrl !== currentMedia.webContentLink) {
+                  console.warn('⚠️ Library: Video blob URL failed, falling back to original URL');
+                  setCachedMediaUrl(currentMedia.webContentLink);
+                } else {
+                  setHasMediaError(true);
+                }
               }}
             />
+          )}
+          {hasMediaError && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/90">
+              <div className="text-center text-white p-4">
+                <p className="text-lg font-semibold">Media Failed to Load</p>
+                <p className="text-sm opacity-70 mt-2">Try the next item</p>
+              </div>
+            </div>
           )}
         </div>
       );
