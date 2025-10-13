@@ -46,6 +46,7 @@ function GridItem({ item, onClick, liked }: { item: MediaItem; onClick: () => vo
           alt={item.name}
           className="w-full h-full object-cover"
           loading="lazy"
+          decoding="async"
         />
       )}
       

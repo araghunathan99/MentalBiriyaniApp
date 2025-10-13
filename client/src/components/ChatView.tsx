@@ -13,7 +13,9 @@ interface Conversation {
   fromName: string;
   fromEmail: string;
   subject: string;
-  date: string;
+  date?: string;
+  displayDate?: string;
+  conversationNumber?: number;
   messages: Message[];
 }
 
@@ -54,17 +56,32 @@ export default function ChatView() {
     setExpandedConvIndex(expandedConvIndex === index ? null : index);
   };
 
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
+  const formatDate = (conv: Conversation) => {
+    // If displayDate exists (numbered conversation), return it
+    if (conv.displayDate) {
+      return conv.displayDate;
+    }
+    
+    // Otherwise format the actual date
+    if (conv.date) {
+      const date = new Date(conv.date);
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      });
+    }
+    
+    return 'Unknown Date';
   };
 
-  const formatTime = (dateStr: string) => {
-    const date = new Date(dateStr);
+  const formatTime = (conv: Conversation) => {
+    // Only show time if there's an actual date (not numbered)
+    if (!conv.date || conv.displayDate) {
+      return null;
+    }
+    
+    const date = new Date(conv.date);
     return date.toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit'
@@ -116,11 +133,13 @@ export default function ChatView() {
                     <div className="flex items-center gap-2 mb-1">
                       <MessageCircle className="w-4 h-4 text-primary flex-shrink-0" />
                       <span className="text-sm font-medium truncate">
-                        {formatDate(conv.date)}
+                        {formatDate(conv)}
                       </span>
-                      <span className="text-xs text-muted-foreground">
-                        {formatTime(conv.date)}
-                      </span>
+                      {formatTime(conv) && (
+                        <span className="text-xs text-muted-foreground">
+                          {formatTime(conv)}
+                        </span>
+                      )}
                     </div>
                     <p className="text-sm text-muted-foreground">
                       {conv.messages.length} message{conv.messages.length !== 1 ? 's' : ''}

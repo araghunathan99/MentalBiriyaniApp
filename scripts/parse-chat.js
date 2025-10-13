@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const MBOX_PATH = path.join(__dirname, '../client/public/content/Chat.mbox');
+const MBOX_PATH = path.join(__dirname, '../Chat.mbox');
 const OUTPUT_PATH = path.join(__dirname, '../client/public/content/chat-list.json');
 
 console.log('📬 Chat Parser - Extracting Ashwin & Divya conversations');
@@ -27,12 +27,38 @@ function parseHtmlMessages(htmlContent) {
   return messages;
 }
 
+function extractFirstMessageTimestamp(htmlContent) {
+  // Try to find timestamp patterns in the HTML content
+  // Common formats: "Oct 12, 2023", "2023-10-12", "10/12/2023", etc.
+  const patterns = [
+    /(\w{3}\s+\d{1,2},\s+\d{4})/,  // Oct 12, 2023
+    /(\d{1,2}\/\d{1,2}\/\d{4})/,    // 10/12/2023
+    /(\d{4}-\d{2}-\d{2})/,          // 2023-10-12
+    /(\w{3}\s+\d{1,2}\s+\d{4})/,    // Oct 12 2023
+  ];
+  
+  for (const pattern of patterns) {
+    const match = htmlContent.match(pattern);
+    if (match) {
+      const date = new Date(match[1]);
+      if (!isNaN(date.getTime())) {
+        return date.toISOString();
+      }
+    }
+  }
+  
+  return null;
+}
+
 function extractDate(headers) {
   const dateMatch = headers.match(/Date: (.+)/);
   if (dateMatch) {
-    return new Date(dateMatch[1]).toISOString();
+    const parsedDate = new Date(dateMatch[1]);
+    if (!isNaN(parsedDate.getTime())) {
+      return parsedDate.toISOString();
+    }
   }
-  return new Date().toISOString();
+  return null;
 }
 
 function parseConversation(conversationText) {
@@ -41,7 +67,6 @@ function parseConversation(conversationText) {
   // Extract headers
   const fromMatch = conversationText.match(/From: (.+) <(.+)>/);
   const subjectMatch = conversationText.match(/Subject: (.+)/);
-  const dateStr = extractDate(conversationText);
   
   if (!fromMatch) return null;
   
@@ -61,6 +86,23 @@ function parseConversation(conversationText) {
   const messages = parseHtmlMessages(htmlContent);
   
   if (messages.length === 0) return null;
+  
+  // Extract date - priority order:
+  // 1. First message timestamp from HTML content
+  // 2. Email Date header
+  // 3. null if no date found (will use numbering instead)
+  let dateStr = extractFirstMessageTimestamp(htmlContent);
+  if (!dateStr) {
+    dateStr = extractDate(conversationText);
+  }
+  
+  // Try to extract year from first message if no date found
+  if (!dateStr && messages.length > 0) {
+    const yearMatch = messages[0]?.text.match(/\b(19|20)\d{2}\b/);
+    if (yearMatch) {
+      dateStr = new Date(`Jan 1, ${yearMatch[0]}`).toISOString();
+    }
+  }
   
   return {
     fromName,
@@ -97,12 +139,27 @@ function parseMboxFile() {
     }
   }
   
-  // Sort by date (newest first)
-  filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+  // Separate conversations with dates and without dates
+  const withDates = filtered.filter(conv => conv.date);
+  const withoutDates = filtered.filter(conv => !conv.date);
   
-  console.log(`✓ Filtered ${filtered.length} conversations with Divya Dharshini Chandrasekaran\n`);
+  // Sort conversations with dates chronologically (oldest to newest)
+  withDates.sort((a, b) => new Date(a.date) - new Date(b.date));
   
-  return filtered;
+  // Add fallback numbering to conversations without dates
+  withoutDates.forEach((conv, index) => {
+    conv.conversationNumber = index + 1;
+    conv.displayDate = `Conversation ${index + 1}`;
+  });
+  
+  // Combine: dated conversations first (chronologically), then numbered ones
+  const sorted = [...withDates, ...withoutDates];
+  
+  console.log(`✓ Filtered ${sorted.length} conversations with Divya Dharshini Chandrasekaran`);
+  console.log(`  - ${withDates.length} with dates (chronologically sorted old→new)`);
+  console.log(`  - ${withoutDates.length} without dates (numbered 1, 2, 3...)\n`);
+  
+  return sorted;
 }
 
 function main() {
@@ -123,10 +180,15 @@ function main() {
     
     // Show sample
     if (conversations.length > 0) {
-      console.log(`\n📝 Sample conversation (latest):`);
-      console.log(`   Date: ${new Date(conversations[0].date).toLocaleDateString()}`);
-      console.log(`   Messages: ${conversations[0].messages.length}`);
-      console.log(`   First message: "${conversations[0].messages[0].text.substring(0, 50)}..."`);
+      const firstConv = conversations[0];
+      console.log(`\n📝 Sample conversation (oldest):`);
+      if (firstConv.date) {
+        console.log(`   Date: ${new Date(firstConv.date).toLocaleDateString()}`);
+      } else if (firstConv.displayDate) {
+        console.log(`   Date: ${firstConv.displayDate}`);
+      }
+      console.log(`   Messages: ${firstConv.messages.length}`);
+      console.log(`   First message: "${firstConv.messages[0].text.substring(0, 50)}..."`);
     }
     
   } catch (error) {

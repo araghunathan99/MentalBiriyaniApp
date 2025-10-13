@@ -18,7 +18,8 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
   const [isLiked, setIsLiked] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [isPlaying, setIsPlaying] = useState(true);
-  const [isMuted, setIsMuted] = useState(false);
+  // iOS requires videos to be muted for autoplay to work
+  const [isMuted, setIsMuted] = useState(true);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
   const [mediaOpacity, setMediaOpacity] = useState(1);
@@ -121,13 +122,18 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
     }
   }, [currentMedia?.id, currentMedia?.isVideo, currentMedia?.isImage]);
 
-  // Prefetch next 10 media items in parallel
+  // Prefetch next media items (reduced for iOS memory management)
   useEffect(() => {
+    // Detect iOS for conservative prefetching
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const prefetchCount = isIOS ? 3 : 10; // Reduced prefetch for iOS
+    
+
     const prefetchNextItems = async () => {
       const itemsToPrefetch: number[] = [];
       
-      // Get indices for next 10 items (wrapping around if needed)
-      for (let i = 1; i <= 10; i++) {
+      // Get indices for next items (wrapping around if needed)
+      for (let i = 1; i <= prefetchCount; i++) {
         const nextIndex = (currentIndex + i) % media.length;
         if (!prefetchedRef.current.has(nextIndex)) {
           itemsToPrefetch.push(nextIndex);
@@ -192,6 +198,18 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
       setHasError(false);
     };
 
+    const handleLoadedData = () => {
+      console.log('✓ Video data loaded');
+      setIsBuffering(false);
+      // iOS-specific: Attempt to play after data is loaded
+      if (isPlaying && video.paused) {
+        video.play().catch((error) => {
+          console.warn('iOS autoplay prevented:', error);
+          // Autoplay was prevented, will require user interaction
+        });
+      }
+    };
+
     const handleError = (e: Event) => {
       console.error('✗ Video error:', e);
       setHasError(true);
@@ -213,20 +231,29 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
       setIsBuffering(false);
     };
 
+    const handleSuspend = () => {
+      console.log('📹 Video suspended (iOS optimization)');
+      // iOS may suspend video loading, this is normal
+    };
+
     video.addEventListener('waiting', handleWaiting);
     video.addEventListener('canplay', handleCanPlay);
+    video.addEventListener('loadeddata', handleLoadedData);
     video.addEventListener('error', handleError);
     video.addEventListener('stalled', handleStalled);
     video.addEventListener('playing', handlePlaying);
+    video.addEventListener('suspend', handleSuspend);
 
     return () => {
       video.removeEventListener('waiting', handleWaiting);
       video.removeEventListener('canplay', handleCanPlay);
+      video.removeEventListener('loadeddata', handleLoadedData);
       video.removeEventListener('error', handleError);
       video.removeEventListener('stalled', handleStalled);
       video.removeEventListener('playing', handlePlaying);
+      video.removeEventListener('suspend', handleSuspend);
     };
-  }, [currentMedia, toast]);
+  }, [currentMedia, toast, isPlaying]);
 
   // Auto screen rotation based on media aspect ratio
   useEffect(() => {
@@ -448,23 +475,24 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (isTransitioningRef.current) return;
+    if (isTransitioningRef.current || isDraggingProgress) return;
     setTouchStart(e.targetTouches[0].clientY);
     setTouchEnd(e.targetTouches[0].clientY);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (isTransitioningRef.current) return;
+    if (isTransitioningRef.current || isDraggingProgress) return;
     const currentY = e.targetTouches[0].clientY;
     setTouchEnd(currentY);
   };
 
   const handleTouchEnd = () => {
-    if (isTransitioningRef.current) return;
+    if (isTransitioningRef.current || isDraggingProgress) return;
     
     const swipeDistance = touchStart - touchEnd;
     
     // Reduced threshold for faster, more responsive swipes (50px)
+    // Ignore very small movements (likely accidental touches)
     if (Math.abs(swipeDistance) > 50) {
       if (swipeDistance > 0) {
         // Swipe up - show next
@@ -498,7 +526,29 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
     }
   };
 
-  const handleProgressDragStart = (e: React.MouseEvent | React.TouchEvent) => {
+  const handleProgressTouchStart = (e: React.TouchEvent) => {
+    e.stopPropagation();
+    setIsDraggingProgress(true);
+    // Immediately update position on touch start
+    const duration = videoRef.current?.duration;
+    if (!videoRef.current || !currentMedia?.isVideo || !isFinite(duration) || duration === 0) return;
+    
+    const progressBar = document.getElementById('video-progress-bar');
+    if (!progressBar) return;
+    
+    const rect = progressBar.getBoundingClientRect();
+    const clientX = e.touches[0].clientX;
+    const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
+    const percentage = (x / rect.width) * 100;
+    const newTime = (percentage / 100) * duration;
+    
+    if (isFinite(newTime)) {
+      setVideoProgress(percentage);
+      videoRef.current.currentTime = newTime;
+    }
+  };
+
+  const handleProgressDragStart = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsDraggingProgress(true);
   };
@@ -569,6 +619,13 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
             crossOrigin="anonymous"
             onClick={handleTap}
             onDoubleClick={handleDoubleTap}
+            onError={(e) => {
+              // iOS blob URL fallback: if blob URL fails, try original URL
+              if (cachedMediaUrl && cachedMediaUrl.startsWith('blob:') && cachedMediaUrl !== currentMedia.webContentLink) {
+                console.warn('⚠️ Blob URL failed, falling back to original URL');
+                setCachedMediaUrl(currentMedia.webContentLink);
+              }
+            }}
             data-testid="video-player"
           />
           {isBuffering && (
@@ -594,6 +651,15 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
           style={{ opacity: mediaOpacity }}
           onClick={handleTap}
           onDoubleClick={handleDoubleTap}
+          decoding="async"
+          loading="eager"
+          onError={(e) => {
+            // iOS blob URL fallback: if blob URL fails, try original URL
+            if (cachedMediaUrl && cachedMediaUrl.startsWith('blob:') && cachedMediaUrl !== currentMedia.webContentLink) {
+              console.warn('⚠️ Image blob URL failed, falling back to original URL');
+              setCachedMediaUrl(currentMedia.webContentLink);
+            }
+          }}
           data-testid="image-viewer"
         />
       )}
@@ -663,23 +729,27 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
 
       {currentMedia.isVideo && (
         <div className={`absolute left-0 right-0 bottom-16 px-4 transition-opacity duration-200 ${showControls ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
-          <div
-            id="video-progress-bar"
-            className="relative h-1 bg-white/30 rounded-full cursor-pointer group"
-            onClick={handleProgressClick}
-            data-testid="video-progress-bar"
-          >
+          {/* Larger touch area for mobile */}
+          <div className="py-3 -my-3">
             <div
-              className="absolute top-0 left-0 h-full bg-white rounded-full transition-all"
-              style={{ width: `${videoProgress}%` }}
-            />
-            <div
-              className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity"
-              style={{ left: `${videoProgress}%`, transform: 'translate(-50%, -50%)' }}
-              onMouseDown={handleProgressDragStart}
-              onTouchStart={handleProgressDragStart}
-              data-testid="video-progress-handle"
-            />
+              id="video-progress-bar"
+              className="relative h-1 bg-white/30 rounded-full cursor-pointer group"
+              onClick={handleProgressClick}
+              onTouchStart={handleProgressTouchStart}
+              data-testid="video-progress-bar"
+            >
+              <div
+                className="absolute top-0 left-0 h-full bg-white rounded-full transition-all"
+                style={{ width: `${videoProgress}%` }}
+              />
+              {/* Always visible handle on mobile, hover-visible on desktop */}
+              <div
+                className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg cursor-grab active:cursor-grabbing md:opacity-0 md:group-hover:opacity-100 transition-opacity"
+                style={{ left: `${videoProgress}%`, transform: 'translate(-50%, -50%)' }}
+                onMouseDown={handleProgressDragStart}
+                data-testid="video-progress-handle"
+              />
+            </div>
           </div>
         </div>
       )}

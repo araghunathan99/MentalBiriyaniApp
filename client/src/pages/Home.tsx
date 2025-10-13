@@ -485,7 +485,6 @@ export default function Home() {
               src={currentMedia.webContentLink}
               controls
               autoPlay
-              muted
               playsInline
               loop
               className="max-w-full max-h-full"

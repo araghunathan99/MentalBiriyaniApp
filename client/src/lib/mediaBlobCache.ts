@@ -2,6 +2,7 @@
 const DB_NAME = 'mental-biriyani-media';
 const DB_VERSION = 1;
 const STORE_NAME = 'media-blobs';
+const MAX_CACHE_SIZE = 100 * 1024 * 1024; // 100MB limit for iOS compatibility
 
 interface CachedBlob {
   url: string;
@@ -24,6 +25,30 @@ async function requestPersistentStorage(): Promise<boolean> {
   return false;
 }
 
+// Get total cache size
+async function getCacheSize(): Promise<number> {
+  try {
+    const db = await openDB();
+    
+    return new Promise((resolve) => {
+      const transaction = db.transaction(STORE_NAME, 'readonly');
+      const store = transaction.objectStore(STORE_NAME);
+      const request = store.getAll();
+      
+      request.onsuccess = () => {
+        const items = request.result as CachedBlob[];
+        const totalSize = items.reduce((sum, item) => sum + item.blob.size, 0);
+        resolve(totalSize);
+      };
+      
+      request.onerror = () => resolve(0);
+    });
+  } catch (error) {
+    console.error('Error getting cache size:', error);
+    return 0;
+  }
+}
+
 // Check storage quota
 export async function getStorageQuota(): Promise<{ used: number; available: number; percentUsed: number } | null> {
   if ('storage' in navigator && 'estimate' in navigator.storage) {
@@ -33,7 +58,11 @@ export async function getStorageQuota(): Promise<{ used: number; available: numb
       const available = estimate.quota || 0;
       const percentUsed = available > 0 ? (used / available) * 100 : 0;
       
-      console.log(`💾 Storage: ${(used / 1024 / 1024).toFixed(2)} MB / ${(available / 1024 / 1024).toFixed(2)} MB (${percentUsed.toFixed(1)}% used)`);
+      const cacheSize = await getCacheSize();
+      const cacheMB = (cacheSize / 1024 / 1024).toFixed(2);
+      const limitMB = (MAX_CACHE_SIZE / 1024 / 1024).toFixed(0);
+      
+      console.log(`💾 Cache: ${cacheMB} MB / ${limitMB} MB | Storage: ${(used / 1024 / 1024).toFixed(2)} MB / ${(available / 1024 / 1024).toFixed(2)} MB`);
       
       return { used, available, percentUsed };
     } catch (error) {
@@ -98,6 +127,21 @@ export async function setCachedBlob(url: string, blob: Blob, mimeType: string): 
   try {
     const db = await openDB();
     
+    // Check cache size before adding
+    const currentSize = await getCacheSize();
+    
+    // If adding this blob would exceed 100MB, clear old entries first
+    if (currentSize + blob.size > MAX_CACHE_SIZE) {
+      console.log(`📦 Cache limit reached (${(currentSize / 1024 / 1024).toFixed(2)} MB), cleaning up...`);
+      await clearOldCache(3 * 24 * 60 * 60 * 1000); // Clear entries older than 3 days
+      
+      // If still over limit, clear more aggressively
+      const newSize = await getCacheSize();
+      if (newSize + blob.size > MAX_CACHE_SIZE) {
+        await clearOldCache(1 * 24 * 60 * 60 * 1000); // Clear entries older than 1 day
+      }
+    }
+    
     return new Promise(async (resolve, reject) => {
       const transaction = db.transaction(STORE_NAME, 'readwrite');
       const store = transaction.objectStore(STORE_NAME);
@@ -122,7 +166,7 @@ export async function setCachedBlob(url: string, blob: Blob, mimeType: string): 
           // Show current quota
           await getStorageQuota();
           
-          // Clear old cache entries (older than 7 days)
+          // Clear old cache entries
           await clearOldCache();
           
           // Try again
