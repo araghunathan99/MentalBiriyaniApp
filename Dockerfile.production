@@ -25,6 +25,9 @@ RUN npm ci
 # Copy application files
 COPY . .
 
+# Add node_modules/.bin to PATH so vite and esbuild can be found
+ENV PATH="/app/node_modules/.bin:$PATH"
+
 # Build the application
 RUN npm run build
 

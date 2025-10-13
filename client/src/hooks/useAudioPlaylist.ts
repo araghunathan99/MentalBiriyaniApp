@@ -106,9 +106,7 @@ export function useAudioPlaylist() {
 
   const play = useCallback(() => {
     if (audioRef.current && playlist.length > 0) {
-      audioRef.current.play().catch(err => {
-        console.error('Failed to play audio:', err);
-      });
+      // Just set isPlaying to true, let the useEffect handle playback
       setIsPlaying(true);
     }
   }, [playlist.length]);
@@ -124,8 +122,11 @@ export function useAudioPlaylist() {
   }, []);
 
   const resume = useCallback(() => {
-    play();
-  }, [play]);
+    if (audioRef.current && playlist.length > 0) {
+      // Just set isPlaying to true, let the useEffect restore position and play
+      setIsPlaying(true);
+    }
+  }, [playlist.length]);
 
   return {
     play,

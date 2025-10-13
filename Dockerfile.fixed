@@ -16,19 +16,22 @@ RUN git lfs install
 # Set working directory
 WORKDIR /app
 
+# Add node_modules/.bin to PATH
+ENV PATH="/app/node_modules/.bin:$PATH"
+
 # Copy package files
 COPY package*.json ./
 
-# Install Node.js dependencies
-RUN npm install
+# Install Node.js dependencies with verbose output
+RUN npm install --verbose
+
+# Verify node_modules exists
+RUN ls -la node_modules/.bin/ || echo "ERROR: node_modules not created"
 
 # Copy the rest of the application
 COPY . .
 
-# Add node_modules/.bin to PATH
-ENV PATH="/app/node_modules/.bin:$PATH"
-
-# Expose port 5000 (default dev server port)
+# Expose port 5000
 EXPOSE 5000
 
 # Default command runs the dev server

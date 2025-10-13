@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { toggleMediaLike, isMediaLiked } from "@/lib/localStorage";
 import type { MediaItem } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
-import { useAudioPlaylist } from "@/hooks/useAudioPlaylist";
+import { useAudio } from "@/contexts/AudioContext";
 
 interface ReelsFeedProps {
   media: MediaItem[];
@@ -31,7 +31,7 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const prefetchedRef = useRef<Set<number>>(new Set());
   const { toast } = useToast();
-  const audioPlaylist = useAudioPlaylist();
+  const audio = useAudio();
 
   const currentMedia = media[currentIndex];
 
@@ -39,7 +39,7 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
   useEffect(() => {
     // Start playing if first media is not a video
     if (!currentMedia?.isVideo) {
-      audioPlaylist.play();
+      audio.play();
     }
   }, []);
 
@@ -49,18 +49,18 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
 
     if (currentMedia.isVideo) {
       // Pause background music when showing a video
-      if (audioPlaylist.isPlaying) {
-        audioPlaylist.pause();
+      if (audio.isPlaying) {
+        audio.pause();
         console.log('🎵 Paused background music for video');
       }
     } else if (currentMedia.isImage) {
       // Resume background music when showing a photo
-      if (!audioPlaylist.isPlaying) {
-        audioPlaylist.resume();
+      if (!audio.isPlaying) {
+        audio.resume();
         console.log('🎵 Resumed background music for photo');
       }
     }
-  }, [currentMedia, audioPlaylist]);
+  }, [currentMedia?.id, currentMedia?.isVideo, currentMedia?.isImage, audio.isPlaying, audio.pause, audio.resume]);
 
   // Prefetch next 10 media items in parallel
   useEffect(() => {

@@ -8,6 +8,7 @@ import { fetchLocalMedia } from "@/lib/localMedia";
 import { Button } from "@/components/ui/button";
 import { isMediaLiked } from "@/lib/localStorage";
 import { ArrowLeft } from "lucide-react";
+import { useAudio } from "@/contexts/AudioContext";
 
 // TODO: remove mock functionality
 const mockMedia: MediaItem[] = [
@@ -151,6 +152,8 @@ export default function Home() {
   const [shuffledMedia, setShuffledMedia] = useState<MediaItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const audio = useAudio();
+  const wasPlayingBeforeLibraryRef = useRef(false);
 
   // Load media from local content folder
   useEffect(() => {
@@ -191,6 +194,25 @@ export default function Home() {
 
     loadMedia();
   }, []);
+
+  // Handle tab changes to pause/resume audio
+  useEffect(() => {
+    if (activeTab === "grid") {
+      // Switching to library - pause reels audio if playing
+      if (audio.isPlaying) {
+        wasPlayingBeforeLibraryRef.current = true;
+        audio.pause();
+        console.log('🎵 Paused reels audio for library view');
+      }
+    } else if (activeTab === "reels") {
+      // Switching back to reels - resume if was playing before
+      if (wasPlayingBeforeLibraryRef.current && !audio.isPlaying) {
+        audio.resume();
+        wasPlayingBeforeLibraryRef.current = false;
+        console.log('🎵 Resumed reels audio from library view');
+      }
+    }
+  }, [activeTab, audio]);
 
   const handleMediaClick = (index: number) => {
     if (activeTab === "grid") {
