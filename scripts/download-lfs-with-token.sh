@@ -44,8 +44,8 @@ SKIPPED=0
 # Get LFS OID and size from pointer file
 get_lfs_info() {
   local file=$1
-  local oid=$(grep "oid sha256:" "$file" | cut -d: -f3 | tr -d ' ')
-  local size=$(grep "size" "$file" | awk '{print $2}')
+  local oid=$(grep "oid sha256:" "$file" | sed 's/oid sha256://' | tr -d ' \n\r')
+  local size=$(grep "^size" "$file" | awk '{print $2}')
   echo "${oid}:${size}"
 }
 
@@ -115,15 +115,15 @@ done < <(find client/public/content -type f \( -name "*.mp4" -o -name "*.mov" -o
 
 echo ""
 echo "🎵 Downloading audio files..."
-if [ -d "content/audio" ]; then
+if [ -d "client/public/content/audio" ]; then
   while IFS= read -r file; do
     [ -f "$file" ] && download_file "$file"
-  done < <(find content/audio -type f \( -name "*.mp3" -o -name "*.wav" -o -name "*.MP3" -o -name "*.WAV" \) 2>/dev/null)
+  done < <(find client/public/content/audio -type f \( -name "*.mp3" -o -name "*.wav" -o -name "*.MP3" -o -name "*.WAV" \) 2>/dev/null)
 fi
 
 echo ""
 echo "💬 Downloading Chat.mbox..."
-[ -f "content/Chat.mbox" ] && download_file "content/Chat.mbox"
+[ -f "client/public/content/Chat.mbox" ] && download_file "client/public/content/Chat.mbox"
 
 # Summary
 echo ""

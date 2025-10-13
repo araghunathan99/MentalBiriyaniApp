@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from "react";
+import { useLocation } from "wouter";
 import ReelsFeed from "@/components/ReelsFeed";
 import GridView from "@/components/GridView";
 import BottomNav from "@/components/BottomNav";
 import type { MediaItem } from "@shared/schema";
 import { getCachedMedia, setCachedMedia, isCacheValid } from "@/lib/mediaCache";
 import { fetchLocalMedia } from "@/lib/localMedia";
+import { getStorageQuota } from "@/lib/mediaBlobCache";
 import { Button } from "@/components/ui/button";
 import { isMediaLiked } from "@/lib/localStorage";
 import { ArrowLeft } from "lucide-react";
@@ -145,8 +147,10 @@ function sortByFavorites(mediaItems: MediaItem[]): MediaItem[] {
 }
 
 export default function Home() {
+  const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState<"reels" | "grid">("reels");
   const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
+  const [reelsPosition, setReelsPosition] = useState(0);
   const [libraryViewerIndex, setLibraryViewerIndex] = useState<number | null>(null);
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [shuffledMedia, setShuffledMedia] = useState<MediaItem[]>([]);
@@ -154,6 +158,24 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const audio = useAudio();
   const wasPlayingBeforeLibraryRef = useRef(false);
+  const initialLoadRef = useRef(true);
+
+  // Redirect to landing page on hard refresh
+  useEffect(() => {
+    const SESSION_KEY = 'mental-biriyani-session-active';
+    
+    // Check if this is a fresh page load (hard refresh)
+    const isSessionActive = sessionStorage.getItem(SESSION_KEY);
+    
+    if (!isSessionActive) {
+      // First time loading the app in this session - redirect to landing
+      console.log('🔄 Fresh page load detected - redirecting to landing page');
+      setLocation('/');
+    } else {
+      // Mark session as active for subsequent navigations
+      sessionStorage.setItem(SESSION_KEY, 'true');
+    }
+  }, [setLocation]);
 
   // Load media from local content folder
   useEffect(() => {
@@ -175,7 +197,11 @@ export default function Home() {
         const mediaItems = await fetchLocalMedia();
         
         if (mediaItems.length === 0) {
-          setError('No media found in content folder');
+          // Use mock data as fallback for testing
+          console.log('⚠️  No media found, using mock data for testing');
+          setMedia(mockMedia);
+          setShuffledMedia(shuffleArray(mockMedia));
+          setCachedMedia(mockMedia);
           setIsLoading(false);
           return;
         }
@@ -184,10 +210,18 @@ export default function Home() {
         setShuffledMedia(shuffleArray(mediaItems));
         setCachedMedia(mediaItems);
         console.log(`✓ Loaded ${mediaItems.length} items from content folder`);
+        
+        // Show available storage quota
+        await getStorageQuota();
+        
         setIsLoading(false);
       } catch (err) {
         console.error('Error loading media:', err);
-        setError('Failed to load media from content folder');
+        // Use mock data as fallback
+        console.log('⚠️  Error loading media, using mock data for testing');
+        setMedia(mockMedia);
+        setShuffledMedia(shuffleArray(mockMedia));
+        setCachedMedia(mockMedia);
         setIsLoading(false);
       }
     }
@@ -213,6 +247,50 @@ export default function Home() {
       }
     }
   }, [activeTab, audio]);
+
+  // Handle browser back button
+  useEffect(() => {
+    const handleBackButton = (e: PopStateEvent) => {
+      e.preventDefault();
+      
+      // Priority order for back button:
+      // 1. If in library viewer mode, go back to library grid
+      if (libraryViewerIndex !== null) {
+        setLibraryViewerIndex(null);
+        return;
+      }
+      
+      // 2. If in library tab (not All filter), go to All filter
+      // (This would require tracking the filter state, which is in GridView)
+      
+      // 3. If in reels view and not at first item, go to previous reel
+      if (activeTab === "reels" && reelsPosition > 0) {
+        setReelsPosition(prev => Math.max(0, prev - 1));
+        return;
+      }
+      
+      // 4. If in library tab, switch to reels view
+      if (activeTab === "grid") {
+        setActiveTab("reels");
+        return;
+      }
+      
+      // 5. Default: go to landing page
+      window.history.go(-1);
+    };
+
+    // Push state on initial load to enable back button
+    if (initialLoadRef.current) {
+      window.history.pushState({ page: 'home' }, '', '');
+      initialLoadRef.current = false;
+    }
+
+    window.addEventListener('popstate', handleBackButton);
+    
+    return () => {
+      window.removeEventListener('popstate', handleBackButton);
+    };
+  }, [activeTab, reelsPosition, libraryViewerIndex]);
 
   const handleMediaClick = (index: number) => {
     if (activeTab === "grid") {
@@ -442,7 +520,11 @@ export default function Home() {
     <div className="h-screen w-full overflow-hidden bg-background">
       <div className="h-full pb-14">
         {activeTab === "reels" ? (
-          <ReelsFeed media={shuffledMedia} initialIndex={selectedMediaIndex} />
+          <ReelsFeed 
+            media={shuffledMedia} 
+            initialIndex={reelsPosition} 
+            onIndexChange={setReelsPosition}
+          />
         ) : (
           <GridView media={sortByFavorites(media)} onMediaClick={handleMediaClick} />
         )}

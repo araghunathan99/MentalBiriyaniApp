@@ -5,13 +5,15 @@ import { toggleMediaLike, isMediaLiked } from "@/lib/localStorage";
 import type { MediaItem } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { useAudio } from "@/contexts/AudioContext";
+import { fetchAndCacheMedia, prefetchMedia } from "@/lib/mediaBlobCache";
 
 interface ReelsFeedProps {
   media: MediaItem[];
   initialIndex?: number;
+  onIndexChange?: (index: number) => void;
 }
 
-export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
+export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: ReelsFeedProps) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [isLiked, setIsLiked] = useState(false);
   const [showControls, setShowControls] = useState(true);
@@ -25,6 +27,8 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
   const [isDraggingProgress, setIsDraggingProgress] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [cachedMediaUrl, setCachedMediaUrl] = useState<string>("");
+  const cachedBlobRef = useRef<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const controlsTimeoutRef = useRef<NodeJS.Timeout>();
@@ -34,6 +38,58 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
   const audio = useAudio();
 
   const currentMedia = media[currentIndex];
+
+  // Notify parent of index changes
+  useEffect(() => {
+    onIndexChange?.(currentIndex);
+  }, [currentIndex, onIndexChange]);
+
+  // Load cached media URL when current media changes
+  useEffect(() => {
+    if (!currentMedia?.webContentLink) {
+      // Revoke previous blob URL
+      if (cachedBlobRef.current && cachedBlobRef.current.startsWith('blob:')) {
+        URL.revokeObjectURL(cachedBlobRef.current);
+        cachedBlobRef.current = null;
+      }
+      setCachedMediaUrl("");
+      return;
+    }
+
+    let cancelled = false;
+    
+    fetchAndCacheMedia(currentMedia.webContentLink)
+      .then((url) => {
+        if (!cancelled) {
+          // Revoke previous blob URL before setting new one
+          if (cachedBlobRef.current && cachedBlobRef.current.startsWith('blob:') && cachedBlobRef.current !== url) {
+            URL.revokeObjectURL(cachedBlobRef.current);
+          }
+          
+          cachedBlobRef.current = url;
+          setCachedMediaUrl(url);
+        } else {
+          // If cancelled, revoke the new URL we just created
+          if (url && url.startsWith('blob:')) {
+            URL.revokeObjectURL(url);
+          }
+        }
+      })
+      .catch((error) => {
+        console.error('Error loading cached media:', error);
+        if (!cancelled) {
+          setCachedMediaUrl(currentMedia.webContentLink);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+      if (cachedBlobRef.current && cachedBlobRef.current.startsWith('blob:')) {
+        URL.revokeObjectURL(cachedBlobRef.current);
+        cachedBlobRef.current = null;
+      }
+    };
+  }, [currentMedia?.webContentLink]);
 
   // Start background music when component mounts
   useEffect(() => {
@@ -67,7 +123,7 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
 
   // Prefetch next 10 media items in parallel
   useEffect(() => {
-    const prefetchMedia = async () => {
+    const prefetchNextItems = async () => {
       const itemsToPrefetch: number[] = [];
       
       // Get indices for next 10 items (wrapping around if needed)
@@ -85,59 +141,21 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
       // Mark items as being prefetched IMMEDIATELY to prevent duplicate requests
       itemsToPrefetch.forEach(index => prefetchedRef.current.add(index));
 
-      // Prefetch in parallel
+      // Prefetch in parallel using cache system (no blob URLs created)
       const prefetchPromises = itemsToPrefetch.map(async (index) => {
         const item = media[index];
         if (!item) return;
 
         try {
-          if (item.isVideo && item.webContentLink) {
-            // Prefetch video metadata only (faster, no timeout needed)
-            const video = document.createElement('video');
-            video.preload = 'metadata';
-            video.src = item.webContentLink;
-            
-            await new Promise<void>((resolve, reject) => {
-              const timeout = setTimeout(() => {
-                console.warn(`⚠️ Prefetch timeout for video index ${index}: ${item.name}`);
-                resolve(); // Don't block on timeout
-              }, 15000); // 15 second timeout for videos
-              
-              video.addEventListener('loadedmetadata', () => {
-                clearTimeout(timeout);
-                console.log(`✓ Prefetched video metadata index ${index}: ${item.name}`);
-                resolve();
-              }, { once: true });
-              
-              video.addEventListener('error', (e) => {
-                clearTimeout(timeout);
-                console.error(`✗ Failed to prefetch video index ${index}:`, e);
-                resolve(); // Don't block on error
-              }, { once: true });
-            });
-          } else if (item.isImage && item.webContentLink) {
-            // Prefetch image
-            const img = new Image();
-            img.src = item.webContentLink;
-            
-            await new Promise<void>((resolve) => {
-              const timeout = setTimeout(() => {
-                console.warn(`⚠️ Prefetch timeout for image index ${index}: ${item.name}`);
-                resolve();
-              }, 10000); // 10 second timeout for images
-              
-              img.onload = () => {
-                clearTimeout(timeout);
-                console.log(`✓ Prefetched image index ${index}: ${item.name}`);
-                resolve();
-              };
-              
-              img.onerror = () => {
-                clearTimeout(timeout);
-                console.error(`✗ Failed to prefetch image index ${index}`);
-                resolve();
-              };
-            });
+          if (item.webContentLink) {
+            // Prefetch media (caches without creating blob URL)
+            await prefetchMedia(item.webContentLink);
+            console.log(`✓ Prefetched ${item.isVideo ? 'video' : 'image'} index ${index}: ${item.name}`);
+          }
+          if (item.thumbnailLink && item.thumbnailLink !== item.webContentLink) {
+            // Also prefetch thumbnail if different
+            await prefetchMedia(item.thumbnailLink);
+            console.log(`✓ Prefetched thumbnail index ${index}: ${item.name}`);
           }
         } catch (error) {
           console.error(`Failed to prefetch item at index ${index}:`, error);
@@ -147,7 +165,7 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
       await Promise.all(prefetchPromises);
     };
 
-    prefetchMedia();
+    prefetchNextItems();
   }, [currentIndex, media]);
 
   useEffect(() => {
@@ -540,7 +558,7 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
         <>
           <video
             ref={videoRef}
-            src={currentMedia.webContentLink}
+            src={cachedMediaUrl || currentMedia.webContentLink}
             className="w-full h-full object-contain transition-opacity duration-150 ease-in-out"
             style={{ opacity: mediaOpacity }}
             loop
@@ -570,7 +588,7 @@ export default function ReelsFeed({ media, initialIndex = 0 }: ReelsFeedProps) {
       ) : (
         <img
           ref={imageRef}
-          src={currentMedia.webContentLink}
+          src={cachedMediaUrl || currentMedia.webContentLink}
           alt={currentMedia.name}
           className="w-full h-full object-contain transition-opacity duration-150 ease-in-out"
           style={{ opacity: mediaOpacity }}

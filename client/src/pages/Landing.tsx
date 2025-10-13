@@ -86,6 +86,8 @@ export default function Landing() {
   }, []);
 
   const handleClick = () => {
+    // Mark session as active before navigating to home
+    sessionStorage.setItem('mental-biriyani-session-active', 'true');
     setLocation("/home");
   };
 

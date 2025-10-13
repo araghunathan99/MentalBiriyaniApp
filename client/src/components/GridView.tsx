@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useCachedMedia } from "@/hooks/useCachedMedia";
 
 interface GridViewProps {
   media: MediaItem[];
@@ -20,6 +21,48 @@ interface GridViewProps {
 }
 
 const CHAT_PASSWORD = "greyhound";
+
+function GridItem({ item, onClick, liked }: { item: MediaItem; onClick: () => void; liked: boolean }) {
+  const cachedUrl = useCachedMedia(item.webContentLink);
+  const cachedThumbnail = useCachedMedia(item.thumbnailLink || item.webContentLink);
+
+  return (
+    <button
+      onClick={onClick}
+      className="relative aspect-square overflow-hidden bg-card hover-elevate active-elevate-2 rounded-sm"
+      data-testid={`button-media-${item.id}`}
+    >
+      {item.isVideo ? (
+        <video
+          src={cachedUrl || item.webContentLink || ""}
+          className="w-full h-full object-cover"
+          preload="metadata"
+          muted
+          playsInline
+        />
+      ) : (
+        <img
+          src={cachedThumbnail || item.thumbnailLink || item.webContentLink || ""}
+          alt={item.name}
+          className="w-full h-full object-cover"
+          loading="lazy"
+        />
+      )}
+      
+      {item.isVideo && (
+        <div className="absolute bottom-1 right-1 bg-black/60 rounded-full p-1">
+          <Play className="h-3 w-3 text-white fill-white" />
+        </div>
+      )}
+      
+      {liked && (
+        <div className="absolute top-1 right-1 bg-black/60 rounded-full p-1">
+          <Heart className="h-3 w-3 text-destructive fill-destructive" />
+        </div>
+      )}
+    </button>
+  );
+}
 
 export default function GridView({ media, onMediaClick }: GridViewProps) {
   const [filter, setFilter] = useState<"all" | "photos" | "videos" | "songs" | "chat">("all");
@@ -118,41 +161,12 @@ export default function GridView({ media, onMediaClick }: GridViewProps) {
               const liked = isMediaLiked(item.id);
               
               return (
-                <button
+                <GridItem
                   key={item.id}
+                  item={item}
                   onClick={() => onMediaClick(originalIndex)}
-                  className="relative aspect-square overflow-hidden bg-card hover-elevate active-elevate-2 rounded-sm"
-                  data-testid={`button-media-${item.id}`}
-                >
-                  {item.isVideo ? (
-                    <video
-                      src={item.webContentLink || ""}
-                      className="w-full h-full object-cover"
-                      preload="metadata"
-                      muted
-                      playsInline
-                    />
-                  ) : (
-                    <img
-                      src={item.thumbnailLink || item.webContentLink || ""}
-                      alt={item.name}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                  )}
-                  
-                  {item.isVideo && (
-                    <div className="absolute bottom-1 right-1 bg-black/60 rounded-full p-1">
-                      <Play className="h-3 w-3 text-white fill-white" />
-                    </div>
-                  )}
-                  
-                  {liked && (
-                    <div className="absolute top-1 right-1 bg-black/60 rounded-full p-1">
-                      <Heart className="h-3 w-3 text-destructive fill-destructive" />
-                    </div>
-                  )}
-                </button>
+                  liked={liked}
+                />
               );
             })}
           </div>
