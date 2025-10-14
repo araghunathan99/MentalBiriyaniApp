@@ -86,17 +86,17 @@ export default function Landing() {
   }, []);
 
   const handleClick = () => {
-    // Mark session as active before navigating to home
+    // Mark as visited (persists across refreshes with localStorage)
     try {
-      sessionStorage.setItem('mental-biriyani-session-active', 'true');
-      console.log('✅ Landing: Session storage set, navigating to /home');
+      localStorage.setItem('mental-biriyani-visited', 'true');
+      console.log('✅ Landing: Visited flag set in localStorage, navigating to /home');
     } catch (error) {
-      console.error('❌ Landing: Failed to set session storage (iOS Private Mode?):', error);
+      console.error('❌ Landing: Failed to set localStorage (very rare):', error);
     }
     
     // iOS Safari Private Mode fallback: set global flag
     (window as any).__fromLanding = true;
-    console.log('✅ Landing: Set global flag for iOS fallback');
+    console.log('✅ Landing: Set global flag for fallback');
     
     setLocation("/home");
   };

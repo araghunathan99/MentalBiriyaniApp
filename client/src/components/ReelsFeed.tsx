@@ -47,7 +47,15 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
 
   // Load cached media URL when current media changes
   useEffect(() => {
+    console.log(`🎬 ReelsFeed: Loading media at index ${currentIndex}:`, currentMedia?.name);
+    
     if (!currentMedia?.webContentLink) {
+      console.warn('⚠️ No webContentLink for current media');
+      toast({
+        title: "No Media Link",
+        description: `No URL for media at index ${currentIndex}`,
+        variant: "destructive",
+      });
       // Revoke previous blob URL
       if (cachedBlobRef.current && cachedBlobRef.current.startsWith('blob:')) {
         URL.revokeObjectURL(cachedBlobRef.current);
@@ -59,9 +67,14 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
 
     let cancelled = false;
     
+    console.log(`📥 Fetching media: ${currentMedia.webContentLink.substring(0, 100)}`);
+    
     fetchAndCacheMedia(currentMedia.webContentLink)
       .then((url) => {
         if (!cancelled) {
+          console.log(`✓ Media loaded successfully for index ${currentIndex}`);
+          console.log(`   URL type: ${url.startsWith('blob:') ? 'blob URL' : 'direct URL'}`);
+          
           // Revoke previous blob URL before setting new one
           if (cachedBlobRef.current && cachedBlobRef.current.startsWith('blob:') && cachedBlobRef.current !== url) {
             URL.revokeObjectURL(cachedBlobRef.current);
@@ -69,7 +82,17 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
           
           cachedBlobRef.current = url;
           setCachedMediaUrl(url);
+          
+          // Show debug toast on iOS to confirm detection
+          if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+            toast({
+              title: "iOS Debug",
+              description: `Loaded ${currentIndex + 1}/${media.length} - ${url.startsWith('blob:') ? 'Blob' : 'Direct'}`,
+              duration: 2000,
+            });
+          }
         } else {
+          console.log('⚠️ Fetch was cancelled before completion');
           // If cancelled, revoke the new URL we just created
           if (url && url.startsWith('blob:')) {
             URL.revokeObjectURL(url);
@@ -77,9 +100,15 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
         }
       })
       .catch((error) => {
-        console.error('Error loading cached media:', error);
+        console.error(`❌ Error loading media at index ${currentIndex}:`, error);
         if (!cancelled) {
-          setCachedMediaUrl(currentMedia.webContentLink);
+          console.log('⚠️ Falling back to original URL');
+          toast({
+            title: "Media Load Error",
+            description: `Failed to load item ${currentIndex + 1}. Trying fallback...`,
+            variant: "destructive",
+          });
+          setCachedMediaUrl(currentMedia.webContentLink || "");
         }
       });
 
@@ -90,7 +119,7 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
         cachedBlobRef.current = null;
       }
     };
-  }, [currentMedia?.webContentLink]);
+  }, [currentMedia?.webContentLink, currentIndex, media.length, toast]);
 
   // Start background music when component mounts
   useEffect(() => {
@@ -258,7 +287,10 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
   // Auto screen rotation based on media aspect ratio
   useEffect(() => {
     const handleOrientationLock = async () => {
-      if (!('orientation' in screen) || !screen.orientation) return;
+      // Check if screen orientation API is fully supported (not on iOS)
+      if (!('orientation' in screen) || !screen.orientation || typeof screen.orientation.lock !== 'function') {
+        return; // Skip on iOS and unsupported browsers
+      }
       
       const checkAndLockOrientation = (element: HTMLVideoElement | HTMLImageElement | null) => {
         if (!element) return;
@@ -277,7 +309,13 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
           });
         } else {
           // Portrait or square media, unlock to allow natural orientation
-          screen.orientation.unlock();
+          if (typeof screen.orientation.unlock === 'function') {
+            try {
+              screen.orientation.unlock();
+            } catch (e) {
+              // Unlock may fail on some browsers
+            }
+          }
         }
       };
 
@@ -296,8 +334,12 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
 
     return () => {
       // Unlock orientation when component unmounts
-      if ('orientation' in screen && screen.orientation) {
-        screen.orientation.unlock();
+      if ('orientation' in screen && screen.orientation && typeof screen.orientation.unlock === 'function') {
+        try {
+          screen.orientation.unlock();
+        } catch (e) {
+          // Unlock may fail on some browsers (especially iOS)
+        }
       }
     };
   }, [currentMedia]);
@@ -531,7 +573,7 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
     setIsDraggingProgress(true);
     // Immediately update position on touch start
     const duration = videoRef.current?.duration;
-    if (!videoRef.current || !currentMedia?.isVideo || !isFinite(duration) || duration === 0) return;
+    if (!videoRef.current || !currentMedia?.isVideo || !duration || !isFinite(duration) || duration === 0) return;
     
     const progressBar = document.getElementById('video-progress-bar');
     if (!progressBar) return;
@@ -623,7 +665,7 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
               // iOS blob URL fallback: if blob URL fails, try original URL
               if (cachedMediaUrl && cachedMediaUrl.startsWith('blob:') && cachedMediaUrl !== currentMedia.webContentLink) {
                 console.warn('⚠️ Blob URL failed, falling back to original URL');
-                setCachedMediaUrl(currentMedia.webContentLink);
+                setCachedMediaUrl(currentMedia.webContentLink || "");
               }
             }}
             data-testid="video-player"
@@ -657,7 +699,7 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
             // iOS blob URL fallback: if blob URL fails, try original URL
             if (cachedMediaUrl && cachedMediaUrl.startsWith('blob:') && cachedMediaUrl !== currentMedia.webContentLink) {
               console.warn('⚠️ Image blob URL failed, falling back to original URL');
-              setCachedMediaUrl(currentMedia.webContentLink);
+              setCachedMediaUrl(currentMedia.webContentLink || "");
             }
           }}
           data-testid="image-viewer"

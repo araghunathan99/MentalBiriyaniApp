@@ -160,36 +160,36 @@ export default function Home() {
   const wasPlayingBeforeLibraryRef = useRef(false);
   const initialLoadRef = useRef(true);
 
-  // Redirect to landing page on hard refresh (skip on direct navigation from landing)
+  // Redirect to landing page on first visit only (use localStorage to persist across refreshes)
   useEffect(() => {
-    const SESSION_KEY = 'mental-biriyani-session-active';
+    const SESSION_KEY = 'mental-biriyani-visited';
     
     // iOS Safari Private Mode workaround: use a global flag
     const hasNavigatedFromLanding = (window as any).__fromLanding;
     
-    // Check if this is a fresh page load (hard refresh)
-    let isSessionActive = null;
+    // Check if user has visited before (persists across refreshes with localStorage)
+    let hasVisited = null;
     try {
-      isSessionActive = sessionStorage.getItem(SESSION_KEY);
-      console.log('🔍 Home: Checking session storage, value:', isSessionActive);
+      hasVisited = localStorage.getItem(SESSION_KEY);
+      console.log('🔍 Home: Checking if visited before, value:', hasVisited);
     } catch (error) {
-      console.error('❌ Home: Failed to read session storage:', error);
-      // If sessionStorage fails (iOS Private Mode), check global flag
+      console.error('❌ Home: Failed to read localStorage:', error);
+      // If localStorage fails (very rare), check global flag
       if (hasNavigatedFromLanding) {
-        console.log('✅ Home: Using fallback flag (iOS Private Mode)');
+        console.log('✅ Home: Using fallback flag (localStorage failed)');
         return;
       }
     }
     
-    if (!isSessionActive && !hasNavigatedFromLanding) {
-      // First time loading the app in this session - redirect to landing
-      console.log('🔄 Home: No session found, redirecting to landing page');
+    if (!hasVisited && !hasNavigatedFromLanding) {
+      // First time visiting the app - redirect to landing
+      console.log('🔄 Home: First visit detected, redirecting to landing page');
       setLocation('/');
       return;
     }
     
-    // Session is active or came from landing, continue loading
-    console.log('✅ Home: Session active or came from landing, loading home page');
+    // User has visited before or came from landing, continue loading
+    console.log('✅ Home: User has visited before or came from landing, loading home page');
   }, [setLocation]);
 
   // Load media from local content folder
@@ -418,7 +418,7 @@ export default function Home() {
             console.error('❌ Library: Error loading cached media:', error);
             if (!cancelled) {
               // Fallback to original URL
-              setCachedMediaUrl(currentMedia.webContentLink);
+              setCachedMediaUrl(currentMedia.webContentLink || "");
               setIsLoadingMedia(false);
               setHasMediaError(true);
             }
@@ -507,7 +507,10 @@ export default function Home() {
 
       useEffect(() => {
         const handleOrientationLock = () => {
-          if (!('orientation' in screen) || !screen.orientation) return;
+          // Check if screen orientation API is fully supported (not on iOS)
+          if (!('orientation' in screen) || !screen.orientation || typeof screen.orientation.lock !== 'function') {
+            return; // Skip on iOS and unsupported browsers
+          }
           
           const checkAndLockOrientation = (element: HTMLVideoElement | HTMLImageElement | null) => {
             if (!element) return;
@@ -520,9 +523,18 @@ export default function Home() {
             }
             
             if (aspectRatio > 1) {
-              (screen.orientation as any).lock('landscape').catch(() => {});
+              (screen.orientation as any).lock('landscape').catch(() => {
+                // Orientation lock may fail on some devices/browsers
+              });
             } else {
-              screen.orientation.unlock();
+              // Portrait or square media, unlock to allow natural orientation
+              if (typeof screen.orientation.unlock === 'function') {
+                try {
+                  screen.orientation.unlock();
+                } catch (e) {
+                  // Unlock may fail on some browsers
+                }
+              }
             }
           };
 
@@ -540,8 +552,13 @@ export default function Home() {
         handleOrientationLock();
 
         return () => {
-          if ('orientation' in screen && screen.orientation) {
-            screen.orientation.unlock();
+          // Unlock orientation when component unmounts
+          if ('orientation' in screen && screen.orientation && typeof screen.orientation.unlock === 'function') {
+            try {
+              screen.orientation.unlock();
+            } catch (e) {
+              // Unlock may fail on some browsers (especially iOS)
+            }
           }
         };
       }, [currentMedia?.isVideo]);
@@ -568,7 +585,7 @@ export default function Home() {
                 // iOS blob URL fallback: if blob URL fails, try original URL
                 if (cachedMediaUrl && cachedMediaUrl.startsWith('blob:') && cachedMediaUrl !== currentMedia.webContentLink) {
                   console.warn('⚠️ Library: Blob URL failed, falling back to original URL');
-                  setCachedMediaUrl(currentMedia.webContentLink);
+                  setCachedMediaUrl(currentMedia.webContentLink || "");
                 } else {
                   setHasMediaError(true);
                 }
@@ -590,7 +607,7 @@ export default function Home() {
                 // iOS blob URL fallback: if blob URL fails, try original URL
                 if (cachedMediaUrl && cachedMediaUrl.startsWith('blob:') && cachedMediaUrl !== currentMedia.webContentLink) {
                   console.warn('⚠️ Library: Video blob URL failed, falling back to original URL');
-                  setCachedMediaUrl(currentMedia.webContentLink);
+                  setCachedMediaUrl(currentMedia.webContentLink || "");
                 } else {
                   setHasMediaError(true);
                 }

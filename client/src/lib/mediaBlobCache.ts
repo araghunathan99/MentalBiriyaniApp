@@ -269,19 +269,27 @@ export async function prefetchMedia(url: string): Promise<void> {
 
 // Fetch and cache media (creates blob URL for immediate use)
 export async function fetchAndCacheMedia(url: string): Promise<string> {
+  console.log('📥 fetchAndCacheMedia called for:', url.substring(0, 100));
+  
   // On iOS Safari, bypass caching entirely and stream directly
-  if (isIOSSafari()) {
-    console.log('🍎 iOS Safari - streaming media directly (no cache)');
+  const iosDetected = isIOSSafari();
+  console.log(`🔍 iOS Detection: ${iosDetected} | UA: ${navigator.userAgent.substring(0, 100)}`);
+  
+  if (iosDetected) {
+    console.log('🍎 iOS/iPadOS detected - streaming media directly (no cache)');
     return url;
   }
   
   // Check cache first
+  console.log('💾 Checking cache...');
   const cached = await getCachedBlob(url);
   if (cached) {
+    console.log('✓ Found in cache');
     return cached;
   }
   
   // Fetch from network
+  console.log('🌐 Fetching from network...');
   try {
     const response = await fetch(url);
     if (!response.ok) throw new Error(`Failed to fetch: ${response.status}`);
@@ -295,15 +303,17 @@ export async function fetchAndCacheMedia(url: string): Promise<string> {
       return url;
     }
     
+    console.log(`✓ Fetched ${(blob.size / 1024).toFixed(2)} KB, caching...`);
+    
     // Cache the blob
     await setCachedBlob(url, blob, mimeType);
     
     // Return object URL
     const objectUrl = URL.createObjectURL(blob);
-    console.log(`✓ Fetched and cached: ${(blob.size / 1024).toFixed(2)} KB`);
+    console.log(`✓ Created blob URL: ${objectUrl}`);
     return objectUrl;
   } catch (error) {
-    console.error('Error fetching media:', error);
+    console.error('❌ Error fetching media:', error);
     // Return original URL as fallback
     return url;
   }
