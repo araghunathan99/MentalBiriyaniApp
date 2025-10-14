@@ -62,11 +62,6 @@ export function useAudioPlaylist() {
     if (!audioRef.current) {
       audioRef.current = new Audio();
       audioRef.current.volume = 0.3; // Set volume to 30%
-      
-      // Auto-play next track when current one ends
-      audioRef.current.addEventListener('ended', () => {
-        setCurrentTrackIndex(prev => (prev + 1) % playlist.length);
-      });
     }
 
     return () => {
@@ -75,6 +70,24 @@ export function useAudioPlaylist() {
         audioRef.current.src = '';
       }
     };
+  }, []);
+
+  // Handle auto-play next track when current one ends
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || playlist.length === 0) return;
+
+    const handleEnded = () => {
+      console.log('🎵 Track ended, advancing to next track');
+      setCurrentTrackIndex(prev => {
+        const nextIndex = (prev + 1) % playlist.length;
+        console.log(`🎵 Next track index: ${nextIndex} (total: ${playlist.length})`);
+        return nextIndex;
+      });
+    };
+
+    audio.addEventListener('ended', handleEnded);
+    return () => audio.removeEventListener('ended', handleEnded);
   }, [playlist.length]);
 
   // Load and play current track

@@ -59,13 +59,26 @@ export default function SongsView() {
   // Initialize audio element
   useEffect(() => {
     if (!audioRef.current) {
+      console.log('🎵 SongsView: Initializing audio element');
       audioRef.current = new Audio();
       audioRef.current.volume = 0.5;
       audioRef.current.preload = 'auto';
+      
+      // Add general error handler
+      audioRef.current.addEventListener('error', (e) => {
+        const target = e.target as HTMLAudioElement;
+        console.error('🎵 SongsView: Audio element error:', {
+          error: target.error,
+          src: target.src,
+          networkState: target.networkState,
+          readyState: target.readyState
+        });
+      });
     }
 
     return () => {
       if (audioRef.current) {
+        console.log('🎵 SongsView: Cleaning up audio element');
         audioRef.current.pause();
         audioRef.current.src = '';
       }
@@ -78,19 +91,27 @@ export default function SongsView() {
     if (!audio) return;
 
     const handleEnded = () => {
+      console.log('🎵 SongsView: Track ended in playlist mode');
       if (isPlaylistMode && playlistSongs.length > 0) {
-        const nextIndex = (currentPlaylistIndex + 1) % playlistSongs.length;
-        setCurrentPlaylistIndex(nextIndex);
-        const nextSong = playlistSongs[nextIndex];
-        if (nextSong) {
-          playSong(nextSong.id);
-        }
+        // Clear current playing song to prevent toggle behavior
+        setCurrentPlayingSong(null);
+        
+        setCurrentPlaylistIndex(prev => {
+          const nextIndex = (prev + 1) % playlistSongs.length;
+          console.log(`🎵 SongsView: Advancing to next track ${nextIndex + 1}/${playlistSongs.length}`);
+          const nextSong = playlistSongs[nextIndex];
+          if (nextSong) {
+            // Play next song asynchronously
+            setTimeout(() => playSong(nextSong.id), 100);
+          }
+          return nextIndex;
+        });
       }
     };
 
     audio.addEventListener('ended', handleEnded);
     return () => audio.removeEventListener('ended', handleEnded);
-  }, [isPlaylistMode, playlistSongs, currentPlaylistIndex]);
+  }, [isPlaylistMode, playlistSongs]);
 
   const playSong = async (songId: string) => {
     // Search in both main songs list and playlist songs

@@ -11,6 +11,23 @@ interface CachedBlob {
   mimeType: string;
 }
 
+// Detect iOS/iPadOS (any browser) - ALL iOS browsers use WebKit and have IndexedDB blob corruption bug
+function isIOSSafari(): boolean {
+  const ua = navigator.userAgent;
+  
+  // Check for traditional iOS devices (iPhone, iPad, iPod)
+  const isIOS = /iPad|iPhone|iPod/.test(ua);
+  
+  // Check for iPadOS (reports as Mac but has touch support)
+  const isMac = /Macintosh/.test(ua);
+  const hasTouchPoints = navigator.maxTouchPoints && navigator.maxTouchPoints > 1;
+  const isIPadOS = isMac && hasTouchPoints;
+  
+  // All browsers on iOS use WebKit (Apple requirement), so they all have the bug
+  // This includes Safari, Chrome (CriOS), Firefox, Edge, etc.
+  return isIOS || isIPadOS;
+}
+
 // Request persistent storage (prevents browser from deleting data)
 async function requestPersistentStorage(): Promise<boolean> {
   if ('storage' in navigator && 'persist' in navigator.storage) {
@@ -95,6 +112,12 @@ async function openDB(): Promise<IDBDatabase> {
 
 // Get cached blob from IndexedDB
 export async function getCachedBlob(url: string): Promise<string | null> {
+  // Skip IndexedDB on iOS Safari due to blob corruption bug
+  if (isIOSSafari()) {
+    console.log('🍎 iOS Safari detected - skipping IndexedDB cache');
+    return null;
+  }
+  
   try {
     const db = await openDB();
     
@@ -106,8 +129,16 @@ export async function getCachedBlob(url: string): Promise<string | null> {
       request.onsuccess = () => {
         const cached = request.result as CachedBlob | undefined;
         if (cached) {
+          // Verify blob is not corrupted (iOS Safari bug check)
+          if (cached.blob.size === 0) {
+            console.warn('⚠️ Corrupted blob detected (0 bytes), skipping cache');
+            resolve(null);
+            return;
+          }
+          
           // Create object URL from blob
           const objectUrl = URL.createObjectURL(cached.blob);
+          console.log(`✓ Retrieved from cache: ${(cached.blob.size / 1024).toFixed(2)} KB`);
           resolve(objectUrl);
         } else {
           resolve(null);
@@ -124,6 +155,11 @@ export async function getCachedBlob(url: string): Promise<string | null> {
 
 // Cache blob to IndexedDB with quota error handling
 export async function setCachedBlob(url: string, blob: Blob, mimeType: string): Promise<void> {
+  // Skip caching on iOS Safari due to blob corruption bug
+  if (isIOSSafari()) {
+    return;
+  }
+  
   try {
     const db = await openDB();
     
@@ -196,6 +232,11 @@ export async function setCachedBlob(url: string, blob: Blob, mimeType: string): 
 
 // Prefetch media (cache without creating blob URL - for background prefetching)
 export async function prefetchMedia(url: string): Promise<void> {
+  // Skip prefetching on iOS Safari due to blob corruption bug
+  if (isIOSSafari()) {
+    return;
+  }
+  
   try {
     const db = await openDB();
     
@@ -228,6 +269,12 @@ export async function prefetchMedia(url: string): Promise<void> {
 
 // Fetch and cache media (creates blob URL for immediate use)
 export async function fetchAndCacheMedia(url: string): Promise<string> {
+  // On iOS Safari, bypass caching entirely and stream directly
+  if (isIOSSafari()) {
+    console.log('🍎 iOS Safari - streaming media directly (no cache)');
+    return url;
+  }
+  
   // Check cache first
   const cached = await getCachedBlob(url);
   if (cached) {
@@ -242,11 +289,19 @@ export async function fetchAndCacheMedia(url: string): Promise<string> {
     const blob = await response.blob();
     const mimeType = response.headers.get('content-type') || blob.type;
     
+    // Verify blob is valid before caching
+    if (blob.size === 0) {
+      console.warn('⚠️ Received empty blob, using original URL');
+      return url;
+    }
+    
     // Cache the blob
     await setCachedBlob(url, blob, mimeType);
     
     // Return object URL
-    return URL.createObjectURL(blob);
+    const objectUrl = URL.createObjectURL(blob);
+    console.log(`✓ Fetched and cached: ${(blob.size / 1024).toFixed(2)} KB`);
+    return objectUrl;
   } catch (error) {
     console.error('Error fetching media:', error);
     // Return original URL as fallback
