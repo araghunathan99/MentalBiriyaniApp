@@ -27,7 +27,14 @@ export function useAudioPlaylist() {
   useEffect(() => {
     async function loadAudioPlaylist() {
       try {
-        const response = await fetch(getFullPath('content/audio/audio-list.json'));
+        const cacheBuster = Date.now();
+        const response = await fetch(getFullPath(`content/audio/audio-list.json?t=${cacheBuster}`), {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+          },
+        });
         if (!response.ok) {
           console.error('Failed to load audio list for playlist');
           return;

@@ -39,7 +39,13 @@ export default function ChatView() {
         const url = getFullPath(`content/chat-list.json?v=${timestamp}`);
         console.log('🔄 ChatView: Fetching from:', url);
         
-        const response = await fetch(url);
+        const response = await fetch(url, {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+          },
+        });
         console.log('🔄 ChatView: Response status:', response.status);
         
         if (!response.ok) {

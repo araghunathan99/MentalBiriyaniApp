@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useCachedMedia } from "@/hooks/useCachedMedia";
 
 interface GridViewProps {
   media: MediaItem[];
@@ -23,9 +22,6 @@ interface GridViewProps {
 const CHAT_PASSWORD = "greyhound";
 
 function GridItem({ item, onClick, liked }: { item: MediaItem; onClick: () => void; liked: boolean }) {
-  const cachedUrl = useCachedMedia(item.webContentLink);
-  const cachedThumbnail = useCachedMedia(item.thumbnailLink || item.webContentLink);
-
   return (
     <button
       onClick={onClick}
@@ -33,7 +29,7 @@ function GridItem({ item, onClick, liked }: { item: MediaItem; onClick: () => vo
       data-testid={`button-media-${item.id}`}
     >
       <img
-        src={cachedThumbnail || item.thumbnailLink || item.webContentLink || ""}
+        src={item.thumbnailLink || item.webContentLink || ""}
         alt={item.name}
         className="w-full h-full object-cover"
         loading="lazy"

@@ -375,7 +375,22 @@ export default function Home() {
       const [cachedMediaUrl, setCachedMediaUrl] = useState<string>("");
       const [isLoadingMedia, setIsLoadingMedia] = useState(true);
       const [hasMediaError, setHasMediaError] = useState(false);
+      const [slideDirection, setSlideDirection] = useState<'up' | 'down' | null>(null);
       const cachedBlobRef = useRef<string | null>(null);
+      const prevIndexRef = useRef<number>(libraryViewerIndex);
+
+      // Track direction for animations
+      useEffect(() => {
+        if (prevIndexRef.current !== libraryViewerIndex) {
+          const direction = libraryViewerIndex > prevIndexRef.current ? 'down' : 'up';
+          setSlideDirection(direction);
+          prevIndexRef.current = libraryViewerIndex;
+          
+          // Reset animation after it completes
+          const timer = setTimeout(() => setSlideDirection(null), 400);
+          return () => clearTimeout(timer);
+        }
+      }, [libraryViewerIndex]);
 
       // Load cached media URL when current media changes
       useEffect(() => {
@@ -575,10 +590,15 @@ export default function Home() {
           )}
           {!isLoadingMedia && cachedMediaUrl && currentMedia.isImage && (
             <img
+              key={libraryViewerIndex}
               ref={imageRef}
               src={cachedMediaUrl}
               alt={currentMedia.name}
-              className="max-w-full max-h-full object-contain"
+              className={`max-w-full max-h-full object-contain transition-all duration-200 ${
+                slideDirection === 'down' ? 'animate-slide-up' : 
+                slideDirection === 'up' ? 'animate-slide-down' : 
+                'opacity-100'
+              }`}
               data-testid={`img-library-media-${currentMedia.id}`}
               onError={(e) => {
                 console.error('❌ Library: Image error');
@@ -594,13 +614,18 @@ export default function Home() {
           )}
           {!isLoadingMedia && cachedMediaUrl && currentMedia.isVideo && (
             <video
+              key={libraryViewerIndex}
               ref={videoRef}
               src={cachedMediaUrl}
               controls
               autoPlay
               playsInline
               loop
-              className="max-w-full max-h-full"
+              className={`max-w-full max-h-full transition-all duration-200 ${
+                slideDirection === 'down' ? 'animate-slide-up' : 
+                slideDirection === 'up' ? 'animate-slide-down' : 
+                'opacity-100'
+              }`}
               data-testid={`video-library-media-${currentMedia.id}`}
               onError={(e) => {
                 console.error('❌ Library: Video playback error:', e);
