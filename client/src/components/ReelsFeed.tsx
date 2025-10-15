@@ -82,15 +82,6 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
           
           cachedBlobRef.current = url;
           setCachedMediaUrl(url);
-          
-          // Show debug toast on iOS to confirm detection
-          if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
-            toast({
-              title: "iOS Debug",
-              description: `Loaded ${currentIndex + 1}/${media.length} - ${url.startsWith('blob:') ? 'Blob' : 'Direct'}`,
-              duration: 2000,
-            });
-          }
         } else {
           console.log('⚠️ Fetch was cancelled before completion');
           // If cancelled, revoke the new URL we just created
@@ -288,7 +279,7 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
   useEffect(() => {
     const handleOrientationLock = async () => {
       // Check if screen orientation API is fully supported (not on iOS)
-      if (!('orientation' in screen) || !screen.orientation || typeof screen.orientation.lock !== 'function') {
+      if (!('orientation' in screen) || !screen.orientation || typeof (screen.orientation as any).lock !== 'function') {
         return; // Skip on iOS and unsupported browsers
       }
       
@@ -309,9 +300,9 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
           });
         } else {
           // Portrait or square media, unlock to allow natural orientation
-          if (typeof screen.orientation.unlock === 'function') {
+          if (typeof (screen.orientation as any).unlock === 'function') {
             try {
-              screen.orientation.unlock();
+              (screen.orientation as any).unlock();
             } catch (e) {
               // Unlock may fail on some browsers
             }

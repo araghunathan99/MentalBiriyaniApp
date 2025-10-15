@@ -508,7 +508,7 @@ export default function Home() {
       useEffect(() => {
         const handleOrientationLock = () => {
           // Check if screen orientation API is fully supported (not on iOS)
-          if (!('orientation' in screen) || !screen.orientation || typeof screen.orientation.lock !== 'function') {
+          if (!('orientation' in screen) || !screen.orientation || typeof (screen.orientation as any).lock !== 'function') {
             return; // Skip on iOS and unsupported browsers
           }
           
@@ -528,9 +528,9 @@ export default function Home() {
               });
             } else {
               // Portrait or square media, unlock to allow natural orientation
-              if (typeof screen.orientation.unlock === 'function') {
+              if (typeof (screen.orientation as any).unlock === 'function') {
                 try {
-                  screen.orientation.unlock();
+                  (screen.orientation as any).unlock();
                 } catch (e) {
                   // Unlock may fail on some browsers
                 }
@@ -628,7 +628,7 @@ export default function Home() {
 
     return (
       <div className="h-screen w-full bg-background flex flex-col">
-        <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-xl border-b border-border px-4 py-3">
+        <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-xl border-b border-border px-4 py-3 pt-safe">
           <button
             onClick={handleBackToLibrary}
             className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-foreground bg-secondary rounded-md hover-elevate active-elevate-2"

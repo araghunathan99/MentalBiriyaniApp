@@ -235,7 +235,7 @@ export default function SongsView() {
     <div className="flex flex-col h-full bg-background">
       {/* Selection Controls */}
       {selectedSongs.size > 0 && (
-        <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-xl border-b border-border">
+        <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-xl border-b border-border pt-safe">
           <div className="flex items-center justify-between p-3">
             <span className="text-sm text-muted-foreground">
               {selectedSongs.size} song{selectedSongs.size > 1 ? 's' : ''} selected

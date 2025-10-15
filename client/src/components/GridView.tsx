@@ -32,23 +32,13 @@ function GridItem({ item, onClick, liked }: { item: MediaItem; onClick: () => vo
       className="relative aspect-square overflow-hidden bg-card hover-elevate active-elevate-2 rounded-sm"
       data-testid={`button-media-${item.id}`}
     >
-      {item.isVideo ? (
-        <video
-          src={cachedUrl || item.webContentLink || ""}
-          className="w-full h-full object-cover"
-          preload="metadata"
-          muted
-          playsInline
-        />
-      ) : (
-        <img
-          src={cachedThumbnail || item.thumbnailLink || item.webContentLink || ""}
-          alt={item.name}
-          className="w-full h-full object-cover"
-          loading="lazy"
-          decoding="async"
-        />
-      )}
+      <img
+        src={cachedThumbnail || item.thumbnailLink || item.webContentLink || ""}
+        alt={item.name}
+        className="w-full h-full object-cover"
+        loading="lazy"
+        decoding="async"
+      />
       
       {item.isVideo && (
         <div className="absolute bottom-1 right-1 bg-black/60 rounded-full p-1">
@@ -81,7 +71,7 @@ export default function GridView({ media, onMediaClick }: GridViewProps) {
 
   return (
     <div className="flex flex-col h-full bg-background">
-      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-xl border-b border-border">
+      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-xl border-b border-border pt-safe">
         <div className="flex gap-2 p-3 overflow-x-auto scrollbar-hide">
           <button
             onClick={() => setFilter("all")}

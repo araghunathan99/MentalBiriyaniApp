@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useLocation } from "wouter";
 import { ArrowLeft, Heart, Share2, Download } from "lucide-react";
-import { MediaItem } from "@/lib/types";
+import type { MediaItem } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { isMediaLiked, toggleMediaLike } from "@/lib/localStorage";
 import { useState } from "react";
@@ -79,7 +79,7 @@ export default function ShareView() {
 
   return (
     <div className="h-screen w-full bg-background flex flex-col">
-      <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border px-4 py-3 flex items-center justify-between">
+      <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border px-4 py-3 pt-safe flex items-center justify-between">
         <button
           onClick={() => setLocation("/")}
           className="flex items-center gap-2 text-foreground hover-elevate active-elevate-2 px-3 py-2 rounded-md"

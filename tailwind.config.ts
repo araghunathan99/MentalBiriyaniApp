@@ -103,5 +103,24 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
+  plugins: [
+    require("tailwindcss-animate"), 
+    require("@tailwindcss/typography"),
+    function({ addUtilities }: any) {
+      addUtilities({
+        '.pt-safe': {
+          'padding-top': 'env(safe-area-inset-top, 0px)',
+        },
+        '.pb-safe': {
+          'padding-bottom': 'env(safe-area-inset-bottom, 0px)',
+        },
+        '.pl-safe': {
+          'padding-left': 'env(safe-area-inset-left, 0px)',
+        },
+        '.pr-safe': {
+          'padding-right': 'env(safe-area-inset-right, 0px)',
+        },
+      });
+    },
+  ],
 } satisfies Config;
