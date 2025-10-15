@@ -14,6 +14,7 @@ const __dirname = path.dirname(__filename);
 
 const CONTENT_DIR = path.join(__dirname, '../client/public/content');
 const AUDIO_DIR = path.join(CONTENT_DIR, 'audio');
+const THUMBNAILS_DIR = path.join(CONTENT_DIR, 'thumbnails');
 
 // MIME type mapping
 const MIME_TYPES = {
@@ -78,11 +79,17 @@ function generateMediaList() {
     const stats = getFileStats(filePath);
     const mimeType = getMimeType(file);
     const name = path.basename(file, path.extname(file));
+    
+    // Check if thumbnail exists
+    const thumbnailFilename = `${name}_thumb.jpg`;
+    const thumbnailPath = path.join(THUMBNAILS_DIR, thumbnailFilename);
+    const hasThumbnail = fs.existsSync(thumbnailPath);
 
     return {
       id: String(index + 1),
       name,
       file,
+      thumbnail: hasThumbnail ? `thumbnails/${thumbnailFilename}` : null,
       mimeType,
       createdTime: stats.createdTime,
       modifiedTime: stats.modifiedTime,

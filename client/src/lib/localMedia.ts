@@ -5,6 +5,7 @@ interface LocalMediaItem {
   id: string;
   name: string;
   file: string;
+  thumbnail?: string | null;
   mimeType: string;
   createdTime: string;
   modifiedTime: string;
@@ -69,7 +70,11 @@ export async function fetchLocalMedia(): Promise<MediaItem[]> {
       id: item.id,
       name: item.name,
       mimeType: item.mimeType,
-      thumbnailLink: getFullPath(`content/${item.file}`),
+      // Use thumbnail for thumbnailLink if available, otherwise use full media
+      thumbnailLink: item.thumbnail 
+        ? getFullPath(`content/${item.thumbnail}`) 
+        : getFullPath(`content/${item.file}`),
+      // Always use full media for webContentLink
       webContentLink: getFullPath(`content/${item.file}`),
       webViewLink: getFullPath(`content/${item.file}`),
       modifiedTime: item.modifiedTime || new Date().toISOString(),

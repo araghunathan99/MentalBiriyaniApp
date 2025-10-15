@@ -44,7 +44,7 @@ for arg in "$@"; do
 done
 
 # Download LFS files if needed
-echo "📥 Step 1/8: Downloading Git LFS files..."
+echo "📥 Step 1/9: Downloading Git LFS files..."
 if python3 scripts/download-lfs-files.py; then
   echo "✓ LFS files downloaded successfully"
 else
@@ -54,7 +54,7 @@ echo ""
 
 # Convert videos to MP4 (720p max)
 if [ "$SKIP_VIDEO" = false ]; then
-  echo "🎬 Step 2/8: Converting videos to MP4 (H.264, 720p)..."
+  echo "🎬 Step 2/9: Converting videos to MP4 (H.264, 720p)..."
   if node scripts/convert-videos.js 2>&1 | tee video-conversion.log; then
     echo "✓ Video conversion complete"
   else
@@ -62,32 +62,37 @@ if [ "$SKIP_VIDEO" = false ]; then
   fi
   echo ""
 else
-  echo "⏭️  Step 2/8: Skipping video conversion (--skip-video flag)"
+  echo "⏭️  Step 2/9: Skipping video conversion (--skip-video flag)"
   echo ""
 fi
 
+# Generate thumbnails for all media
+echo "🖼️  Step 3/9: Generating thumbnails for media files..."
+node scripts/generate-thumbnails.js
+echo ""
+
 # Generate content lists (media, audio, chat)
-echo "📋 Step 3/8: Generating content lists..."
+echo "📋 Step 4/9: Generating content lists..."
 node scripts/generate-content-lists.js
 echo ""
 
 # Parse chat conversations
-echo "💬 Step 4/8: Parsing chat conversations..."
+echo "💬 Step 5/9: Parsing chat conversations..."
 node scripts/parse-chat.js
 echo ""
 
 # Build the app with Vite
-echo "📦 Step 5/8: Building app with Vite..."
+echo "📦 Step 6/9: Building app with Vite..."
 npm run build
 echo ""
 
 # Fix paths for GitHub Pages base path
-echo "🔧 Step 6/8: Fixing asset paths for /MentalBiriyani/ base..."
+echo "🔧 Step 7/9: Fixing asset paths for /MentalBiriyani/ base..."
 node scripts/fix-github-pages-paths.js
 echo ""
 
 # Copy static assets to dist
-echo "📁 Step 7/8: Copying static assets..."
+echo "📁 Step 8/9: Copying static assets..."
 cp -r client/public/content dist/public/
 cp client/public/manifest.json client/public/sw.js dist/public/
 cp client/public/icon-*.png client/public/apple-touch-icon.png client/public/favicon.ico client/public/og-image.png dist/public/
@@ -95,7 +100,7 @@ touch dist/public/.nojekyll
 echo ""
 
 # Add cache-busting version parameters
-echo "🔄 Step 8/8: Adding cache-busting version..."
+echo "🔄 Step 9/9: Adding cache-busting version..."
 node scripts/add-cache-busting.js
 echo ""
 
