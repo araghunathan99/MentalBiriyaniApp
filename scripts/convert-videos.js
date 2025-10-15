@@ -6,7 +6,7 @@ import { join } from 'path';
 
 const CONTENT_DIR = 'client/public/content';
 const MEDIA_LIST_PATH = join(CONTENT_DIR, 'media-list.json');
-const MAX_FILE_SIZE_MB = 100;
+const MAX_FILE_SIZE_MB = 50;
 
 // Video formats to convert to MP4
 const VIDEO_FORMATS = ['.mov', '.avi', '.mkv', '.webm', '.flv', '.wmv', '.m4v', '.mpeg', '.mpg', '.3gp', '.ogv'];

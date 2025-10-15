@@ -80,7 +80,7 @@ function isLFSPointer(filePath) {
  */
 async function generateVideoThumbnail(inputPath, outputPath) {
   // Extract frame at 3 seconds with 400x400 size
-  const command = `ffmpeg -ss 00:00:03 -i "${inputPath}" -vf "scale=400:400:force_original_aspect_ratio=decrease,pad=400:400:(ow-iw)/2:(oh-ih)/2" -frames:v 1 -q:v 2 -y "${outputPath}"`;
+  const command = `ffmpeg -ss 00:00:01 -i "${inputPath}" -vf "scale=400:400:force_original_aspect_ratio=decrease,pad=400:400:(ow-iw)/2:(oh-ih)/2" -frames:v 1 -q:v 2 -y "${outputPath}"`;
   
   try {
     await execAsync(command);
