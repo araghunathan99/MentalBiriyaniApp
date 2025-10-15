@@ -22,7 +22,7 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
   const [isMuted, setIsMuted] = useState(true);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
-  const [mediaOpacity, setMediaOpacity] = useState(1);
+  const [slideDirection, setSlideDirection] = useState<'up' | 'down' | null>(null);
   const isTransitioningRef = useRef(false);
   const [videoProgress, setVideoProgress] = useState(0);
   const [isDraggingProgress, setIsDraggingProgress] = useState(false);
@@ -417,38 +417,34 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
     if (isTransitioningRef.current) return;
     
     isTransitioningRef.current = true;
-    setMediaOpacity(0);
+    setCurrentIndex((prev) => {
+      const next = (prev + 1) % media.length;
+      console.log(`➡️ Next: ${prev} → ${next} | ${media[next]?.name}`);
+      return next;
+    });
+    setSlideDirection('down');
     
     setTimeout(() => {
-      setCurrentIndex((prev) => {
-        const next = (prev + 1) % media.length;
-        console.log(`➡️ Next: ${prev} → ${next} | ${media[next]?.name}`);
-        return next;
-      });
-      setTimeout(() => {
-        setMediaOpacity(1);
-        isTransitioningRef.current = false;
-      }, 30);
-    }, 150);
+      setSlideDirection(null);
+      isTransitioningRef.current = false;
+    }, 200);
   };
 
   const handlePrevious = () => {
     if (isTransitioningRef.current) return;
     
     isTransitioningRef.current = true;
-    setMediaOpacity(0);
+    setCurrentIndex((prev) => {
+      const next = (prev - 1 + media.length) % media.length;
+      console.log(`⬅️ Previous: ${prev} → ${next} | ${media[next]?.name}`);
+      return next;
+    });
+    setSlideDirection('up');
     
     setTimeout(() => {
-      setCurrentIndex((prev) => {
-        const next = (prev - 1 + media.length) % media.length;
-        console.log(`⬅️ Previous: ${prev} → ${next} | ${media[next]?.name}`);
-        return next;
-      });
-      setTimeout(() => {
-        setMediaOpacity(1);
-        isTransitioningRef.current = false;
-      }, 30);
-    }, 150);
+      setSlideDirection(null);
+      isTransitioningRef.current = false;
+    }, 200);
   };
 
   const handleLike = () => {
@@ -640,10 +636,14 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
       {currentMedia.isVideo ? (
         <>
           <video
+            key={currentIndex}
             ref={videoRef}
             src={cachedMediaUrl || currentMedia.webContentLink}
-            className="w-full h-full object-contain transition-opacity duration-150 ease-in-out"
-            style={{ opacity: mediaOpacity }}
+            className={`w-full h-full object-contain transition-all duration-200 ${
+              slideDirection === 'down' ? 'animate-slide-up' : 
+              slideDirection === 'up' ? 'animate-slide-down' : 
+              'opacity-100'
+            }`}
             loop
             muted={isMuted}
             playsInline
@@ -677,11 +677,15 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
         </>
       ) : (
         <img
+          key={currentIndex}
           ref={imageRef}
           src={cachedMediaUrl || currentMedia.webContentLink}
           alt={currentMedia.name}
-          className="w-full h-full object-contain transition-opacity duration-150 ease-in-out"
-          style={{ opacity: mediaOpacity }}
+          className={`w-full h-full object-contain transition-all duration-200 ${
+            slideDirection === 'down' ? 'animate-slide-up' : 
+            slideDirection === 'up' ? 'animate-slide-down' : 
+            'opacity-100'
+          }`}
           onClick={handleTap}
           onDoubleClick={handleDoubleTap}
           decoding="async"
