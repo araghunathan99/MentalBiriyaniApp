@@ -480,7 +480,7 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
         setTimeout(() => {
           setSlideDirection(null);
           isTransitioningRef.current = false;
-        }, 250);
+        }, 350);
       });
     });
   };
@@ -506,7 +506,7 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
         setTimeout(() => {
           setSlideDirection(null);
           isTransitioningRef.current = false;
-        }, 250);
+        }, 350);
       });
     });
   };
@@ -602,9 +602,12 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
     
     const swipeDistance = touchStartRef.current - touchEndRef.current;
     
-    // Reduced threshold for faster, more responsive swipes (50px)
-    // Ignore very small movements (likely accidental touches)
-    if (Math.abs(swipeDistance) > 50) {
+    // iOS devices require more deliberate swipes for better control
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const swipeThreshold = isIOS ? 75 : 50;
+    
+    if (Math.abs(swipeDistance) > swipeThreshold) {
       if (swipeDistance > 0) {
         // Swipe up - show next
         handleNext();
