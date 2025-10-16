@@ -30,6 +30,7 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
   const [hasError, setHasError] = useState(false);
   const [cachedMediaUrl, setCachedMediaUrl] = useState<string>("");
   const cachedBlobRef = useRef<string | null>(null);
+  const hasTriedFallbackRef = useRef(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const controlsTimeoutRef = useRef<NodeJS.Timeout>();
@@ -48,6 +49,9 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
   // Load cached media URL when current media changes
   useEffect(() => {
     console.log(`🎬 ReelsFeed: Loading media at index ${currentIndex}:`, currentMedia?.name);
+    
+    // Reset fallback tracker for new media
+    hasTriedFallbackRef.current = false;
     
     if (!currentMedia?.webContentLink) {
       console.warn('⚠️ No webContentLink for current media');
@@ -232,13 +236,19 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
 
     const handleError = (e: Event) => {
       console.error('✗ Video error:', e);
-      setHasError(true);
-      setIsBuffering(false);
-      toast({
-        title: "Video Error",
-        description: "Failed to load video. Please try the next one.",
-        variant: "destructive",
-      });
+      
+      // Only show error if we've already tried the fallback URL
+      if (hasTriedFallbackRef.current) {
+        setHasError(true);
+        setIsBuffering(false);
+        toast({
+          title: "Video Error",
+          description: "Failed to load video. Please try the next one.",
+          variant: "destructive",
+        });
+      } else {
+        console.log('⚠️ First error - will try fallback if blob URL');
+      }
     };
 
     const handleStalled = () => {
@@ -656,7 +666,10 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
               // iOS blob URL fallback: if blob URL fails, try original URL
               if (cachedMediaUrl && cachedMediaUrl.startsWith('blob:') && cachedMediaUrl !== currentMedia.webContentLink) {
                 console.warn('⚠️ Blob URL failed, falling back to original URL');
+                hasTriedFallbackRef.current = true;
                 setCachedMediaUrl(currentMedia.webContentLink || "");
+              } else {
+                hasTriedFallbackRef.current = true;
               }
             }}
             data-testid="video-player"
