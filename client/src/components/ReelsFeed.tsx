@@ -463,34 +463,52 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
     if (isTransitioningRef.current) return;
     
     isTransitioningRef.current = true;
-    setCurrentIndex((prev) => {
-      const next = (prev + 1) % media.length;
-      console.log(`➡️ Next: ${prev} → ${next} | ${media[next]?.name}`);
-      return next;
-    });
+    
+    // Set slide direction first
     setSlideDirection('down');
     
-    setTimeout(() => {
-      setSlideDirection(null);
-      isTransitioningRef.current = false;
-    }, 200);
+    // Use requestAnimationFrame to ensure the direction is set before changing index
+    // This ensures iOS Safari properly applies the animation
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setCurrentIndex((prev) => {
+          const next = (prev + 1) % media.length;
+          console.log(`➡️ Next: ${prev} → ${next} | ${media[next]?.name}`);
+          return next;
+        });
+        
+        setTimeout(() => {
+          setSlideDirection(null);
+          isTransitioningRef.current = false;
+        }, 250);
+      });
+    });
   };
 
   const handlePrevious = () => {
     if (isTransitioningRef.current) return;
     
     isTransitioningRef.current = true;
-    setCurrentIndex((prev) => {
-      const next = (prev - 1 + media.length) % media.length;
-      console.log(`⬅️ Previous: ${prev} → ${next} | ${media[next]?.name}`);
-      return next;
-    });
+    
+    // Set slide direction first
     setSlideDirection('up');
     
-    setTimeout(() => {
-      setSlideDirection(null);
-      isTransitioningRef.current = false;
-    }, 200);
+    // Use requestAnimationFrame to ensure the direction is set before changing index
+    // This ensures iOS Safari properly applies the animation
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setCurrentIndex((prev) => {
+          const next = (prev - 1 + media.length) % media.length;
+          console.log(`⬅️ Previous: ${prev} → ${next} | ${media[next]?.name}`);
+          return next;
+        });
+        
+        setTimeout(() => {
+          setSlideDirection(null);
+          isTransitioningRef.current = false;
+        }, 250);
+      });
+    });
   };
 
   const handleLike = () => {
