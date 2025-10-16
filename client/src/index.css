@@ -454,4 +454,49 @@
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
   }
+
+  /* CSS Scroll Snap for Reels */
+  .reels-container {
+    overflow-y: scroll;
+    overflow-x: hidden;
+    scroll-snap-type: y mandatory;
+    overscroll-behavior: contain;
+    height: 100vh;
+    height: 100dvh; /* Dynamic viewport height for mobile browsers */
+    width: 100vw;
+    position: fixed;
+    top: 0;
+    left: 0;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+    touch-action: pan-y; /* Only allow vertical scrolling */
+  }
+
+  .reels-container::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge */
+  }
+
+  .reel-item {
+    height: 100vh;
+    height: 100dvh; /* Dynamic viewport height for mobile browsers */
+    width: 100vw;
+    scroll-snap-align: center; /* Center alignment for better positioning */
+    scroll-snap-stop: always;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 28px; /* Half of bottom nav height (56px/2) to shift content up */
+    opacity: 0.4;
+    transition: opacity 0.4s ease-in-out;
+  }
+
+  .reel-item.active {
+    opacity: 1;
+  }
+
+  /* First item should be visible initially */
+  .reel-item:first-child {
+    opacity: 1;
+  }
 }
