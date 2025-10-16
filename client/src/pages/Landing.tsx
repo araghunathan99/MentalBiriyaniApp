@@ -139,12 +139,15 @@ export default function Landing() {
       >
         <h1 
           className="text-4xl md:text-5xl font-bold mb-4"
-          style={{ color: '#00BFFF' }}
+          style={{ 
+            color: '#00BFFF',
+            fontFamily: "'Pacifico', 'Brush Script MT', cursive"
+          }}
           data-testid="text-title"
         >
           Happy Birthday!!
           <br />
-          Div Papa
+          Divs
         </h1>
         <p className="text-lg md:text-xl font-semibold italic" style={{ color: '#FFD700' }}>
           Mental Biriyani - A curated nostalgia ride that is like biriyani for the soul! #DD40

@@ -214,6 +214,26 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
     }
   }, [currentMedia]);
 
+  // Manage video playback based on current index
+  useEffect(() => {
+    // Pause all videos except the current one
+    Object.entries(videoRefs.current).forEach(([index, video]) => {
+      const idx = parseInt(index);
+      if (video) {
+        if (idx === currentIndex) {
+          // Play current video
+          video.play().catch(err => {
+            console.log('📹 Video autoplay prevented (user interaction may be required):', err);
+          });
+          setIsPlaying(true);
+        } else {
+          // Pause non-current videos
+          video.pause();
+        }
+      }
+    });
+  }, [currentIndex]);
+
   // Auto-hide controls
   useEffect(() => {
     setShowControls(true);
