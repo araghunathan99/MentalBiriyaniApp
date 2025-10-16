@@ -396,7 +396,7 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
                 <video
                   ref={(el) => { videoRefs.current[index] = el; }}
                   src={cachedUrl || item.webContentLink}
-                  className="absolute inset-0 w-full h-full object-contain"
+                  className="max-w-full max-h-full object-contain"
                   loop
                   muted={isMuted}
                   playsInline
@@ -439,7 +439,7 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
                 ref={(el) => { imageRefs.current[index] = el; }}
                 src={cachedUrl || item.webContentLink}
                 alt={item.name}
-                className="absolute inset-0 w-full h-full object-contain"
+                className="max-w-full max-h-full object-contain"
                 decoding="async"
                 loading={index <= currentIndex + 2 ? "eager" : "lazy"}
                 onError={() => {

@@ -486,7 +486,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding-bottom: 28px; /* Half of bottom nav height (56px/2) to shift content up */
+    padding-bottom: 56px; /* Bottom nav height to shift content up for centering */
     opacity: 0.4;
     transition: opacity 0.4s ease-in-out;
   }
