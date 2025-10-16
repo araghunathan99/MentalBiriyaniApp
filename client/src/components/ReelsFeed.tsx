@@ -239,8 +239,16 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
     const handleError = (e: Event) => {
       console.error('✗ Video error:', e);
       
-      // Only show error if we've already tried the fallback URL
-      if (hasTriedFallbackRef.current) {
+      // Check if we can try a fallback (blob URL → original URL)
+      if (!hasTriedFallbackRef.current && cachedMediaUrl && cachedMediaUrl.startsWith('blob:') && cachedMediaUrl !== currentMedia.webContentLink) {
+        console.warn('⚠️ Video blob URL failed, trying original URL as fallback');
+        hasTriedFallbackRef.current = true;
+        setCachedMediaUrl(currentMedia.webContentLink || "");
+        return; // Don't show error yet, trying fallback
+      }
+      
+      // Only show error if we've exhausted all options (tried fallback or no fallback available)
+      if (hasTriedFallbackRef.current || !cachedMediaUrl.startsWith('blob:')) {
         setHasError(true);
         setIsBuffering(false);
         toast({
@@ -248,8 +256,6 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
           description: "Failed to load video. Please try the next one.",
           variant: "destructive",
         });
-      } else {
-        console.log('⚠️ First error - will try fallback if blob URL');
       }
     };
 
@@ -285,7 +291,7 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
       video.removeEventListener('playing', handlePlaying);
       video.removeEventListener('suspend', handleSuspend);
     };
-  }, [currentMedia, toast, isPlaying]);
+  }, [currentMedia, toast, isPlaying, cachedMediaUrl]);
 
   // Auto screen rotation based on media aspect ratio
   useEffect(() => {
@@ -712,16 +718,6 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
             crossOrigin="anonymous"
             onClick={handleTap}
             onDoubleClick={handleDoubleTap}
-            onError={(e) => {
-              // iOS blob URL fallback: if blob URL fails, try original URL
-              if (cachedMediaUrl && cachedMediaUrl.startsWith('blob:') && cachedMediaUrl !== currentMedia.webContentLink) {
-                console.warn('⚠️ Blob URL failed, falling back to original URL');
-                hasTriedFallbackRef.current = true;
-                setCachedMediaUrl(currentMedia.webContentLink || "");
-              } else {
-                hasTriedFallbackRef.current = true;
-              }
-            }}
             data-testid="video-player"
           />
           {isBuffering && (
