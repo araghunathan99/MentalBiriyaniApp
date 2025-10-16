@@ -22,6 +22,8 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
   const [isMuted, setIsMuted] = useState(true);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
+  const touchStartRef = useRef(0);
+  const touchEndRef = useRef(0);
   const [slideDirection, setSlideDirection] = useState<'up' | 'down' | null>(null);
   const isTransitioningRef = useRef(false);
   const [videoProgress, setVideoProgress] = useState(0);
@@ -423,6 +425,34 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
     return () => video.removeEventListener("timeupdate", updateProgress);
   }, [currentMedia, isDraggingProgress]);
 
+  // iOS Safari fix: Attach native touch listeners to video/image elements
+  // because iOS blocks touchmove from bubbling up from media elements
+  useEffect(() => {
+    // Only add native listeners on iOS devices
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    
+    if (!isIOS) return;
+
+    const mediaElement = currentMedia?.isVideo ? videoRef.current : imageRef.current;
+    if (!mediaElement) return;
+
+    // Use native event listeners with passive: false to enable preventDefault
+    const touchStartHandler = (e: Event) => handleTouchStart(e as TouchEvent);
+    const touchMoveHandler = (e: Event) => handleTouchMove(e as TouchEvent);
+    const touchEndHandler = () => handleTouchEnd();
+
+    mediaElement.addEventListener('touchstart', touchStartHandler, { passive: true });
+    mediaElement.addEventListener('touchmove', touchMoveHandler, { passive: false });
+    mediaElement.addEventListener('touchend', touchEndHandler, { passive: true });
+
+    return () => {
+      mediaElement.removeEventListener('touchstart', touchStartHandler);
+      mediaElement.removeEventListener('touchmove', touchMoveHandler);
+      mediaElement.removeEventListener('touchend', touchEndHandler);
+    };
+  }, [currentMedia, currentIndex]);
+
   const handleNext = () => {
     if (isTransitioningRef.current) return;
     
@@ -513,22 +543,40 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
     }
   };
 
-  const handleTouchStart = (e: React.TouchEvent) => {
+  const handleTouchStart = (e: React.TouchEvent | TouchEvent) => {
     if (isTransitioningRef.current || isDraggingProgress) return;
-    setTouchStart(e.targetTouches[0].clientY);
-    setTouchEnd(e.targetTouches[0].clientY);
+    const touch = e instanceof TouchEvent ? e.touches[0] : e.targetTouches[0];
+    if (!touch) return;
+    
+    const y = touch.clientY;
+    setTouchStart(y);
+    setTouchEnd(y);
+    touchStartRef.current = y;
+    touchEndRef.current = y;
   };
 
-  const handleTouchMove = (e: React.TouchEvent) => {
+  const handleTouchMove = (e: React.TouchEvent | TouchEvent) => {
     if (isTransitioningRef.current || isDraggingProgress) return;
-    const currentY = e.targetTouches[0].clientY;
-    setTouchEnd(currentY);
+    const touch = e instanceof TouchEvent ? e.touches[0] : e.targetTouches[0];
+    if (!touch) return;
+    
+    const y = touch.clientY;
+    setTouchEnd(y);
+    touchEndRef.current = y;
+    
+    // Prevent default on native events to avoid iOS scroll interference
+    if (e instanceof TouchEvent && e.cancelable) {
+      const swipeDistance = Math.abs(touchStartRef.current - y);
+      if (swipeDistance > 10) {
+        e.preventDefault();
+      }
+    }
   };
 
   const handleTouchEnd = () => {
     if (isTransitioningRef.current || isDraggingProgress) return;
     
-    const swipeDistance = touchStart - touchEnd;
+    const swipeDistance = touchStartRef.current - touchEndRef.current;
     
     // Reduced threshold for faster, more responsive swipes (50px)
     // Ignore very small movements (likely accidental touches)
@@ -545,6 +593,8 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
     // Reset touch values
     setTouchStart(0);
     setTouchEnd(0);
+    touchStartRef.current = 0;
+    touchEndRef.current = 0;
   };
 
   const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
