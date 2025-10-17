@@ -236,13 +236,24 @@ export async function prefetchMedia(url: string): Promise<void> {
   // On iOS (all browsers), use browser HTTP cache instead of IndexedDB
   if (isIOS()) {
     try {
+      // Create AbortController for timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+      
       await fetch(url, { 
         method: 'GET',
-        cache: 'force-cache' // Use browser's HTTP cache
+        cache: 'force-cache', // Use browser's HTTP cache
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
       console.log('🍎 iOS prefetch (browser cache):', url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('/') + 30));
-    } catch (error) {
-      console.error('iOS prefetch failed:', error);
+    } catch (error: any) {
+      if (error?.name === 'AbortError') {
+        console.error('iOS prefetch timeout (30s):', url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('/') + 30));
+      } else {
+        console.error('iOS prefetch failed:', error);
+      }
     }
     return;
   }
@@ -264,16 +275,25 @@ export async function prefetchMedia(url: string): Promise<void> {
       return; // Already cached
     }
     
-    // Fetch and cache
-    const response = await fetch(url);
+    // Fetch and cache with timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    
+    const response = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeoutId);
+    
     if (!response.ok) throw new Error(`Failed to fetch: ${response.status}`);
     
     const blob = await response.blob();
     const mimeType = response.headers.get('content-type') || blob.type;
     
     await setCachedBlob(url, blob, mimeType);
-  } catch (error) {
-    console.error('Error prefetching media:', error);
+  } catch (error: any) {
+    if (error?.name === 'AbortError') {
+      console.error('Prefetch timeout (30s)');
+    } else {
+      console.error('Error prefetching media:', error);
+    }
   }
 }
 
@@ -298,10 +318,15 @@ export async function fetchAndCacheMedia(url: string): Promise<string> {
     return cached;
   }
   
-  // Fetch from network
+  // Fetch from network with timeout
   console.log('🌐 Fetching from network...');
   try {
-    const response = await fetch(url);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    
+    const response = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeoutId);
+    
     if (!response.ok) throw new Error(`Failed to fetch: ${response.status}`);
     
     const blob = await response.blob();
@@ -322,8 +347,12 @@ export async function fetchAndCacheMedia(url: string): Promise<string> {
     const objectUrl = URL.createObjectURL(blob);
     console.log(`✓ Created blob URL: ${objectUrl}`);
     return objectUrl;
-  } catch (error) {
-    console.error('❌ Error fetching media:', error);
+  } catch (error: any) {
+    if (error?.name === 'AbortError') {
+      console.error('❌ Media fetch timeout (30s)');
+    } else {
+      console.error('❌ Error fetching media:', error);
+    }
     // Return original URL as fallback
     return url;
   }

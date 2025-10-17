@@ -16,6 +16,20 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
+  
+  // Skip caching for media files (videos, images, audio) - let browser cache handle them
+  // This is crucial for iOS PWA where we rely on browser HTTP cache
+  const mediaExtensions = ['.mp4', '.mov', '.webm', '.jpg', '.jpeg', '.png', '.gif', '.mp3', '.wav', '.m4a'];
+  const isMediaFile = mediaExtensions.some(ext => url.pathname.toLowerCase().endsWith(ext));
+  
+  if (isMediaFile) {
+    // Pass through to network, no service worker caching for media
+    event.respondWith(fetch(event.request));
+    return;
+  }
+  
+  // For non-media files, use cache-first strategy
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
