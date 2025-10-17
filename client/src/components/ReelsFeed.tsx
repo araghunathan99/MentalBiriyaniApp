@@ -113,15 +113,31 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
     };
   }, [currentIndex, media.length]);
 
-  // Load cached media URLs for all items
+  // Load cached media URLs for current and adjacent items only (iOS PWA compatible)
   useEffect(() => {
-    media.forEach((item, index) => {
-      if (!item?.webContentLink || cachedMediaUrls[index]) return;
-
-      fetchAndCacheMedia(item.webContentLink)
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const loadRange = isIOS ? 1 : 2; // Load 1 item ahead on iOS, 2 on other platforms
+    
+    const itemsToLoad: number[] = [];
+    
+    // Load current item and items within range
+    for (let i = -loadRange; i <= loadRange; i++) {
+      const index = (currentIndex + i + media.length) % media.length;
+      if (!cachedMediaUrls[index] && media[index]?.webContentLink) {
+        itemsToLoad.push(index);
+      }
+    }
+    
+    console.log(`📦 Loading media for indices: ${itemsToLoad.join(', ')}`);
+    
+    itemsToLoad.forEach(index => {
+      const item = media[index];
+      
+      fetchAndCacheMedia(item.webContentLink!)
         .then((url) => {
           setCachedMediaUrls(prev => ({ ...prev, [index]: url }));
           cachedBlobRefs.current[index] = url;
+          console.log(`✓ Loaded media for index ${index}`);
         })
         .catch((error) => {
           console.error(`❌ Error loading media at index ${index}:`, error);
@@ -137,7 +153,7 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
         }
       });
     };
-  }, [media]);
+  }, [media, currentIndex]);
 
   // Start background music when component mounts
   useEffect(() => {
@@ -420,15 +436,24 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
                   muted={isMuted}
                   playsInline
                   autoPlay={isCurrentItem}
-                  preload="auto"
-                  crossOrigin="anonymous"
+                  preload="metadata"
                   data-testid={`video-player-${index}`}
-                  onWaiting={() => setIsBuffering(prev => ({ ...prev, [index]: true }))}
+                  onLoadStart={() => {
+                    console.log(`📹 Video load started: index ${index}`);
+                  }}
+                  onWaiting={() => {
+                    console.log(`⏳ Video waiting/buffering: index ${index}`);
+                    setIsBuffering(prev => ({ ...prev, [index]: true }));
+                  }}
                   onCanPlay={() => {
+                    console.log(`✅ Video can play: index ${index}`);
                     setIsBuffering(prev => ({ ...prev, [index]: false }));
                     // Reset error state and retry count on successful load
                     setHasError(prev => ({ ...prev, [index]: false }));
                     setRetryCount(prev => ({ ...prev, [index]: 0 }));
+                  }}
+                  onLoadedData={() => {
+                    console.log(`📊 Video data loaded: index ${index}`);
                   }}
                   onError={(e) => {
                     const video = e.currentTarget;
