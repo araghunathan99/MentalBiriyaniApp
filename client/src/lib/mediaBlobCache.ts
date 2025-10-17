@@ -21,7 +21,7 @@ function isIOS(): boolean {
   
   // Check for iPadOS (reports as Mac but has touch support)
   const isMac = /Macintosh/.test(ua);
-  const hasTouchPoints = navigator.maxTouchPoints && navigator.maxTouchPoints > 1;
+  const hasTouchPoints = navigator.maxTouchPoints ? navigator.maxTouchPoints > 1 : false;
   const isIPadOS = isMac && hasTouchPoints;
   
   // This detects ALL browsers on iOS (Safari, Chrome, Firefox, Edge, etc.)

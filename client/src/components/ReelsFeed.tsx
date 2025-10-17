@@ -38,6 +38,10 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
   const audio = useAudio();
 
   const currentMedia = media[currentIndex];
+  
+  // Platform-specific video preload strategy
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const videoPreload = isIOS ? "metadata" : "auto";
 
   // Notify parent of index changes
   useEffect(() => {
@@ -144,16 +148,18 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
           setCachedMediaUrls(prev => ({ ...prev, [index]: item.webContentLink || "" }));
         });
     });
+  }, [media, currentIndex]);
 
+  // Cleanup blob URLs only on component unmount (not on index change!)
+  useEffect(() => {
     return () => {
-      // Cleanup blob URLs on unmount
       Object.values(cachedBlobRefs.current).forEach(url => {
         if (url && url.startsWith('blob:')) {
           URL.revokeObjectURL(url);
         }
       });
     };
-  }, [media, currentIndex]);
+  }, []); // Empty dependency array = only runs on mount/unmount
 
   // Start background music when component mounts
   useEffect(() => {
@@ -436,7 +442,7 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
                   muted={isMuted}
                   playsInline
                   autoPlay={isCurrentItem}
-                  preload="metadata"
+                  preload={videoPreload}
                   data-testid={`video-player-${index}`}
                   onLoadStart={() => {
                     console.log(`📹 Video load started: index ${index}`);
