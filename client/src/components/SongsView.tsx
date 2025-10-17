@@ -120,7 +120,9 @@ export default function SongsView() {
     return () => audio.removeEventListener('ended', handleEnded);
   }, [isPlaylistMode, playlistSongs]);
 
-  const playSong = async (songId: string) => {
+  const playSong = async (songId: string, retryAttempt = 0) => {
+    const MAX_RETRIES = 2;
+    
     // Search in both main songs list and playlist songs
     let song = songs.find(s => s.id === songId);
     if (!song && isPlaylistMode) {
@@ -144,18 +146,26 @@ export default function SongsView() {
         audioRef.current.currentTime = 0;
         
         // Set new source
-        console.log('🎵 Attempting to load:', song.displayName);
+        console.log('🎵 Attempting to load:', song.displayName, retryAttempt > 0 ? `(retry ${retryAttempt}/${MAX_RETRIES})` : '');
         console.log('📍 URL:', song.url);
         audioRef.current.src = song.url;
         
-        // Wait for audio to be ready and play
+        // Wait for audio to be ready and play with timeout
         await new Promise<void>((resolve, reject) => {
           if (!audioRef.current) {
             reject(new Error('Audio element not available'));
             return;
           }
 
+          // Timeout after 10 seconds
+          const timeout = setTimeout(() => {
+            audioRef.current?.removeEventListener('canplay', onCanPlay);
+            audioRef.current?.removeEventListener('error', onError);
+            reject(new Error('Audio loading timeout'));
+          }, 10000);
+
           const onCanPlay = () => {
+            clearTimeout(timeout);
             console.log('✅ Audio ready to play');
             audioRef.current?.removeEventListener('canplay', onCanPlay);
             audioRef.current?.removeEventListener('error', onError);
@@ -163,6 +173,7 @@ export default function SongsView() {
           };
 
           const onError = (e: Event) => {
+            clearTimeout(timeout);
             const target = e.target as HTMLAudioElement;
             console.error('❌ Audio error event:', {
               error: target.error,
@@ -185,10 +196,19 @@ export default function SongsView() {
         console.log('🎵 Playing:', song.displayName);
       } catch (err) {
         console.error('Failed to play song:', err);
+        
+        // Retry if we haven't exceeded max retries
+        if (retryAttempt < MAX_RETRIES) {
+          console.log(`🔄 Retrying audio playback (attempt ${retryAttempt + 1}/${MAX_RETRIES})`);
+          // Wait a bit before retrying
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          return playSong(songId, retryAttempt + 1);
+        }
+        
         setCurrentPlayingSong(null);
         toast({
           title: "Playback Error",
-          description: `Could not play "${song.displayName}". Check console for details.`,
+          description: `Could not play "${song.displayName}" after ${MAX_RETRIES + 1} attempts.`,
           variant: "destructive"
         });
       }

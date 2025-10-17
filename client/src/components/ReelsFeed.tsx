@@ -23,6 +23,7 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
   const [isDraggingProgress, setIsDraggingProgress] = useState(false);
   const [isBuffering, setIsBuffering] = useState<{ [key: number]: boolean }>({});
   const [hasError, setHasError] = useState<{ [key: number]: boolean }>({});
+  const [retryCount, setRetryCount] = useState<{ [key: number]: number }>({});
   const [cachedMediaUrls, setCachedMediaUrls] = useState<{ [key: number]: string }>({});
   const cachedBlobRefs = useRef<{ [key: number]: string }>({});
   const hasTriedFallbackRefs = useRef<{ [key: number]: boolean }>({});
@@ -423,12 +424,49 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
                   crossOrigin="anonymous"
                   data-testid={`video-player-${index}`}
                   onWaiting={() => setIsBuffering(prev => ({ ...prev, [index]: true }))}
-                  onCanPlay={() => setIsBuffering(prev => ({ ...prev, [index]: false }))}
-                  onError={() => {
+                  onCanPlay={() => {
+                    setIsBuffering(prev => ({ ...prev, [index]: false }));
+                    // Reset error state and retry count on successful load
+                    setHasError(prev => ({ ...prev, [index]: false }));
+                    setRetryCount(prev => ({ ...prev, [index]: 0 }));
+                  }}
+                  onError={(e) => {
+                    const video = e.currentTarget;
+                    const currentRetry = retryCount[index] || 0;
+                    const MAX_RETRIES = 3;
+                    
+                    console.error(`❌ Video error at index ${index} (retry ${currentRetry}/${MAX_RETRIES}):`, {
+                      error: video.error,
+                      networkState: video.networkState,
+                      readyState: video.readyState,
+                      src: video.src?.substring(0, 100)
+                    });
+                    
+                    // First try blob fallback if using cached blob
                     if (!hasTriedFallbackRefs.current[index] && cachedUrl?.startsWith('blob:')) {
+                      console.log(`🔄 Trying direct URL fallback for index ${index}`);
                       hasTriedFallbackRefs.current[index] = true;
                       setCachedMediaUrls(prev => ({ ...prev, [index]: item.webContentLink || "" }));
+                      return;
+                    }
+                    
+                    // Retry loading for slow connections
+                    if (currentRetry < MAX_RETRIES) {
+                      console.log(`🔄 Retrying video load (attempt ${currentRetry + 1}/${MAX_RETRIES})`);
+                      setRetryCount(prev => ({ ...prev, [index]: currentRetry + 1 }));
+                      
+                      // Reset and retry after a delay
+                      setTimeout(() => {
+                        if (videoRefs.current[index]) {
+                          const vid = videoRefs.current[index];
+                          if (vid) {
+                            vid.load();
+                          }
+                        }
+                      }, 1000 * (currentRetry + 1)); // Exponential backoff
                     } else {
+                      // Max retries exceeded
+                      console.error(`❌ Video failed after ${MAX_RETRIES} retries`);
                       setHasError(prev => ({ ...prev, [index]: true }));
                     }
                   }}

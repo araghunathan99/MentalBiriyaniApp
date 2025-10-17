@@ -11,21 +11,22 @@ interface CachedBlob {
   mimeType: string;
 }
 
-// Detect iOS/iPadOS (any browser) - ALL iOS browsers use WebKit and have IndexedDB blob corruption bug
-function isIOSSafari(): boolean {
+// Detect iOS/iPadOS (ALL browsers including Safari, Chrome, Firefox, Edge, etc.)
+// Apple requires all iOS browsers to use WebKit, so they all have the same IndexedDB blob limitations
+function isIOS(): boolean {
   const ua = navigator.userAgent;
   
   // Check for traditional iOS devices (iPhone, iPad, iPod)
-  const isIOS = /iPad|iPhone|iPod/.test(ua);
+  const isIOSDevice = /iPad|iPhone|iPod/.test(ua);
   
   // Check for iPadOS (reports as Mac but has touch support)
   const isMac = /Macintosh/.test(ua);
   const hasTouchPoints = navigator.maxTouchPoints && navigator.maxTouchPoints > 1;
   const isIPadOS = isMac && hasTouchPoints;
   
-  // All browsers on iOS use WebKit (Apple requirement), so they all have the bug
-  // This includes Safari, Chrome (CriOS), Firefox, Edge, etc.
-  return isIOS || isIPadOS;
+  // This detects ALL browsers on iOS (Safari, Chrome, Firefox, Edge, etc.)
+  // since Apple requires all iOS browsers to use WebKit under the hood
+  return isIOSDevice || isIPadOS;
 }
 
 // Request persistent storage (prevents browser from deleting data)
@@ -112,9 +113,9 @@ async function openDB(): Promise<IDBDatabase> {
 
 // Get cached blob from IndexedDB
 export async function getCachedBlob(url: string): Promise<string | null> {
-  // Skip IndexedDB on iOS Safari due to blob corruption bug
-  if (isIOSSafari()) {
-    console.log('🍎 iOS Safari detected - skipping IndexedDB cache');
+  // Skip IndexedDB on iOS (all browsers) due to WebKit blob limitations
+  if (isIOS()) {
+    console.log('🍎 iOS detected (any browser) - skipping IndexedDB cache');
     return null;
   }
   
@@ -129,7 +130,7 @@ export async function getCachedBlob(url: string): Promise<string | null> {
       request.onsuccess = () => {
         const cached = request.result as CachedBlob | undefined;
         if (cached) {
-          // Verify blob is not corrupted (iOS Safari bug check)
+          // Verify blob is not corrupted
           if (cached.blob.size === 0) {
             console.warn('⚠️ Corrupted blob detected (0 bytes), skipping cache');
             resolve(null);
@@ -155,8 +156,8 @@ export async function getCachedBlob(url: string): Promise<string | null> {
 
 // Cache blob to IndexedDB with quota error handling
 export async function setCachedBlob(url: string, blob: Blob, mimeType: string): Promise<void> {
-  // Skip caching on iOS Safari due to blob corruption bug
-  if (isIOSSafari()) {
+  // Skip caching on iOS (all browsers) due to WebKit blob limitations
+  if (isIOS()) {
     return;
   }
   
@@ -232,8 +233,17 @@ export async function setCachedBlob(url: string, blob: Blob, mimeType: string): 
 
 // Prefetch media (cache without creating blob URL - for background prefetching)
 export async function prefetchMedia(url: string): Promise<void> {
-  // Skip prefetching on iOS Safari due to blob corruption bug
-  if (isIOSSafari()) {
+  // On iOS (all browsers), use browser HTTP cache instead of IndexedDB
+  if (isIOS()) {
+    try {
+      await fetch(url, { 
+        method: 'GET',
+        cache: 'force-cache' // Use browser's HTTP cache
+      });
+      console.log('🍎 iOS prefetch (browser cache):', url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('/') + 30));
+    } catch (error) {
+      console.error('iOS prefetch failed:', error);
+    }
     return;
   }
   
@@ -271,12 +281,12 @@ export async function prefetchMedia(url: string): Promise<void> {
 export async function fetchAndCacheMedia(url: string): Promise<string> {
   console.log('📥 fetchAndCacheMedia called for:', url.substring(0, 100));
   
-  // On iOS Safari, bypass caching entirely and stream directly
-  const iosDetected = isIOSSafari();
+  // On iOS (all browsers), bypass caching entirely and stream directly
+  const iosDetected = isIOS();
   console.log(`🔍 iOS Detection: ${iosDetected} | UA: ${navigator.userAgent.substring(0, 100)}`);
   
   if (iosDetected) {
-    console.log('🍎 iOS/iPadOS detected - streaming media directly (no cache)');
+    console.log('🍎 iOS detected (any browser) - streaming media directly (no cache)');
     return url;
   }
   
