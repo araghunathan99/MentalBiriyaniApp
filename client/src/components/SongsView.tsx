@@ -69,7 +69,7 @@ export default function SongsView() {
       console.log('🎵 SongsView: Initializing audio element');
       audioRef.current = new Audio();
       audioRef.current.volume = 0.5;
-      audioRef.current.preload = 'auto';
+      audioRef.current.preload = 'none'; // Lazy load - only load when play is clicked
       
       // Add general error handler
       audioRef.current.addEventListener('error', (e) => {

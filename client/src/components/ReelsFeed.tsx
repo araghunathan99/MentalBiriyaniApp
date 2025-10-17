@@ -151,17 +151,15 @@ export default function ReelsFeed({ media, initialIndex = 0, onIndexChange }: Re
     if (!currentMedia) return;
 
     if (currentMedia.isVideo) {
-      if (audio.isPlaying) {
-        audio.pause();
-        console.log('🎵 Paused background music for video');
-      }
+      // Pause audio when showing video
+      audio.pause();
+      console.log('🎵 Paused background music for video');
     } else if (currentMedia.isImage) {
-      if (!audio.isPlaying) {
-        audio.resume();
-        console.log('🎵 Resumed background music for photo');
-      }
+      // Always resume audio when showing photo (resume() handles state internally)
+      audio.resume();
+      console.log('🎵 Resumed background music for photo');
     }
-  }, [currentMedia?.id, currentMedia?.isVideo, currentMedia?.isImage]);
+  }, [currentMedia?.id, currentMedia?.isVideo, currentMedia?.isImage, audio]);
 
   // Prefetch next media items
   useEffect(() => {
